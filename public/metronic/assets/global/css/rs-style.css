@@ -1,0 +1,167 @@
+.page-content{
+    overflow: hidden;
+}
+/* Appointment Calender start */
+
+div.consultancy-clndr .fc-head th{
+   padding: 4px 4px;
+}
+div.consultancy-clndr .fc-row.fc-widget-header tr td {
+    padding: 4px 4px;
+}
+div.consultancy-clndr .fc-slats td {
+    padding: 4px 4px;
+    text-align: center;
+}
+div.consultancy-clndr .fc-button{
+    top:0 !important;
+}
+div.consultancy-clndr .fc-toolbar h2{
+    display: inline-block;
+    margin: 0 35px 0 45px;
+}
+.calender-row{
+    display: flex ;
+}
+.calender-row .cards{
+    border: 1px solid #ddd;
+    margin-top: 45px;
+    position: absolute;
+    padding: 10px;
+    width: 250px;
+}
+.calendar-container {
+    padding-left: 260px;
+}
+div.consultancy-clndr .fc-widget-header {
+    background-color: #35a1d4 !important;
+    color: #fff !important;
+}
+div.consultancy-clndr th.fc-resource-cell {
+    font-size: 18px;
+}
+div.consultancy-clndr .fc-row.fc-widget-header tr:first-child td {
+    font-size: 18px;
+}
+.external-event{
+    margin-left: 0px !important;
+}
+.service-cal #calendar{
+    overflow-y: visible !important;
+}
+.service-cal .fc-ltr .fc-axis {
+    text-align: center !important;
+}
+.double-scroll {
+    width: 100%;
+    padding-top: 40px;
+    overflow-y: visible !important;
+}
+.rota-popup .mt-checkbox-list{
+    width: 18px;
+    display: inline-block;
+    vertical-align: top;
+}
+.rota-popup .rota-days{
+    display: inline-block;
+    vertical-align: top;
+    margin-left: 15px;
+}
+.multiselect-container{
+    height: 230px;
+    overflow-y: scroll;
+}
+.showonmbl{
+        display: none;
+}
+.cal-flter{
+    background: #35a1d4;
+    color: #fff;
+    padding:7px;
+    width: 100%;
+}
+.cal-flter:after{
+    content: "^";
+    width: 6px;
+    height: 11px;
+    display: block;
+    color: #fff;
+}
+.fc-bg td:first-child {
+    text-align: center;
+    text-transform: capitalize;
+}
+#calendar .fc-time-grid-container{
+    height: 523px !important;
+}
+@media(max-width: 1280px){
+    .calender-responsivness{
+        overflow-x: auto;
+    }
+    .calender-responsivness #calendar{
+        width: 1400px;
+    }
+    .calender-row .cards h3{
+        font-size: 14px;
+    }
+}
+@media(max-width: 1199px){
+    .package-custom-popup .control-label{
+        font-size: 13px;
+    }
+    .select2-results__option{
+         font-size: 12px;
+    }
+}
+@media only screen and (max-width: 1199px) and (min-width: 1000px){
+    div.consultancy-clndr .fc-toolbar h2{
+    margin: 0;
+    }
+    div.consultancy-clndr .fc-button{
+        padding: 5px 6px 8px !important;
+    }
+}
+@media(max-width: 999px){
+    .calender-row{
+        display: block;
+    }
+    .calender-row .cards {
+        margin-bottom: 20px;
+    }
+    .hideonmbl{
+        display: none;
+    }
+    .showonmbl{
+        display: block;
+    }
+    .rota-popup .rota-days{
+        margin-top: 18px;
+    }
+    .sm_class{
+        padding-top: 16px !important;
+    }
+}
+@media(max-width: 767px){
+div.consultancy-clndr .fc-icon, .fc-toolbar .fc-center{
+    display: block !important;
+}
+div.consultancy-clndr .fc-toolbar .fc-right{
+    float: left;
+}
+div.consultancy-clndr .fc-toolbar h2{
+    margin: 0;
+    }
+    div.consultancy-clndr .fc-button{
+        padding: 5px 6px 8px !important;
+    }
+.double-scroll{
+    padding-top: 145px;
+}
+.suwala-doubleScroll-scroll-wrapper{
+    top: 236px !important
+}
+div.consultancy-clndr .fc-button {
+    top: 4px !important;
+}
+}
+/* Appointment Calender end */ 

@@ -1,0 +1,244 @@
+.clearfix:before,
+.clearfix:after {
+    content: " "; /* 1 */
+    display: table; /* 2 */
+}
+
+.clearfix:after {
+    clear: both;
+}
+
+/*
+ * For IE 6/7 only
+ * Include this rule to trigger hasLayout and contain floats.
+ */
+
+.clearfix {
+    *zoom: 1;
+}
+.wizard > .content > .body{
+  width: 100%;
+}
+.checkbox-module {
+  width: 100%;
+  text-align: center;
+  /* Made by */
+}
+.checkbox-module h1 {
+  font-family: "Dax", sans-serif;
+  color: #fff;
+}
+.checkbox-module input[type="radio"] {
+  position: absolute;
+  left: 52%;
+}
+.checkbox-module input[type="radio"]:checked + .box {
+  background-color: #007e90;
+  border-color:#4edc37;
+}
+.checkbox-module input[type="radio"]:checked + .box span {
+  color: white;
+
+}
+.checkbox-module input[type="radio"]:checked + .box span:before {
+  transform: translateY(0px);
+  opacity: 1;
+}
+.checkbox-module .box {
+  width: 200px;
+  height: 150px;
+  background-color: #fff;
+  transition: all 250ms ease;
+  will-change: transition;
+  display: inline-block;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  font-family: "Dax", sans-serif;
+  font-weight: 900;
+  z-index: 999;
+  margin: 0 0 0;
+  vertical-align: top;
+  border-top:#2184be 5px solid;
+}
+.checkbox-module.doctors-moduls .box{
+  height: auto;
+  min-height: 48px;
+  width: 100%;
+  border-top: 0;
+  border-left:#2184be 5px solid;
+}
+.checkbox-module .box:active {
+  transform: translateY(10px);
+}
+.checkbox-module .box span {
+  position: absolute;
+  transform: translate(0, 25px);
+  left: 0;
+  right: 0;
+  transition: all 300ms ease;
+  font-size: 16px;
+  user-select: none;
+  color: #007e90;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.appoint-form .wizard > .content > .body.checkbox-module.doctors-moduls label{
+  width: 32.2%;
+  margin: 5px 0.5%;
+}
+.checkbox-module.doctors-moduls .box span{
+  transform: translate(0, 0);
+  font-size: 20px;
+  text-transform: capitalize;
+  text-align: left;
+  padding: 0 0;
+  font-weight: 500;
+  line-height: 48px;
+}
+
+
+.checkbox-module .box span:before {
+  font-size: 1.2em;
+  font-family: FontAwesome;
+  display: block;
+  transform: translateY(-80px);
+  opacity: 0;
+  transition: all 300ms ease-in-out;
+  font-weight: normal;
+  color: white;
+}
+.checkbox-module .lahore span:before {
+  content: '';
+  height: 42px;
+  width: 100%;
+  background: url(../img/cities.png) no-repeat center -12px;
+}
+.checkbox-module .peshawar span:before {
+  content: '';
+  height: 42px;
+  width: 100%;
+  background: url(../img/cities.png) no-repeat center -249px;
+}
+.checkbox-module .karachi span:before {
+  content: '';
+  height: 42px;
+  width: 100%;
+  background: url(../img/cities.png) no-repeat center -71px;
+}
+.checkbox-module .islamabad span:before {
+  content: '';
+  height: 42px;
+  width: 100%;
+  background: url(../img/cities.png) no-repeat center -132px;
+}
+.checkbox-module .dcenter span:before{
+  content: "\f1ad";
+}
+.checkbox-module .tdoctor span:before{
+  content: "\f0f0";
+  transform: translateX(-80px);
+  float: left;
+}
+.checkbox-module.doctors-moduls input[type="radio"]:checked + .box span:before {
+    transform: translateY(0px);
+    opacity: 1;
+    margin: 0 10px 0 0;
+}
+
+.checkbox-module.doctors-moduls input[type="radio"]:checked + .box span {
+    color: white;
+    transform: translateY(0);
+    padding: 0 0 0 14px;
+}
+
+.checkbox-module p {
+  color: #333;
+  font-family: "Dax", sans-serif;
+  font-weight: 400;
+}
+.checkbox-module p span:after {
+  content: '\f0e7';
+  font-family: FontAwesome;
+  color: yellow;
+}
+.checkbox-module-step4{
+  width: 100%;
+  text-align: center;
+}
+.checkbox-module-step4 input{
+  padding:  8px;
+}
+
+
+.appoint-form .wizard > .content{
+  background: #FFF;
+}
+
+.appoint-form .wizard > .steps ul li.disabled a{
+  background: #e3e3e3;
+}
+.appoint-form .wizard > .content > .body label{
+  margin: 5px;
+  vertical-align: top;
+}
+.datewrap{
+  
+}
+.appoint-form .wizard > .steps ul li.disabled a{
+  background: #2184be;
+}
+.appoint-form .wizard > .steps ul li a{
+  background: #00416b;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 18px;
+  color: #fafafa;
+  font-weight: normal;
+  padding: 11px 16px 15px;
+  min-height: 95px;
+}
+.appoint-form .wizard > .steps ul li a span.number{
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 18px;
+  color: #fafafa;
+  font-weight: normal;
+}
+.appoint-form .wizard > .steps ul li a span.subtitle{
+  display: block;
+  font-size: 14px;
+  color: #fafafa;
+  font-weight: normal;
+  padding:4px 0 0;
+}
+.appoint-form .wizard > .steps ul li.done a{
+  background: #007e90;
+}
+.appoint-form .wizard > .steps ul li.done a:before{
+  display: inline-block;
+    font: normal normal normal 14px/1 FontAwesome;
+    font-size: inherit;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    content: "\f00c";
+    margin-right:10px;
+}
+
+.appoint-form .wizard > .steps .current a, .appoint-form .wizard > .steps .current a:hover{
+  background: #00416b;
+}
+.appoint-form .wizard > .steps .disabled a, .appoint-form  .wizard > .steps .disabled a:hover, .appoint-form .wizard > .steps .disabled a:active{
+  color: #FFF;
+}
+.wizard > .content > .body label.error {
+  color: #8a1f11;
+  display: inline-block;
+  position: absolute;
+  top: 28px;
+  font-size: 12px;
+  font-weight: 400;
+  margin: 10px 0 0 5px !important;
+  /*left: 44%;*/
+}
+ 

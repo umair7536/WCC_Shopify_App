@@ -1,0 +1,17 @@
+/node_modules
+/public/hot
+/public/storage
+/public/leadsdata
+!/public/customs/index.html
+/public/customs/
+/storage/*.key
+/vendor
+/.idea
+/.vagrant
+Homestead.json
+Homestead.yaml
+npm-debug.log
+.env
+/composer.lock
+/package-lock.json
+/public/appointment_image

@@ -1,0 +1,1 @@
+<a id="ticket{{ $ticket->id }}" href="{{ route('admin.tickets.showticketstatus',['id' => $ticket->id]) }}" data-target="#ajax" data-toggle="modal">@if($ticket->ticket_status_id){{ $ticket->ticket_status->name }}@else{{''}}@endif</a>
