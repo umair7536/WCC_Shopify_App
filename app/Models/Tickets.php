@@ -346,26 +346,13 @@ class Tickets extends BaseModal
      */
     static public function updateRecord($id, $request, $account_id)
     {
-        $old_data = (Tickets::find($id))->toArray();
-
         $data = $request->all();
+
         // Set Account ID
         $data['account_id'] = $account_id;
-        $data['type'] = 'multiple';
 
-        if(!isset($data['apply_discount'])) {
-            $data['apply_discount'] = 0;
-        } else if($data['apply_discount'] == '') {
-            $data['apply_discount'] = 0;
-        }
-
-        if(is_array($data['service_id']) && count($data['service_id'])) {
-            $data['total_services'] = count($data['service_id']);
-
-            $data['services_price'] = 0.00;
-            foreach($data['service_price'] as $service_price) {
-                $data['services_price'] = $data['services_price'] + $service_price;
-            }
+        if(is_array($data['product_id']) && count($data['product_id'])) {
+            $data['total_products'] = count($data['product_id']);
         }
 
         $record = self::where([
@@ -379,58 +366,25 @@ class Tickets extends BaseModal
 
         $record->update($data);
 
-        AuditTrails::EditEventLogger(self::$_table, 'edit', $data, self::$_fillable, $old_data, $id);
+        /**
+         * Create Ticket Products Records
+         */
+        TicketProducts::where([
+            'ticket_id' => $record->id
+        ])->forceDelete();
 
-        // Delete Old Ticket relationships
-        TicketHasServices::where(['ticket_id' => $record->id])->delete();
-
-        // Deactivate Previous Price History
-        TicketServicesPriceHistory::where(['ticket_id' => $record->id])
-            ->whereNull('effective_to')
-            ->update(array(
-                'effective_to' => Carbon::now()->format('Y-m-d'),
-                'active' => 0,
-                'updated_by' => Auth::User()->id,
-            ));
-
-        // Create New Ticket Services
-        if(is_array($data['service_id']) && count($data['service_id'])) {
-            $services = Services::whereIn('id', $data['service_id'])->where(['account_id' => $account_id])->get()->getDictionary();
-
-            // Calculate New Service Prices
-            $services_calculation = array();
-            foreach ($data['service_id'] as $key => $service_id) {
-                if (array_key_exists($service_id, $services)) {
-                    $services_calculation[$key] = array(
-                        'service_id' => $service_id,
-                        'service_price' => $data['service_price'][$key],
-                        'calculated_price' => 0.00,
-                    );
-                }
+        if(is_array($data['product_id']) && count($data['product_id'])) {
+            $ticket_products = [];
+            foreach($data['product_id'] as $key => $product_id) {
+                $ticket_products[] = array(
+                    'ticket_id' => $record->id,
+                    'serial_number' => $data['serial_number'][$key],
+                    'customer_feedback' => $data['customer_feedback'][$key],
+                    'product_id' => $product_id
+                );
             }
-            $calculated_services = self::calculatePrices($services_calculation, $data['services_price'], $data['price']);
-
-            foreach($data['service_id'] as $key => $service_id) {
-                if(array_key_exists($service_id, $services)) {
-                    TicketHasServices::createRecord(array(
-                        'ticket_id' => $record->id,
-                        'service_id' => $service_id,
-                        'service_price' => $calculated_services[$key]['service_price'],
-                        'calculated_price' => $calculated_services[$key]['calculated_price'],
-                        'end_node' => $services[$service_id]->end_node,
-                    ), $record->id);
-
-                    TicketServicesPriceHistory::createRecord(array(
-                        'ticket_id' => $record->id,
-                        'ticket_price' => $record->price,
-                        'service_id' => $service_id,
-//                        'service_price' => $data['service_price'][$key],
-                        'service_price' => $calculated_services[$key]['calculated_price'],
-                        'effective_from' => \Carbon\Carbon::now()->format('Y-m-d'),
-                        'created_by' => Auth::User()->id,
-                        'updated_by' => Auth::User()->id,
-                    ), $account_id);
-                }
+            if(count($ticket_products)) {
+                TicketProducts::insert($ticket_products);
             }
         }
 

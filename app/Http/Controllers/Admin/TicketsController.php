@@ -331,18 +331,41 @@ class TicketsController extends Controller
             return view('error', compact('lead_statuse'));
         }
 
+        $shopify_customer = ShopifyCustomers::where([
+            'customer_id' => $ticket->customer_id,
+            'account_id' => Auth::User()->account_id
+        ])->first();
+
+        $products = ShopifyProducts::where([
+            'account_id' => Auth::User()->account_id
+        ])->get()->toArray();
+
+        $ticket_statuses = TicketStatuses::where([
+            'account_id' => Auth::User()->account_id,
+            'active' => 1,
+        ])->orderBy('sort_number', 'asc')
+            ->get()
+            ->pluck('name', 'id');
+
+        $status = ['' => 'Select a Status'];
+
+        if($ticket_statuses) {
+            $ticket_statuses = ($status + $ticket_statuses->toArray());
+        } else {
+            $ticket_statuses = $status;
+        }
+
         $relationships = TicketProducts::where(array(
             'ticket_id' => $ticket->id
         ))->select('product_id')->get();
 
-        $ticket_products = array();
         $ticket_products = collect(new ShopifyProducts());
 
         if($relationships->count()) {
-            $ticket_products = ShopifyProducts::whereIn('product_id', $relationships)->where(['account_id' => Auth::User()->account_id])->get()->getDictionary();
+            $ticket_products = ShopifyProducts::join('ticket_products', 'ticket_products.product_id', '=', 'shopify_products.product_id')->whereIn('shopify_products.product_id', $relationships)->where(['shopify_products.account_id' => Auth::User()->account_id])->select('shopify_products.*', 'ticket_products.id', 'ticket_products.serial_number', 'ticket_products.customer_feedback')->groupBy('ticket_products.id')->get()->getDictionary();
         }
 
-        return view('admin.tickets.edit', compact('ticket', 'ticket_products', 'relationships'));
+        return view('admin.tickets.edit', compact('ticket', 'ticket_products', 'relationships', 'products', 'ticket_statuses', 'shopify_customer'));
     }
 
     /**
@@ -360,11 +383,110 @@ class TicketsController extends Controller
 
         $validator = $this->verifyFields($request);
 
+        $customerId = 0;
+
         if ($validator->fails()) {
             return response()->json(array(
                 'status' => 0,
                 'message' => $validator->messages()->all(),
             ));
+        }
+
+        if($request->get('customer_confirmation') != '' && $request->get('customer_confirmation') == '1') {
+            /**
+             * Set Customer's Basic Informaton
+             */
+            $shopifyCustomer = array(
+                'first_name' => $request->get('first_name'),
+                'last_name' => $request->get('last_name'),
+                'email' => $request->get('email'),
+                'phone' => $request->get('phone'),
+                'verified_email' => true
+            );
+
+            /**
+             * Create Customer in Shopify
+             */
+            $shop = ShopifyShops::where([
+                'account_id' => Auth::User()->account_id
+            ])->first();
+
+            $customer = [];
+
+            if($shop) {
+                try {
+                    $shopifyClient = new ShopifyClient([
+                        'private_app' => false,
+                        'api_key' => env('SHOPIFY_APP_API_KEY'), // In public app, this is the app ID
+                        'access_token' => $shop->access_token,
+                        'shop' => $shop->myshopify_domain
+                    ]);
+
+                    $customer = $shopifyClient->createCustomer($shopifyCustomer);
+
+                } catch (\Exception $e) {
+                    return response()->json(array(
+                        'status' => 0,
+                        'message' => [$e->getMessage()],
+                    ));
+                }
+            } else {
+                return response()->json(array(
+                    'status' => 0,
+                    'message' => ['Shop is not connected, Please contact App Administrator.'],
+                ));
+            }
+
+            if(count($customer)) {
+                /**
+                 * Merge Customer ID with Request Object
+                 */
+                $request->merge(['customer_id' => $customer['id']]);
+
+
+                $customer['customer_id'] = $customer['id'];
+                unset($customer['id']);
+
+                if(isset($customer['default_address']) && count($customer['default_address'])) {
+                    $default_address = $customer['default_address'];
+                    unset($default_address['id']);
+                    unset($default_address['customer_id']);
+                    $customer = array_merge($customer, $default_address);
+                    $customer['default_address'] = json_encode($customer['default_address']);
+                }
+
+                /**
+                 * Set Address based on array provided
+                 */
+                if(count($customer['addresses'])) {
+                    $customer['addresses'] = json_encode($customer['addresses']);
+                }
+
+                $customer_processed = ShopifyCustomers::prepareRecord($customer);
+                $customer_processed['account_id'] = $shop['account_id'];
+
+                $customer_record = ShopifyCustomers::where([
+                    'customer_id' => $customer_processed['customer_id'],
+                    'account_id' => $customer_processed['account_id'],
+                ])->select('id')->first();
+
+                if($customer_record) {
+                    ShopifyCustomers::where([
+                        'customer_id' => $customer_processed['customer_id'],
+                        'account_id' => $customer_processed['account_id'],
+                    ])->update($customer_processed);
+                } else {
+                    //echo 'Product Created: ' . $customer_processed['title'] . "\n";
+                    ShopifyCustomers::create($customer_processed);
+                }
+            } else {
+                return response()->json(array(
+                    'status' => 0,
+                    'message' => ['Something went wrong, please try again later.'],
+                ));
+            }
+        } else {
+            $customerId = $request->get('customer_id');
         }
 
         if(Tickets::updateRecord($id, $request, Auth::User()->account_id)) {

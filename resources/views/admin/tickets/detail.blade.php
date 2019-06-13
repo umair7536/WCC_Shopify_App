@@ -5,24 +5,20 @@
     </div>
     <table class="table table-striped">
         <tbody>
-        <tr>
-            <th width="25%">Number</th>
-            <td>{{ $ticket->number }}</td>
-            <th width="25%">Total Products</th>
-            <td>{{ number_format($ticket->total_products) }}</td>
-        </tr>
-        <tr>
-            <th>Status</th>
-            <td colspan="3">{{ $ticket->ticket_status->name }}</td>
-        </tr>
-        <tr>
-            <th>Notes for Technician</th>
-            <td colspan="3">{{ $ticket->technician_remarks }}</td>
-        </tr>
-        <tr>
-            <th>Feedback/ Complain from Customer</th>
-            <td colspan="3">{{ $ticket->customer_complain }}</td>
-        </tr>
+            <tr>
+                <th width="25%">Number</th>
+                <td>{{ $ticket->number }}</td>
+                <th width="25%">Total Products</th>
+                <td>{{ number_format($ticket->total_products) }}</td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td colspan="3">{{ $ticket->ticket_status->name }}</td>
+            </tr>
+            <tr>
+                <th>Notes for Technician</th>
+                <td colspan="3">{{ $ticket->technician_remarks }}</td>
+            </tr>
         </tbody>
     </table>
 

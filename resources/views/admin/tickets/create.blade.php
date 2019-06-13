@@ -176,8 +176,7 @@
     <input type="hidden" value="0" id="total_productsCount"/>
     <table id="rowGenerator" style="display: none;">
         <tr id="singleRowAAA">
-            <td id="productImageSrcAAA">
-            </td>
+            <td id="productImageSrcAAA"></td>
             <td>
                 <input type="hidden" value="" id="productIDAAA" name="product_id[AAA]" />
                 <span id="productTextAAA"></span>
@@ -208,6 +207,5 @@
     <script src="{{ url('metronic/assets/global/plugins/jquery-validation/js/additional-methods.min.js') }}" type="text/javascript"></script>
     <script src="{{ url('metronic/assets/global/plugins/select2/js/select2.full.min.js') }}" type="text/javascript"></script>
     <script src="{{'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js'}}" type="text/javascript"></script>
-    <script src="{{ url('js/admin/tickets/ajaxbaseselect2.js') }}" type="text/javascript"></script>
     <script src="{{ url('js/admin/tickets/fields.js') }}" type="text/javascript"></script>
 @endsection
