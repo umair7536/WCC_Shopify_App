@@ -30,6 +30,7 @@ var TableDatatablesAjax = function () {
                     { "data": "id","bSortable": false },
                     { "data": "number" },
                     { "data": "customer_name" },
+                    { "data": "serial_number" },
                     { "data": "total_products" },
                     { "data": "ticket_status_id" },
                     { "data": "created_at" },
@@ -43,7 +44,7 @@ var TableDatatablesAjax = function () {
                     }
                 },
                 ordering: !0,
-                order: [[4, "desc"]]
+                order: [[6, "desc"]]
             }
         }), a.getTableWrapper().on("click", ".table-group-action-submit", function (e) {
             e.preventDefault();

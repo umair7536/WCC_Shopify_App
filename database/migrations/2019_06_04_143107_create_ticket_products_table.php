@@ -14,7 +14,10 @@ class CreateTicketProductsTable extends Migration
     public function up()
     {
         Schema::create('ticket_products', function (Blueprint $table) {
+            $table->increments('id');
             $table->string('product_id');
+            $table->string('serial_number')->nullable();
+            $table->text('customer_feedback')->nullable();
             $table->unsignedInteger('ticket_id');
         });
     }

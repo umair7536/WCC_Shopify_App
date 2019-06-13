@@ -22,6 +22,7 @@ var FormValidation = function () {
                 first_name: {required: '#first_name:visible'},
                 last_name: {required: '#last_name:visible'},
                 email: {required: '#email:visible', email: !0},
+                'serial_number[]': {required: !0},
                 // phone: {required: '#phone:visible'},
             },
             invalidHandler: function (e, t) {

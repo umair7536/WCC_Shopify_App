@@ -25,8 +25,7 @@
        data-toggle="modal">Detail</a>
 @endif
 @if(Gate::allows('tickets_edit'))
-    <a class="btn btn-xs btn-info" href="{{ route('admin.tickets.edit',[$ticket->id]) }}" data-target="#ajax_tickets"
-       data-toggle="modal">@lang('global.app_edit')</a>
+    <a class="btn btn-xs btn-info" href="{{ route('admin.tickets.edit',[$ticket->id]) }}" data-target="#ajax_tickets" data-toggle="modal">@lang('global.app_edit')</a>
 @endif
 @if(Gate::allows('tickets_destroy'))
     {!! Form::open(array(

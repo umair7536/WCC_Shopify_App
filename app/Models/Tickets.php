@@ -101,7 +101,7 @@ class Tickets extends BaseModal
      */
     static public function getRecords(Request $request, $iDisplayStart, $iDisplayLength, $account_id = false)
     {
-        $orderBy = 'created_at';
+        $orderBy = 'tickets.created_at';
         $order = 'desc';
 
         if ($request->get('order')[0]['dir']) {
@@ -110,39 +110,46 @@ class Tickets extends BaseModal
             $order = $request->get('order')[0]['dir'];
         }
 
-        $where = array();
+        $query = self
+            ::join('shopify_customers','shopify_customers.customer_id', '=', 'tickets.customer_id')
+            ->join('ticket_products','ticket_products.ticket_id', '=', 'tickets.id');
 
         if ($account_id) {
-            $where[] = array(
-                'account_id',
-                '=',
-                $account_id
-            );
+            $query->where('tickets.account_id', '=', $account_id);
         }
 
         if ($request->get('number')) {
-            $where[] = array(
-                'number',
-                'like',
-                '%' . $request->get('number') . '%'
-            );
+            $query->where('tickets.number', 'like', '%' . $request->get('number') . '%');
+        }
+
+        if ($request->get('customer_name')) {
+            $customer_name = $request->get('customer_name');
+            $query->where(function ($sub_query) use($customer_name) {
+                $sub_query->orWhere('shopify_customers.first_name', 'like', '%' . $customer_name . '%');
+                $sub_query->orWhere('shopify_customers.last_name', 'like', '%' . $customer_name . '%');
+                $sub_query->orWhere('shopify_customers.email', 'like', '%' . $customer_name . '%');
+                $sub_query->orWhere('shopify_customers.phone', 'like', '%' . $customer_name . '%');
+            });
+        }
+
+        if ($request->get('serial_number')) {
+            $query->where('ticket_products.serial_number', 'like', '%' . $request->get('serial_number') . '%');
         }
 
         if ($request->get('total_products')) {
-            $where[] = array(
-                'total_products',
-                'like',
-                '%' . $request->get('total_products') . '%'
-            );
+            $query->where('tickets.total_products', '=', $request->get('total_products'));
         }
 
         if ($request->get('ticket_status_id')) {
-            $where[] = array(
-                'ticket_status_id',
-                '=',
-                $request->get('ticket_status_id')
-            );
+            $query->where('tickets.ticket_status_id', '=', $request->get('ticket_status_id'));
         }
+
+        return $query
+            ->select('tickets.*', 'shopify_customers.first_name', 'shopify_customers.last_name', 'shopify_customers.email', 'shopify_customers.phone')
+            ->groupBy('tickets.id')
+            ->orderBy($orderBy, $order)
+            ->get();
+        '';
 
         if (count($where)) {
             return self::where($where)
@@ -229,6 +236,8 @@ class Tickets extends BaseModal
             foreach($data['product_id'] as $key => $product_id) {
                 $ticket_products[] = array(
                     'ticket_id' => $record->id,
+                    'serial_number' => $data['serial_number'][$key],
+                    'customer_feedback' => $data['customer_feedback'][$key],
                     'product_id' => $product_id
                 );
             }

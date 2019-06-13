@@ -33,7 +33,7 @@
                 <span class="caption-subject bold uppercase"> @lang('global.app_create')</span>
             </div>
             <div class="actions">
-                <a href="{{ route('admin.roles.index') }}" class="btn dark pull-right">@lang('global.app_back')</a>
+                <a href="{{ route('admin.tickets.index') }}" class="btn dark pull-right">@lang('global.app_back')</a>
             </div>
         </div>
         <div class="portlet-body form">
@@ -136,35 +136,34 @@
                             @endif
                         </div>
                     </div>
-
-                    <div class="table-responsive">
-                        <table id="table_products" class="table table-striped table-bordered table-advance table-hover">
-                            <thead>
-                            <tr>
-                                <th width="10%">Image</th>
-                                <th>Name</th>
-                                <th width="5%">Action</th>
-                            </tr>
-                            </thead>
-                        </table>
-                    </div>
                 </div>
 
                 <div class="col-md-4">
                     <div class="row">
                         <div class="form-group col-md-12">
                             {!! Form::label('technician_remarks', 'Notes for Technician', ['class' => 'control-label']) !!}
-                            {!! Form::textarea('technician_remarks', old('technician_remarks'), ['rows' => '6', 'id' => 'technician_remarks', 'class' => 'form-control', 'placeholder' => '']) !!}
-                        </div>
-
-                        <div class="form-group col-md-12">
-                            {!! Form::label('customer_complain', 'Feedback/ Complain from Customer', ['class' => 'control-label']) !!}
-                            {!! Form::textarea('customer_complain', old('customer_complain'), ['rows' => '6', 'id' => 'customer_complain', 'class' => 'form-control', 'placeholder' => '']) !!}
+                            {!! Form::textarea('technician_remarks', old('technician_remarks'), ['rows' => '9', 'id' => 'technician_remarks', 'class' => 'form-control', 'placeholder' => '']) !!}
                         </div>
                     </div>
                 </div>
 
                 <div class="clearfix"></div>
+
+                <div class="form-body col-md-12">
+                    <div class="table-responsive">
+                        <table id="table_products" class="table table-striped table-bordered table-advance table-hover">
+                            <thead>
+                            <tr>
+                                <th width="10%">Image</th>
+                                <th>Name</th>
+                                <th>Serial Number</th>
+                                <th>Customer Feedback</th>
+                                <th width="5%">Action</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
 
                 <div class="form-actions">
                     {!! Form::submit(trans('global.app_save'), ['class' => 'btn btn-success']) !!}
@@ -182,6 +181,12 @@
             <td>
                 <input type="hidden" value="" id="productIDAAA" name="product_id[AAA]" />
                 <span id="productTextAAA"></span>
+            </td>
+            <td>
+                <input type="text" id="serialNumberAAA" class="form-control" name="serial_number[AAA]" placeholder="Searil Number" />
+            </td>
+            <td>
+                <textarea id="customerFeedbackAAA" class="form-control" name="customer_feedback[AAA]" rows="2"></textarea>
             </td>
             <td>
                 <button class="btn btn-xs btn-danger" type="button" onclick="FormValidation.deleteRow('AAA')">

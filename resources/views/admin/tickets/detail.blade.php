@@ -31,6 +31,8 @@
         <tr>
             <th>Image</th>
             <th>Product</th>
+            <th>Searil Number</th>
+            <th>Customer Feedback</th>
         </tr>
         </tbody>
         <tbody>
@@ -39,6 +41,8 @@
                     <tr>
                         <td width="10%"><img src="{{ $ticket_product->image_src }}" width="60" /></td>
                         <td>{{ $ticket_product->title }}</td>
+                        <td>{{ $ticket_product->serial_number }}</td>
+                        <td>{{ $ticket_product->customer_feedback }}</td>
                     </tr>
                 @endforeach
             @endif

@@ -16,6 +16,7 @@ class CreateTicketsTable extends Migration
         Schema::create('tickets', function (Blueprint $table) {
             $table->increments('id');
             $table->string('number', 500)->nullable();
+            $table->string('draft_order_id', 500)->nullable();
             $table->text('technician_remarks')->nullable();
             $table->text('customer_complain')->nullable();
             $table->integer('total_products')->default(0);

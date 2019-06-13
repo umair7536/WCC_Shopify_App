@@ -74,20 +74,31 @@ class TicketsController extends Controller
         $Tickets = Tickets::getRecords($request, $iDisplayStart, $iDisplayLength, Auth::User()->account_id);
 
         if($Tickets) {
-            $customerIds = array();
+
+            $ticket_ids = array();
             foreach($Tickets as $ticket) {
-                $customerIds[] = $ticket->customer_id;
+                $ticket_ids[] = $ticket->id;
             }
 
-            $customers = ShopifyCustomers::whereIn('customer_id', $customerIds)->get()->keyBy('customer_id');
+            $ticket_products = TicketProducts::whereIn('ticket_id', $ticket_ids)->select('serial_number', 'ticket_id')->get();
+            $ticket_products_mapping = array();
+            if($ticket_products) {
+                foreach($ticket_products as $ticket_product) {
+                    $ticket_products_mapping[$ticket_product->ticket_id][] = $ticket_product->serial_number;
+                }
+            }
+//            echo '<pre>';
+//            print_r($ticket_products_mapping);
+//            exit;
 
             foreach($Tickets as $ticket) {
 
                 $records["data"][] = array(
                     'id' => '<label class="mt-checkbox mt-checkbox-single mt-checkbox-outline"><input name="id[]" type="checkbox" class="checkboxes" value="'.$ticket->id.'"/><span></span></label>',
                     'number' => $ticket->number,
-                    'customer_name' => $customers[$ticket->customer_id]->first_name . ' ' . $customers[$ticket->customer_id]->last_name,
+                    'customer_name' => $ticket->first_name . ' ' . $ticket->last_name . '<br/>' . $ticket->email . (($ticket->phone) ? '<br/>' . $ticket->phone : ''),
                     'total_products' => $ticket->total_products,
+                    'serial_number' => isset($ticket_products_mapping[$ticket->id]) ? implode('<br/>', $ticket_products_mapping[$ticket->id]) : '',
                     'ticket_status_id' => view('admin.tickets.ticket_status', compact('ticket'))->render(),
                     'created_at' => Carbon::parse($ticket->created_at)->format('F j,Y h:i A'),
                     'actions' => view('admin.tickets.actions', compact('ticket'))->render(),
@@ -297,6 +308,7 @@ class TicketsController extends Controller
             'phone' => 'sometimes|nullable',
             'total_products' => 'required|numeric|min:1',
             'product_id' => 'required|array',
+            'serial_number' => 'required|array',
         ]);
     }
 
@@ -395,7 +407,7 @@ class TicketsController extends Controller
         $ticket_products = collect(new ShopifyProducts());
 
         if($relationships->count()) {
-            $ticket_products = ShopifyProducts::whereIn('product_id', $relationships)->where(['account_id' => Auth::User()->account_id])->get()->getDictionary();
+            $ticket_products = ShopifyProducts::join('ticket_products', 'ticket_products.product_id', '=', 'shopify_products.product_id')->whereIn('shopify_products.product_id', $relationships)->where(['shopify_products.account_id' => Auth::User()->account_id])->select('shopify_products.*', 'ticket_products.id', 'ticket_products.serial_number', 'ticket_products.customer_feedback')->groupBy('ticket_products.id')->get()->getDictionary();
         }
 
         return view('admin.tickets.detail', compact('ticket', 'ticket_products', 'relationships'));
@@ -469,9 +481,14 @@ class TicketsController extends Controller
             ])->select('name','customer_id','phone')->get();
         } else {
             $patient = ShopifyCustomers::where([
-                ['account_id','=',$account_id],
-                ['name', 'LIKE', "%{$name}%"]
-            ])->select('name','customer_id','phone')->get();
+                    ['account_id','=',$account_id],
+                    ['name', 'LIKE', "%{$name}%"]
+                ])
+                ->orWhere([
+                    ['account_id','=',$account_id],
+                    ['email', 'LIKE', "%{$name}%"]
+                ])
+                ->select('name','customer_id','phone')->get();
         }
 
         return response()->json($patient);

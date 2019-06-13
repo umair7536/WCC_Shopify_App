@@ -59,6 +59,7 @@
                         </th>
                         <th>@lang('global.tickets.fields.number')</th>
                         <th>@lang('global.tickets.fields.customer_name')</th>
+                        <th>@lang('global.tickets.fields.serial_number')</th>
                         <th>@lang('global.tickets.fields.total_products')</th>
                         <th>@lang('global.tickets.fields.ticket_status_id')</th>
                         <th>@lang('global.tickets.fields.created_at')</th>
@@ -67,10 +68,13 @@
                     <tr role="row" class="filter">
                         <td></td>
                         <td>
-                            <input type="text" class="form-control form-filter input-sm" name="name">
+                            <input type="text" class="form-control form-filter input-sm" name="number">
                         </td>
                         <td>
                             <input type="text" class="form-control form-filter input-sm" name="customer_name">
+                        </td>
+                        <td>
+                            <input type="text" class="form-control form-filter input-sm" name="serial_number">
                         </td>
                         <td>
                             <input type="text" class="form-control form-filter input-sm" name="total_products">
