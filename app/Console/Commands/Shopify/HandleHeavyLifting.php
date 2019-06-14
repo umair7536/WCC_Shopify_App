@@ -102,21 +102,21 @@ class HandleHeavyLifting extends Command
                                         /**
                                          * Payload
                                          */
-//                            $payload = array(
-//                                'variant' => array(
-//                                    'id' => $productVariant['variant_id'],
-//                                    'price' => $data['simple_price']['price'],
-//                                    'compare_at_price' => ($productVariant['compare_at_price']) ? $productVariant['compare_at_price'] : $productVariant['price']
-//                                ),
-//                                'shop' => $shop->toArray(),
-//                            );
                                         $payload = array(
                                             'variant' => array(
                                                 'id' => $productVariant['variant_id'],
+                                                'price' => $data['simple_price']['price'],
                                                 'compare_at_price' => ($productVariant['compare_at_price']) ? $productVariant['compare_at_price'] : $productVariant['price']
                                             ),
-                                            'shop' => $shop,
+                                            'shop' => $shop->toArray(),
                                         );
+//                                        $payload = array(
+//                                            'variant' => array(
+//                                                'id' => $productVariant['variant_id'],
+//                                                'compare_at_price' => ($productVariant['compare_at_price']) ? $productVariant['compare_at_price'] : $productVariant['price']
+//                                            ),
+//                                            'shop' => $shop,
+//                                        );
 
                                         $shopify_jobs[] = array(
                                             'payload' => json_encode($payload),
