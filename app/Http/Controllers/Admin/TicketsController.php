@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
 use DB;
 use Auth;
+use Illuminate\Support\Facades\Redirect;
 use Validator;
 use ZfrShopify\ShopifyClient;
 
@@ -688,7 +689,7 @@ class TicketsController extends Controller
                 'position' => '1',
             ))
             ->whereIn('product_id', $relationships)
-            ->select('variant_id')
+            ->select('variant_id', 'product_id', 'price')
             ->get();
 
         if ($product_variants) {
@@ -696,8 +697,20 @@ class TicketsController extends Controller
             $line_items = array();
 
             foreach($product_variants as $product_variant) {
+                $product = ShopifyProducts::where(array(
+                    'account_id' => Auth::User()->account_id,
+                    'product_id' => $product_variant->product_id,
+                ))->first();
+
+                if(!$product) {
+                    flash('One or more products not found.')->error()->important();
+                    return back()->withInput();
+                }
+
                 $line_items[] = array(
-                    'id' => $product_variant->variant_id,
+                    'variant_id' => $product_variant->variant_id,
+//                    'title' => $product->title,
+//                    'price' => 0.00,
                     'quantity' => 1,
                 );
             }
@@ -708,22 +721,42 @@ class TicketsController extends Controller
 
             if ($shop) {
 
-                $shopifyClient = new ShopifyClient([
-                    'private_app' => false,
-                    'api_key' => env('SHOPIFY_APP_API_KEY'), // In public app, this is the app ID
-                    'version' => env('SHOPIFY_API_VERSION'), // Put API Version
-                    'access_token' => $shop->access_token,
-                    'shop' => $shop->myshopify_domain
-                ]);
+                try {
+                    $shopifyClient = new ShopifyClient([
+                        'private_app' => false,
+                        'api_key' => env('SHOPIFY_APP_API_KEY'), // In public app, this is the app ID
+                        'version' => env('SHOPIFY_API_VERSION'), // Put API Version
+                        'access_token' => $shop->access_token,
+                        'shop' => $shop->myshopify_domain
+                    ]);
 
-                $draftOrder = array(
-                    'line_items' => $line_items,
-                    'customer' => array(
-                        'id' => (int) $ticket->customer_id
-                    ),
-                    'use_customer_default_address' => true
-                );
+                    $draftOrder = array(
+                        'line_items' => $line_items,
+                        'customer' => array(
+                            'id' => $ticket->customer_id
+                        ),
+                        'use_customer_default_address' => true
+                    );
 
+//                    echo '<pre>';
+//                    print_r($draftOrder);
+//                    echo '</pre>';
+//                    exit;
+
+                    $response = $shopifyClient->createDraftOrder($draftOrder);
+//                    $response['id'] = '207364522078';
+
+                    if(count($response)) {
+                        $url = 'https://' . $shop->myshopify_domain . '/admin/draft_orders/' . $response['id'];
+                        return Redirect::to($url);
+                    } else {
+                        flash('Something went wrong, please try again later.')->error()->important();
+                        return back()->withInput();
+                    }
+                } catch (\Exception $exception) {
+                    flash($exception->getMessage())->error()->important();
+                    return back()->withInput();
+                }
             } else {
                 flash('Shop not found. Pleaes contact with support.')->error()->important();
                 return back()->withInput();

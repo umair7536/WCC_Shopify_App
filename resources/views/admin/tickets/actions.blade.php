@@ -36,4 +36,4 @@
     {!! Form::button('<i class="fa fa-trash"></i>', array('type' => 'submit', 'class' => 'btn btn-xs btn-danger')) !!}
     {!! Form::close() !!}
 @endif
-<a class="btn btn-xs btn-warning" href="{{ route('admin.tickets.draft_order',[$ticket->id]) }}"><i class="fa fa-money"></i> </a>
+<a class="btn btn-xs btn-warning" target="_blank" href="{{ route('admin.tickets.draft_order',[$ticket->id]) }}"><i class="fa fa-money"></i> </a>
