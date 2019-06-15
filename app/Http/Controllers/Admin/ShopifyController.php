@@ -161,6 +161,7 @@ class ShopifyController extends Controller
                 $shopifyClient = new ShopifyClient([
                     'private_app' => false,
                     'api_key' => self::$APP_API_KEY, // In public app, this is the app ID
+                    'version' => env('SHOPIFY_API_VERSION'), // Put API Version
                     'access_token' => session('access_token'),
                     'shop' => session('shopify_domain')
                 ]);

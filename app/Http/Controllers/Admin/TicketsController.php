@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\ShopifyCustomers;
 use App\Models\ShopifyProducts;
+use App\Models\ShopifyProductVariants;
 use App\Models\ShopifyShops;
 use App\Models\TicketProducts;
 use App\Models\Tickets;
@@ -26,7 +27,7 @@ class TicketsController extends Controller
      */
     public function index()
     {
-        if (! Gate::allows('tickets_manage')) {
+        if (!Gate::allows('tickets_manage')) {
             return abort(401);
         }
 
@@ -50,10 +51,10 @@ class TicketsController extends Controller
 
         if ($request->get('customActionType') && $request->get('customActionType') == "group_action") {
             $Tickets = Tickets::getBulkData($request->get('id'));
-            if($Tickets) {
-                foreach($Tickets as $city) {
+            if ($Tickets) {
+                foreach ($Tickets as $city) {
                     // Check if child records exists or not, If exist then disallow to delete it.
-                    if(!Tickets::isChildExists($city->id, Auth::User()->account_id)) {
+                    if (!Tickets::isChildExists($city->id, Auth::User()->account_id)) {
                         $city->delete();
                     }
                 }
@@ -73,17 +74,17 @@ class TicketsController extends Controller
 
         $Tickets = Tickets::getRecords($request, $iDisplayStart, $iDisplayLength, Auth::User()->account_id);
 
-        if($Tickets) {
+        if ($Tickets) {
 
             $ticket_ids = array();
-            foreach($Tickets as $ticket) {
+            foreach ($Tickets as $ticket) {
                 $ticket_ids[] = $ticket->id;
             }
 
             $ticket_products = TicketProducts::whereIn('ticket_id', $ticket_ids)->select('serial_number', 'ticket_id')->get();
             $ticket_products_mapping = array();
-            if($ticket_products) {
-                foreach($ticket_products as $ticket_product) {
+            if ($ticket_products) {
+                foreach ($ticket_products as $ticket_product) {
                     $ticket_products_mapping[$ticket_product->ticket_id][] = $ticket_product->serial_number;
                 }
             }
@@ -91,10 +92,10 @@ class TicketsController extends Controller
 //            print_r($ticket_products_mapping);
 //            exit;
 
-            foreach($Tickets as $ticket) {
+            foreach ($Tickets as $ticket) {
 
                 $records["data"][] = array(
-                    'id' => '<label class="mt-checkbox mt-checkbox-single mt-checkbox-outline"><input name="id[]" type="checkbox" class="checkboxes" value="'.$ticket->id.'"/><span></span></label>',
+                    'id' => '<label class="mt-checkbox mt-checkbox-single mt-checkbox-outline"><input name="id[]" type="checkbox" class="checkboxes" value="' . $ticket->id . '"/><span></span></label>',
                     'number' => $ticket->number,
                     'customer_name' => $ticket->first_name . ' ' . $ticket->last_name . '<br/>' . $ticket->email . (($ticket->phone) ? '<br/>' . $ticket->phone : ''),
                     'total_products' => $ticket->total_products,
@@ -120,7 +121,7 @@ class TicketsController extends Controller
      */
     public function create()
     {
-        if (! Gate::allows('tickets_create')) {
+        if (!Gate::allows('tickets_create')) {
             return abort(401);
         }
 
@@ -137,7 +138,7 @@ class TicketsController extends Controller
 
         $status = ['' => 'Select a Status'];
 
-        if($ticket_statuses) {
+        if ($ticket_statuses) {
             $ticket_statuses = ($status + $ticket_statuses->toArray());
         } else {
             $ticket_statuses = $status;
@@ -148,13 +149,13 @@ class TicketsController extends Controller
             'slug' => 'open'
         ])->first();
 
-        if($ticket_status) {
+        if ($ticket_status) {
             $ticket_status_id = $ticket_status->id;
         } else {
             $ticket_status_id = 0;
         }
 
-        return view('admin.tickets.create',compact('products', 'ticket_statuses', 'ticket_status_id'));
+        return view('admin.tickets.create', compact('products', 'ticket_statuses', 'ticket_status_id'));
     }
 
     /**
@@ -165,7 +166,7 @@ class TicketsController extends Controller
      */
     public function store(Request $request)
     {
-        if (! Gate::allows('tickets_create')) {
+        if (!Gate::allows('tickets_create')) {
             return abort(401);
         }
 
@@ -180,7 +181,7 @@ class TicketsController extends Controller
             ));
         }
 
-        if($request->get('customer_confirmation') != '' && $request->get('customer_confirmation') == '1') {
+        if ($request->get('customer_confirmation') != '' && $request->get('customer_confirmation') == '1') {
             /**
              * Set Customer's Basic Informaton
              */
@@ -201,11 +202,12 @@ class TicketsController extends Controller
 
             $customer = [];
 
-            if($shop) {
+            if ($shop) {
                 try {
                     $shopifyClient = new ShopifyClient([
                         'private_app' => false,
                         'api_key' => env('SHOPIFY_APP_API_KEY'), // In public app, this is the app ID
+                        'version' => env('SHOPIFY_API_VERSION'), // Put API Version
                         'access_token' => $shop->access_token,
                         'shop' => $shop->myshopify_domain
                     ]);
@@ -225,7 +227,7 @@ class TicketsController extends Controller
                 ));
             }
 
-            if(count($customer)) {
+            if (count($customer)) {
                 /**
                  * Merge Customer ID with Request Object
                  */
@@ -235,7 +237,7 @@ class TicketsController extends Controller
                 $customer['customer_id'] = $customer['id'];
                 unset($customer['id']);
 
-                if(isset($customer['default_address']) && count($customer['default_address'])) {
+                if (isset($customer['default_address']) && count($customer['default_address'])) {
                     $default_address = $customer['default_address'];
                     unset($default_address['id']);
                     unset($default_address['customer_id']);
@@ -246,7 +248,7 @@ class TicketsController extends Controller
                 /**
                  * Set Address based on array provided
                  */
-                if(count($customer['addresses'])) {
+                if (count($customer['addresses'])) {
                     $customer['addresses'] = json_encode($customer['addresses']);
                 }
 
@@ -258,7 +260,7 @@ class TicketsController extends Controller
                     'account_id' => $customer_processed['account_id'],
                 ])->select('id')->first();
 
-                if($customer_record) {
+                if ($customer_record) {
                     ShopifyCustomers::where([
                         'customer_id' => $customer_processed['customer_id'],
                         'account_id' => $customer_processed['account_id'],
@@ -277,7 +279,7 @@ class TicketsController extends Controller
             $customerId = $request->get('customer_id');
         }
 
-        if(Tickets::createRecord($request, Auth::User()->account_id)) {
+        if (Tickets::createRecord($request, Auth::User()->account_id)) {
             flash('Record has been created successfully.')->success()->important();
 
             return response()->json(array(
@@ -316,18 +318,18 @@ class TicketsController extends Controller
     /**
      * Show the form for editing Permission.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
     {
-        if (! Gate::allows('tickets_edit')) {
+        if (!Gate::allows('tickets_edit')) {
             return abort(401);
         }
 
         $ticket = Tickets::findOrFail($id);
 
-        if(!$ticket) {
+        if (!$ticket) {
             return view('error', compact('lead_statuse'));
         }
 
@@ -349,7 +351,7 @@ class TicketsController extends Controller
 
         $status = ['' => 'Select a Status'];
 
-        if($ticket_statuses) {
+        if ($ticket_statuses) {
             $ticket_statuses = ($status + $ticket_statuses->toArray());
         } else {
             $ticket_statuses = $status;
@@ -361,7 +363,7 @@ class TicketsController extends Controller
 
         $ticket_products = collect(new ShopifyProducts());
 
-        if($relationships->count()) {
+        if ($relationships->count()) {
             $ticket_products = ShopifyProducts::join('ticket_products', 'ticket_products.product_id', '=', 'shopify_products.product_id')->whereIn('shopify_products.product_id', $relationships)->where(['shopify_products.account_id' => Auth::User()->account_id])->select('shopify_products.*', 'ticket_products.id', 'ticket_products.serial_number', 'ticket_products.customer_feedback')->groupBy('ticket_products.id')->get()->getDictionary();
         }
 
@@ -372,12 +374,12 @@ class TicketsController extends Controller
      * Update Permission in storage.
      *
      * @param  \Illuminate\Http\Request $request
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
     {
-        if (! Gate::allows('tickets_edit')) {
+        if (!Gate::allows('tickets_edit')) {
             return abort(401);
         }
 
@@ -392,7 +394,7 @@ class TicketsController extends Controller
             ));
         }
 
-        if($request->get('customer_confirmation') != '' && $request->get('customer_confirmation') == '1') {
+        if ($request->get('customer_confirmation') != '' && $request->get('customer_confirmation') == '1') {
             /**
              * Set Customer's Basic Informaton
              */
@@ -413,11 +415,12 @@ class TicketsController extends Controller
 
             $customer = [];
 
-            if($shop) {
+            if ($shop) {
                 try {
                     $shopifyClient = new ShopifyClient([
                         'private_app' => false,
                         'api_key' => env('SHOPIFY_APP_API_KEY'), // In public app, this is the app ID
+                        'version' => env('SHOPIFY_API_VERSION'), // Put API Version
                         'access_token' => $shop->access_token,
                         'shop' => $shop->myshopify_domain
                     ]);
@@ -437,7 +440,7 @@ class TicketsController extends Controller
                 ));
             }
 
-            if(count($customer)) {
+            if (count($customer)) {
                 /**
                  * Merge Customer ID with Request Object
                  */
@@ -447,7 +450,7 @@ class TicketsController extends Controller
                 $customer['customer_id'] = $customer['id'];
                 unset($customer['id']);
 
-                if(isset($customer['default_address']) && count($customer['default_address'])) {
+                if (isset($customer['default_address']) && count($customer['default_address'])) {
                     $default_address = $customer['default_address'];
                     unset($default_address['id']);
                     unset($default_address['customer_id']);
@@ -458,7 +461,7 @@ class TicketsController extends Controller
                 /**
                  * Set Address based on array provided
                  */
-                if(count($customer['addresses'])) {
+                if (count($customer['addresses'])) {
                     $customer['addresses'] = json_encode($customer['addresses']);
                 }
 
@@ -470,7 +473,7 @@ class TicketsController extends Controller
                     'account_id' => $customer_processed['account_id'],
                 ])->select('id')->first();
 
-                if($customer_record) {
+                if ($customer_record) {
                     ShopifyCustomers::where([
                         'customer_id' => $customer_processed['customer_id'],
                         'account_id' => $customer_processed['account_id'],
@@ -489,7 +492,7 @@ class TicketsController extends Controller
             $customerId = $request->get('customer_id');
         }
 
-        if(Tickets::updateRecord($id, $request, Auth::User()->account_id)) {
+        if (Tickets::updateRecord($id, $request, Auth::User()->account_id)) {
             flash('Record has been updated successfully.')->success()->important();
 
             return response()->json(array(
@@ -517,7 +520,7 @@ class TicketsController extends Controller
         }
         $ticket = Tickets::findOrFail($id);
 
-        if(!$ticket) {
+        if (!$ticket) {
             return view('error', compact('lead_statuse'));
         }
 
@@ -528,7 +531,7 @@ class TicketsController extends Controller
         $ticket_products = array();
         $ticket_products = collect(new ShopifyProducts());
 
-        if($relationships->count()) {
+        if ($relationships->count()) {
             $ticket_products = ShopifyProducts::join('ticket_products', 'ticket_products.product_id', '=', 'shopify_products.product_id')->whereIn('shopify_products.product_id', $relationships)->where(['shopify_products.account_id' => Auth::User()->account_id])->select('shopify_products.*', 'ticket_products.id', 'ticket_products.serial_number', 'ticket_products.customer_feedback')->groupBy('ticket_products.id')->get()->getDictionary();
         }
 
@@ -539,12 +542,12 @@ class TicketsController extends Controller
     /**
      * Remove Permission from storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
     {
-        if (! Gate::allows('tickets_destroy')) {
+        if (!Gate::allows('tickets_destroy')) {
             return abort(401);
         }
 
@@ -557,12 +560,12 @@ class TicketsController extends Controller
     /**
      * Inactive Record from storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function inactive($id)
     {
-        if (! Gate::allows('tickets_inactive')) {
+        if (!Gate::allows('tickets_inactive')) {
             return abort(401);
         }
         Tickets::InactiveRecord($id);
@@ -573,17 +576,17 @@ class TicketsController extends Controller
     /**
      * Inactive Record from storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function active($id)
     {
-        if (! Gate::allows('tickets_active')) {
+        if (!Gate::allows('tickets_active')) {
             return abort(401);
         }
 
         Tickets::activeRecord($id);
-        
+
         return redirect()->route('admin.tickets.index');
     }
 
@@ -596,21 +599,21 @@ class TicketsController extends Controller
         $name = $request->q;
         $account_id = Auth::User()->account_id;
 
-        if(is_numeric($name)){
+        if (is_numeric($name)) {
             $patient = ShopifyCustomers::where([
-                ['account_id','=',$account_id],
+                ['account_id', '=', $account_id],
                 ['phone', 'LIKE', "%{$name}%"]
-            ])->select('name','customer_id','phone')->get();
+            ])->select('name', 'customer_id', 'phone')->get();
         } else {
             $patient = ShopifyCustomers::where([
-                    ['account_id','=',$account_id],
-                    ['name', 'LIKE', "%{$name}%"]
-                ])
+                ['account_id', '=', $account_id],
+                ['name', 'LIKE', "%{$name}%"]
+            ])
                 ->orWhere([
-                    ['account_id','=',$account_id],
+                    ['account_id', '=', $account_id],
                     ['email', 'LIKE', "%{$name}%"]
                 ])
-                ->select('name','customer_id','phone')->get();
+                ->select('name', 'customer_id', 'phone')->get();
         }
 
         return response()->json($patient);
@@ -624,7 +627,7 @@ class TicketsController extends Controller
      */
     public function showTicketStatuses(Request $request)
     {
-        if (! Gate::allows('tickets_manage')) {
+        if (!Gate::allows('tickets_manage')) {
             return abort(401);
         }
 
@@ -656,5 +659,79 @@ class TicketsController extends Controller
             ]);
 
         return response()->json(['status' => 1]);
+    }
+
+    /**
+     * Show Lead detail.
+     *
+     * @param  int $id
+     * @return \Illuminate\Http\Response
+     */
+    public function createDraftOrder($id)
+    {
+        if (!Gate::allows('tickets_manage')) {
+            return abort(401);
+        }
+        $ticket = Tickets::findOrFail($id);
+
+        if (!$ticket) {
+            return view('error', compact('lead_statuse'));
+        }
+
+        $relationships = TicketProducts::where(array(
+            'ticket_id' => $ticket->id
+        ))->select('product_id')->get();
+
+        $product_variants = ShopifyProductVariants
+            ::where(array(
+                'account_id' => Auth::User()->account_id,
+                'position' => '1',
+            ))
+            ->whereIn('product_id', $relationships)
+            ->select('variant_id')
+            ->get();
+
+        if ($product_variants) {
+
+            $line_items = array();
+
+            foreach($product_variants as $product_variant) {
+                $line_items[] = array(
+                    'id' => $product_variant->variant_id,
+                    'quantity' => 1,
+                );
+            }
+
+            $shop = ShopifyShops::where([
+                'account_id' => Auth::User()->account_id
+            ])->first();
+
+            if ($shop) {
+
+                $shopifyClient = new ShopifyClient([
+                    'private_app' => false,
+                    'api_key' => env('SHOPIFY_APP_API_KEY'), // In public app, this is the app ID
+                    'version' => env('SHOPIFY_API_VERSION'), // Put API Version
+                    'access_token' => $shop->access_token,
+                    'shop' => $shop->myshopify_domain
+                ]);
+
+                $draftOrder = array(
+                    'line_items' => $line_items,
+                    'customer' => array(
+                        'id' => (int) $ticket->customer_id
+                    ),
+                    'use_customer_default_address' => true
+                );
+
+            } else {
+                flash('Shop not found. Pleaes contact with support.')->error()->important();
+                return back()->withInput();
+            }
+
+        } else {
+            flash('Something went wrong, please try again later.')->error()->important();
+            return back()->withInput();
+        }
     }
 }

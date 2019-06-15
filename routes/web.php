@@ -130,6 +130,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::patch('tickets/inactive/{id}', ['uses' => 'Admin\TicketsController@inactive', 'as' => 'tickets.inactive']);
     Route::get('tickets/detail/{id}', ['uses' => 'Admin\TicketsController@detail', 'as' => 'tickets.detail']);
     Route::resource('tickets', 'Admin\TicketsController');
+    Route::get('tickets/draft/{id}', ['uses' => 'Admin\TicketsController@createDraftOrder', 'as' => 'tickets.draft_order']);
     // Tickets Routes end
 });
 

@@ -63,7 +63,7 @@
                         <th>@lang('global.tickets.fields.total_products')</th>
                         <th>@lang('global.tickets.fields.ticket_status_id')</th>
                         <th>@lang('global.tickets.fields.created_at')</th>
-                        <th width="20%">@lang('global.tickets.fields.actions')</th>
+                        <th width="17%">@lang('global.tickets.fields.actions')</th>
                     </tr>
                     <tr role="row" class="filter">
                         <td></td>

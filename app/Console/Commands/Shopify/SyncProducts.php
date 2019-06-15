@@ -95,6 +95,7 @@ class SyncProducts extends Command
             $shopifyClient = new ShopifyClient([
                 'private_app' => false,
                 'api_key' => env('SHOPIFY_APP_API_KEY'), // In public app, this is the app ID
+                'version' => env('SHOPIFY_API_VERSION'), // Put API Version
                 'access_token' => $shop['access_token'],
                 'shop' => $shop['myshopify_domain']
             ]);

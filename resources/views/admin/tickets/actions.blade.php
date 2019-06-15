@@ -22,10 +22,10 @@
 @if(Gate::allows('tickets_manage'))
     <a class="btn btn-xs btn-success" href="{{ route('admin.tickets.detail',[$ticket->id]) }}"
        data-target="#ajax_tickets"
-       data-toggle="modal">Detail</a>
+       data-toggle="modal"><i class="fa fa-eye"></i></a>
 @endif
 @if(Gate::allows('tickets_edit'))
-    <a class="btn btn-xs btn-info" href="{{ route('admin.tickets.edit',[$ticket->id]) }}">@lang('global.app_edit')</a>
+    <a class="btn btn-xs btn-info" href="{{ route('admin.tickets.edit',[$ticket->id]) }}"><i class="fa fa-edit"></i></a>
 @endif
 @if(Gate::allows('tickets_destroy'))
     {!! Form::open(array(
@@ -33,6 +33,7 @@
         'method' => 'DELETE',
         'onsubmit' => "return confirm('".trans("global.app_are_you_sure")."');",
         'route' => ['admin.tickets.destroy', $ticket->id])) !!}
-    {!! Form::submit(trans('global.app_delete'), array('class' => 'btn btn-xs btn-danger')) !!}
+    {!! Form::button('<i class="fa fa-trash"></i>', array('type' => 'submit', 'class' => 'btn btn-xs btn-danger')) !!}
     {!! Form::close() !!}
 @endif
+<a class="btn btn-xs btn-warning" href="{{ route('admin.tickets.draft_order',[$ticket->id]) }}"><i class="fa fa-money"></i> </a>
