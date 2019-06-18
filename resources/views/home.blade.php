@@ -1,5 +1,19 @@
 @extends('layouts.app')
-
+@php(
+$service_requests = \App\Models\Tickets::where([
+    'account_id' => \Illuminate\Support\Facades\Auth::User()->account_id
+])->count()
+)
+@php(
+$products = \App\Models\ShopifyProducts::where([
+    'account_id' => \Illuminate\Support\Facades\Auth::User()->account_id
+])->count()
+)
+@php(
+$customers = \App\Models\ShopifyCustomers::where([
+    'account_id' => \Illuminate\Support\Facades\Auth::User()->account_id
+])->count()
+)
 @section('stylesheets')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
     <link href="{{ url('metronic/assets/global/plugins/bootstrap-table/bootstrap-table.min.css') }}" rel="stylesheet" type="text/css" />
@@ -13,30 +27,30 @@
 
     <div class="row">
 
-        <div class="col-md-3">
+        <div class="col-md-4">
             <!-- BEGIN WIDGET THUMB -->
             <div class="widget-thumb widget-bg-color-white text-uppercase margin-bottom-20 bordered">
-                <h4 class="widget-thumb-heading">Current Balance</h4>
+                <h4 class="widget-thumb-heading">Service Requests</h4>
                 <div class="widget-thumb-wrap">
-                    <i class="widget-thumb-icon bg-green icon-bulb"></i>
+                    <i class="widget-thumb-icon bg-green icon-support"></i>
                     <div class="widget-thumb-body">
-                        <span class="widget-thumb-subtitle">USD</span>
-                        <span class="widget-thumb-body-stat" data-counter="counterup" data-value="7,644">7,644</span>
+                        <span class="widget-thumb-subtitle">Total</span>
+                        <span class="widget-thumb-body-stat" data-counter="counterup" data-value="{{ number_format($service_requests) }}">{{ number_format($service_requests) }}</span>
                     </div>
                 </div>
             </div>
             <!-- END WIDGET THUMB -->
         </div>
 
-        <div class="col-md-3">
+        <div class="col-md-4">
             <!-- BEGIN WIDGET THUMB -->
             <div class="widget-thumb widget-bg-color-white text-uppercase margin-bottom-20 bordered">
-                <h4 class="widget-thumb-heading">Current Balance</h4>
+                <h4 class="widget-thumb-heading">Products</h4>
                 <div class="widget-thumb-wrap">
-                    <i class="widget-thumb-icon bg-green icon-bulb"></i>
+                    <i class="widget-thumb-icon bg-green icon-layers"></i>
                     <div class="widget-thumb-body">
-                        <span class="widget-thumb-subtitle">USD</span>
-                        <span class="widget-thumb-body-stat" data-counter="counterup" data-value="7,644">7,644</span>
+                        <span class="widget-thumb-subtitle">Total</span>
+                        <span class="widget-thumb-body-stat" data-counter="counterup" data-value="{{ number_format($products) }}">{{ number_format($products) }}</span>
                     </div>
                 </div>
             </div>
@@ -44,15 +58,15 @@
         </div>
 
 
-        <div class="col-md-3">
+        <div class="col-md-4">
             <!-- BEGIN WIDGET THUMB -->
             <div class="widget-thumb widget-bg-color-white text-uppercase margin-bottom-20 bordered">
-                <h4 class="widget-thumb-heading">Current Balance</h4>
+                <h4 class="widget-thumb-heading">Customers</h4>
                 <div class="widget-thumb-wrap">
-                    <i class="widget-thumb-icon bg-green icon-bulb"></i>
+                    <i class="widget-thumb-icon bg-green icon-users"></i>
                     <div class="widget-thumb-body">
-                        <span class="widget-thumb-subtitle">USD</span>
-                        <span class="widget-thumb-body-stat" data-counter="counterup" data-value="7,644">7,644</span>
+                        <span class="widget-thumb-subtitle">Total</span>
+                        <span class="widget-thumb-body-stat" data-counter="counterup" data-value="{{ number_format($customers) }}">{{ number_format($customers) }}</span>
                     </div>
                 </div>
             </div>
