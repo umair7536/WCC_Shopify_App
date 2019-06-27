@@ -238,6 +238,7 @@ class Tickets extends BaseModal
                     'ticket_id' => $record->id,
                     'serial_number' => $data['serial_number'][$key],
                     'customer_feedback' => $data['customer_feedback'][$key],
+                    'variant_id' => $data['variant_id'][$key],
                     'product_id' => $product_id
                 );
             }
@@ -380,6 +381,7 @@ class Tickets extends BaseModal
                     'ticket_id' => $record->id,
                     'serial_number' => $data['serial_number'][$key],
                     'customer_feedback' => $data['customer_feedback'][$key],
+                    'variant_id' => $data['variant_id'][$key],
                     'product_id' => $product_id
                 );
             }

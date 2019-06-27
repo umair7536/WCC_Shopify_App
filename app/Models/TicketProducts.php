@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class TicketProducts extends Model
 {
 
-    protected $fillable = ['ticket_id', 'serial_number', 'customer_feedback', 'product_id'];
+    protected $fillable = ['ticket_id', 'serial_number', 'customer_feedback', 'product_id', 'variant_id'];
 
     protected $table = 'ticket_products';
 

@@ -167,6 +167,7 @@
                                         </td>
                                         <td>
                                             <input type="hidden" value="{{ $ticket_product->product_id }}" id="productID{{ $counter }}" name="product_id[{{ $counter }}]" />
+                                            <input type="hidden" value="{{ $ticket_product->variant_id }}" id="variantID{{ $counter }}" name="variant_id[{{ $counter }}]" />
                                             <span id="productText{{ $counter }}">{{ $ticket_product->title }}</span>
                                         </td>
                                         <td>
@@ -198,6 +199,7 @@
                     <td id="productImageSrcAAA"></td>
                     <td>
                         <input type="hidden" value="" id="productIDAAA" name="product_id[AAA]" />
+                        <input type="hidden" value="" id="variantIDAAA" name="variant_id[AAA]" />
                         <span id="productTextAAA"></span>
                     </td>
                     <td>

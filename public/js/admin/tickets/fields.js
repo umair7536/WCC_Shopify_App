@@ -118,26 +118,46 @@ var FormValidation = function () {
 
     var addRow = function () {
         if($('#product_id').val() != '') {
-            // Add count on row
-            counter = counter + 1;
 
-            var singleRow = $('#rowGenerator').html();
-            singleRow = singleRow.replace(/AAA/g, counter);
-            singleRow = singleRow.replace(/BBB/g, '');
-            $('#table_products').append(singleRow);
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                url: route('admin.tickets.get_product_detail'),
+                type: 'GET',
+                data: {
+                    variant_id: $('#product_id').val()
+                },
+                cache: false,
+                success: function (response) {
+
+                    if(response.status == '1') {
+
+                        // Add count on row
+                        counter = counter + 1;
+
+                        var singleRow = $('#rowGenerator').html();
+                        singleRow = singleRow.replace(/AAA/g, counter);
+                        singleRow = singleRow.replace(/BBB/g, '');
+                        $('#table_products').append(singleRow);
 
 
-            $("#productID" + counter).val($('#product_id').find(':selected').attr('data-id'));
-            $("#productText" + counter).html($('#product_id').find(':selected').attr('data-name'));
-            $("#productImageSrc" + counter).html("<img src=' " + $('#product_id').find(':selected').attr('data-image') + "' height='60' />");
-            $("#productPrice" + counter).html($('#product_id').find(':selected').attr('data-price'));
+                        $("#productID" + counter).val(response.product.product_id);
+                        $("#variantID" + counter).val(response.product.variant_id);
+                        $("#productText" + counter).html(response.product.product_title);
+                        $("#productImageSrc" + counter).html("<img src=' " + response.product.product_image + "' height='60' />");
+                        $("#productPrice" + counter).html(response.product.product_price);
 
-            // Increment Total Products count
-            total_products = total_products + 1;
-            $('#total_products').val(total_products);
-            $('#total_productsCount').val(total_products);
+                        // Increment Total Products count
+                        total_products = total_products + 1;
+                        $('#total_products').val(total_products);
+                        $('#total_productsCount').val(total_products);
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
 
-            // calculateProductsTotal();
+                }
+            });
         }
     }
 
@@ -177,7 +197,7 @@ jQuery(document).ready(function () {
     $('#product_id').select2({ width: '100%' });
 
     $("#customer_id").select2({
-        placeholder: 'Select Customer',
+        placeholder: 'Search a Customer with 2 or more characters',
         ajax: {
             url: route('admin.tickets.get_customer'),
             dataType: 'json',
@@ -209,6 +229,40 @@ jQuery(document).ready(function () {
         templateResult: formatRepo,
         templateSelection: formatRepoSelection
     });
+
+    $("#product_id").select2({
+        placeholder: 'Search a Product with 2 or more characters',
+        ajax: {
+            url: route('admin.tickets.get_product'),
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return {
+                    q: params.term, // search term
+                    page: params.page
+                };
+            },
+            processResults: function (data, params) {
+                params.page = params.page || 1;
+
+                return {
+                    results: $.map(data, function (item) {
+                        return {
+                            text: item.name,
+                            id: item.id
+                        }
+                    }),
+                };
+            },
+            cache: true
+        },
+        escapeMarkup: function (markup) {
+            return markup;
+        },
+        minimumInputLength: 3,
+        templateResult: formatRepo,
+        templateSelection: formatProductSelection
+    });
 });
 
 function formatRepo(item) {
@@ -223,10 +277,22 @@ function formatRepoSelection(item) {
     if (item.id) {
         return item.text + " <button onclick='addUsers()' class='croxcli' style='float: right;border: 0; background: none;padding: 0 0 0;'><i class='fa fa-times' aria-hidden='true'></i></button>";
     } else {
-        return 'Select Customer';
+        return 'Search a Customer with 2 or more characters';
     }
 }
 
 function addUsers() {
     $('.customer_id').val(null).trigger('change');
+};
+
+function formatProductSelection(item) {
+    if (item.id) {
+        return item.text + " <button onclick='setProducts()' class='croxcli' style='float: right;border: 0; background: none;padding: 0 0 0;'><i class='fa fa-times' aria-hidden='true'></i></button>";
+    } else {
+        return 'Search a Product with 2 or more characters';
+    }
+}
+
+function setProducts() {
+    $('.product_id').val(null).trigger('change');
 };

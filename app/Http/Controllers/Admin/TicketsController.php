@@ -126,9 +126,11 @@ class TicketsController extends Controller
             return abort(401);
         }
 
-        $products = ShopifyProducts::where([
-            'account_id' => Auth::User()->account_id
-        ])->get()->toArray();
+//        $products = ShopifyProducts::where([
+//            'account_id' => Auth::User()->account_id
+//        ])->get()->toArray();
+
+        $products = array();
 
         $ticket_statuses = TicketStatuses::where([
             'account_id' => Auth::User()->account_id,
@@ -311,6 +313,7 @@ class TicketsController extends Controller
             'phone' => 'sometimes|nullable',
             'total_products' => 'required|numeric|min:1',
             'product_id' => 'required|array',
+            'variant_id' => 'required|array',
             'serial_number' => 'required|array',
         ]);
     }
@@ -365,7 +368,19 @@ class TicketsController extends Controller
         $ticket_products = collect(new ShopifyProducts());
 
         if ($relationships->count()) {
-            $ticket_products = ShopifyProducts::join('ticket_products', 'ticket_products.product_id', '=', 'shopify_products.product_id')->whereIn('shopify_products.product_id', $relationships)->where(['shopify_products.account_id' => Auth::User()->account_id])->select('shopify_products.*', 'ticket_products.id', 'ticket_products.serial_number', 'ticket_products.customer_feedback')->groupBy('ticket_products.id')->get()->getDictionary();
+            $ticket_products = ShopifyProducts
+                ::join('ticket_products', 'ticket_products.product_id', '=', 'shopify_products.product_id')
+                ->whereIn('shopify_products.product_id', $relationships)
+                ->where(['shopify_products.account_id' => Auth::User()->account_id])
+                ->select(
+                    'shopify_products.*',
+                    'ticket_products.id',
+                    'ticket_products.serial_number',
+                    'ticket_products.variant_id',
+                    'ticket_products.customer_feedback'
+                )
+                ->groupBy('ticket_products.id')
+                ->get()->getDictionary();
         }
 
         return view('admin.tickets.edit', compact('ticket', 'ticket_products', 'relationships', 'products', 'ticket_statuses', 'shopify_customer'));
@@ -766,5 +781,118 @@ class TicketsController extends Controller
             flash('Something went wrong, please try again later.')->error()->important();
             return back()->withInput();
         }
+    }
+
+
+    /*
+     * Function get the variable to search in database to get the patient
+     *
+     * */
+    public function getProduct(Request $request)
+    {
+        $name = $request->q;
+        $account_id = Auth::User()->account_id;
+
+
+        $products = ShopifyProducts
+            ::join('shopify_product_variants', 'shopify_product_variants.product_id', '=', 'shopify_products.product_id')
+            ->where([
+                'shopify_products.account_id' => $account_id
+            ])
+            ->where(function ($query) use ($name) {
+                $query->orWhere('shopify_products.title', 'LIKE', "%{$name}%");
+                $query->orWhere('shopify_product_variants.title', 'LIKE', "%{$name}%");
+            })
+            ->select('shopify_product_variants.variant_id', 'shopify_product_variants.product_id', 'shopify_products.title as product_title', 'shopify_product_variants.title as variant_title')
+            ->orderBy('shopify_products.title', 'asc')
+            ->orderBy('shopify_product_variants.position', 'asc')
+            ->get();
+
+
+        $products_array = array();
+        $product_ids = array();
+        $product_counts = array();
+        if($products) {
+            foreach($products as $single_product) {
+                if(!array_key_exists($single_product['product_id'], $product_counts)) {
+                    $product_counts[$single_product['product_id']] = 1;
+                } else {
+                    $product_counts[$single_product['product_id']] += 1;
+                }
+            }
+
+            foreach($products as $single_product) {
+                if(!in_array($single_product['product_id'], $product_ids)) {
+                    $product_ids[] = $single_product['product_id'];
+                    if($product_counts[$single_product['product_id']] == 1) {
+                        $products_array[] = array(
+                            'id' => $single_product['variant_id'],
+                            'name' => $single_product['product_title'],
+                        );
+                    } else {
+                        $products_array[] = array(
+                            'id' => $single_product['variant_id'],
+                            'name' => $single_product['product_title'],
+                            'product_id' => $single_product['product_id'],
+                        );
+                        $products_array[] = array(
+                            'id' => $single_product['variant_id'],
+                            'name' => "&nbsp;&nbsp;&nbsp;&nbsp;" . $single_product['variant_title'] . "&nbsp;(default)",
+                            'product_id' => $single_product['product_id'],
+                        );
+                    }
+                } else {
+                    $products_array[] = array(
+                        'id' => $single_product['variant_id'],
+                        'name' => "&nbsp;&nbsp;&nbsp;&nbsp;" . $single_product['variant_title'],
+                        'product_id' => $single_product['product_id'],
+                    );
+                }
+            }
+        }
+
+        return response()->json($products_array);
+    }
+
+    /**
+     * Get Product Detail with Variant ID
+     *
+     * @param  \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function getProductDetail(Request $request) {
+        $data = array(
+            'status' => 0,
+            'product' => array()
+        );
+
+        if($request->get('variant_id') != '') {
+
+            $account_id = Auth::User()->account_id;
+
+            $variant = ShopifyProducts
+                ::join('shopify_product_variants', 'shopify_product_variants.product_id', '=', 'shopify_products.product_id')
+                ->where([
+                    'shopify_products.account_id' => $account_id,
+                    'shopify_product_variants.variant_id' => $request->get('variant_id')
+                ])
+                ->select(
+                    'shopify_product_variants.variant_id',
+                    'shopify_product_variants.product_id',
+                    'shopify_products.title as product_title',
+                    'shopify_product_variants.price as product_price',
+                    'shopify_products.image_src as product_image'
+                )
+                ->first();
+
+            if($variant) {
+                $data = array(
+                    'status' => 1,
+                    'product' => $variant->toArray()
+                );
+            }
+        }
+
+        return response()->json($data);
     }
 }
