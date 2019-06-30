@@ -108,30 +108,6 @@
                                 @endif
                             </div>
                         </div>
-
-                        <div class="row">
-                            <div class="form-group col-md-6">
-                                {!! Form::label('product_id', 'Products', ['class' => 'control-label']) !!}
-                                <div class="input-group">
-                                    <select id="product_id" class="form-control select2">
-                                        <option value="">Search a Product</option>
-                                        @foreach($products as $product)
-                                            <option value="<?php echo $product['product_id'] ?>" data-image="<?php echo $product['image_src'] ?>" data-name="<?php echo $product['title'] ?>" data-id="<?php echo $product['product_id'] ?>"><?php echo $product['title'] ?></option>
-                                        @endforeach
-                                    </select>
-                                    <span class="input-group-btn"><button class="btn blue" type="button" onclick="FormValidation.addRow();"><i class="fa fa-plus"></i>&nbsp;Add</button></span>
-                                </div>
-                            </div>
-                            <div class="form-group col-md-6">
-                                {!! Form::label('total_products', 'Total Products*', ['class' => 'control-label']) !!}
-                                {!! Form::number('total_products', old('total_products'), ['id' => 'total_products', 'min' => '1', 'readonly' => true, 'class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
-                                @if($errors->has('total_products'))
-                                    <p class="help-block">
-                                        {{ $errors->first('total_products') }}
-                                    </p>
-                                @endif
-                            </div>
-                        </div>
                     </div>
 
                     <div class="col-md-4">
@@ -140,6 +116,30 @@
                                 {!! Form::label('technician_remarks', 'Notes for Technician', ['class' => 'control-label']) !!}
                                 {!! Form::textarea('technician_remarks', old('technician_remarks'), ['rows' => '9', 'id' => 'technician_remarks', 'class' => 'form-control', 'placeholder' => '']) !!}
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-md-8">
+                            {!! Form::label('product_id', 'Products', ['class' => 'control-label']) !!}
+                            <div class="input-group">
+                                <select id="product_id" class="form-control select2">
+                                    <option value="">Search a Product</option>
+                                    @foreach($products as $product)
+                                        <option value="<?php echo $product['product_id'] ?>" data-image="<?php echo $product['image_src'] ?>" data-name="<?php echo $product['title'] ?>" data-id="<?php echo $product['product_id'] ?>"><?php echo $product['title'] ?></option>
+                                    @endforeach
+                                </select>
+                                <span class="input-group-btn"><button class="btn blue" type="button" onclick="FormValidation.addRow();"><i class="fa fa-plus"></i>&nbsp;Add</button></span>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            {!! Form::label('total_products', 'Total Products*', ['class' => 'control-label']) !!}
+                            {!! Form::number('total_products', old('total_products'), ['id' => 'total_products', 'min' => '1', 'readonly' => true, 'class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
+                            @if($errors->has('total_products'))
+                                <p class="help-block">
+                                    {{ $errors->first('total_products') }}
+                                </p>
+                            @endif
                         </div>
                     </div>
 

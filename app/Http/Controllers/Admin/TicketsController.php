@@ -739,23 +739,20 @@ class TicketsController extends Controller
         if (!Gate::allows('tickets_manage')) {
             return abort(401);
         }
+
         $ticket = Tickets::findOrFail($id);
 
         if (!$ticket) {
             return view('error', compact('lead_statuse'));
         }
 
-        $relationships = TicketProducts::where(array(
-            'ticket_id' => $ticket->id
-        ))->select('product_id')->get();
-
         $product_variants = ShopifyProductVariants
-            ::where(array(
-                'account_id' => Auth::User()->account_id,
-                'position' => '1',
+            ::join('ticket_repairs', 'ticket_repairs.variant_id', '=', 'shopify_product_variants.variant_id')
+            ->where(array(
+                'shopify_product_variants.account_id' => Auth::User()->account_id,
+                'ticket_repairs.ticket_id' => $ticket->id
             ))
-            ->whereIn('product_id', $relationships)
-            ->select('variant_id', 'product_id', 'price')
+            ->select('shopify_product_variants.variant_id', 'shopify_product_variants.product_id', 'shopify_product_variants.price')
             ->get();
 
         if ($product_variants) {
@@ -804,13 +801,7 @@ class TicketsController extends Controller
                         'use_customer_default_address' => true
                     );
 
-//                    echo '<pre>';
-//                    print_r($draftOrder);
-//                    echo '</pre>';
-//                    exit;
-
                     $response = $shopifyClient->createDraftOrder($draftOrder);
-//                    $response['id'] = '207364522078';
 
                     if(count($response)) {
                         $url = 'https://' . $shop->myshopify_domain . '/admin/draft_orders/' . $response['id'];
@@ -832,6 +823,89 @@ class TicketsController extends Controller
             flash('Something went wrong, please try again later.')->error()->important();
             return back()->withInput();
         }
+
+//        $relationships = TicketProducts::where(array(
+//            'ticket_id' => $ticket->id
+//        ))->select('product_id')->get();
+//
+//        $product_variants = ShopifyProductVariants
+//            ::where(array(
+//                'account_id' => Auth::User()->account_id,
+//                'position' => '1',
+//            ))
+//            ->whereIn('product_id', $relationships)
+//            ->select('variant_id', 'product_id', 'price')
+//            ->get();
+//
+//        if ($product_variants) {
+//
+//            $line_items = array();
+//
+//            foreach($product_variants as $product_variant) {
+//                $product = ShopifyProducts::where(array(
+//                    'account_id' => Auth::User()->account_id,
+//                    'product_id' => $product_variant->product_id,
+//                ))->first();
+//
+//                if(!$product) {
+//                    flash('One or more products not found.')->error()->important();
+//                    return back()->withInput();
+//                }
+//
+//                $line_items[] = array(
+//                    'variant_id' => $product_variant->variant_id,
+////                    'title' => $product->title,
+////                    'price' => 0.00,
+//                    'quantity' => 1,
+//                );
+//            }
+//
+//            $shop = ShopifyShops::where([
+//                'account_id' => Auth::User()->account_id
+//            ])->first();
+//
+//            if ($shop) {
+//
+//                try {
+//                    $shopifyClient = new ShopifyClient([
+//                        'private_app' => false,
+//                        'api_key' => env('SHOPIFY_APP_API_KEY'), // In public app, this is the app ID
+//                        'version' => env('SHOPIFY_API_VERSION'), // Put API Version
+//                        'access_token' => $shop->access_token,
+//                        'shop' => $shop->myshopify_domain
+//                    ]);
+//
+//                    $draftOrder = array(
+//                        'line_items' => $line_items,
+//                        'customer' => array(
+//                            'id' => $ticket->customer_id
+//                        ),
+//                        'use_customer_default_address' => true
+//                    );
+//
+//                    $response = $shopifyClient->createDraftOrder($draftOrder);
+////                    $response['id'] = '207364522078';
+//
+//                    if(count($response)) {
+//                        $url = 'https://' . $shop->myshopify_domain . '/admin/draft_orders/' . $response['id'];
+//                        return Redirect::to($url);
+//                    } else {
+//                        flash('Something went wrong, please try again later.')->error()->important();
+//                        return back()->withInput();
+//                    }
+//                } catch (\Exception $exception) {
+//                    flash($exception->getMessage())->error()->important();
+//                    return back()->withInput();
+//                }
+//            } else {
+//                flash('Shop not found. Pleaes contact with support.')->error()->important();
+//                return back()->withInput();
+//            }
+//
+//        } else {
+//            flash('Something went wrong, please try again later.')->error()->important();
+//            return back()->withInput();
+//        }
     }
 
 

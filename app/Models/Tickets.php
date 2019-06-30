@@ -39,6 +39,14 @@ class Tickets extends BaseModal
     }
 
     /**
+     * Get the Ticket Statuses for Ticket.
+     */
+    public function ticket_repairs()
+    {
+        return $this->hasMany('App\Models\TicketRepairs', 'ticket_id');
+    }
+
+    /**
      * Get Total Records
      *
      * @param \Illuminate\Http\Request $request

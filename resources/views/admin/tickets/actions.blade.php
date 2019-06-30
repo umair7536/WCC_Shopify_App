@@ -35,5 +35,7 @@
     {!! Form::close() !!}
 @endif
 @if(Gate::allows('tickets_manage'))
-    <a class="btn btn-xs btn-warning" target="_blank" href="{{ route('admin.tickets.draft_order',[$ticket->id]) }}"><i class="fa fa-money"></i>&nbsp;Invoice</a>
+    @if($ticket->ticket_repairs->count())
+        <a class="btn btn-xs btn-warning" target="_blank" href="{{ route('admin.tickets.draft_order',[$ticket->id]) }}"><i class="fa fa-money"></i>&nbsp;Invoice</a>
+    @endif
 @endif
