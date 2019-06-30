@@ -570,14 +570,39 @@ class TicketsController extends Controller
             'ticket_id' => $ticket->id
         ))->select('product_id')->get();
 
-        $ticket_products = array();
         $ticket_products = collect(new ShopifyProducts());
 
         if ($relationships->count()) {
             $ticket_products = ShopifyProducts::join('ticket_products', 'ticket_products.product_id', '=', 'shopify_products.product_id')->whereIn('shopify_products.product_id', $relationships)->where(['shopify_products.account_id' => Auth::User()->account_id])->select('shopify_products.*', 'ticket_products.id', 'ticket_products.serial_number', 'ticket_products.customer_feedback')->groupBy('ticket_products.id')->get()->getDictionary();
         }
 
-        return view('admin.tickets.detail', compact('ticket', 'ticket_products', 'relationships'));
+
+        /**
+         * Product Repairs
+         */
+        $repair_relationships = TicketRepairs::where(array(
+            'ticket_id' => $ticket->id
+        ))->select('product_id')->get();
+
+        $ticket_repairs = collect(new ShopifyProducts());
+
+        if ($repair_relationships->count()) {
+            $ticket_repairs = ShopifyProducts
+                ::join('ticket_repairs', 'ticket_repairs.product_id', '=', 'shopify_products.product_id')
+                ->whereIn('shopify_products.product_id', $repair_relationships)
+                ->where(['shopify_products.account_id' => Auth::User()->account_id])
+                ->select(
+                    'shopify_products.*',
+                    'ticket_repairs.id',
+                    'ticket_repairs.serial_number',
+                    'ticket_repairs.variant_id',
+                    'ticket_repairs.customer_feedback'
+                )
+                ->groupBy('ticket_repairs.id')
+                ->get()->getDictionary();
+        }
+
+        return view('admin.tickets.detail', compact('ticket', 'ticket_products', 'relationships', 'ticket_repairs', 'repair_relationships'));
     }
 
 

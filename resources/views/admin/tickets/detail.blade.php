@@ -44,4 +44,30 @@
             @endif
         </tbody>
     </table>
+
+    @if($ticket_repairs)
+        <h4>Repair Parts</h4>
+        <table class="table table-striped">
+            <tbody>
+            <tr>
+                <th>Image</th>
+                <th>Product</th>
+                <th>Serial Number</th>
+                <th>Customer Feedback</th>
+            </tr>
+            </tbody>
+            <tbody>
+                @if($ticket_repairs)
+                    @foreach($ticket_repairs as $ticket_repair)
+                        <tr>
+                            <td width="10%"><img src="{{ $ticket_repair->image_src }}" width="60" /></td>
+                            <td>{{ $ticket_repair->title }}</td>
+                            <td>{{ $ticket_repair->serial_number }}</td>
+                            <td>{{ $ticket_repair->customer_feedback }}</td>
+                        </tr>
+                    @endforeach
+                @endif
+            </tbody>
+        </table>
+    @endif
 </div>

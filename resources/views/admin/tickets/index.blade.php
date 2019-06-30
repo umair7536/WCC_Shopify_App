@@ -33,7 +33,9 @@
                 <span class="caption-subject font-dark sbold uppercase">@lang('global.app_list')</span>
             </div>
             <div class="actions">
-                <a class="btn btn-success btn-to-focus" href="{{ route('admin.tickets.create') }}">@lang('global.app_add_new')</a>
+                @if(Gate::allows('tickets_create'))
+                    <a class="btn btn-success btn-to-focus" href="{{ route('admin.tickets.create') }}">@lang('global.app_add_new')</a>
+                @endif
             </div>
         </div>
         <div class="portlet-body">
