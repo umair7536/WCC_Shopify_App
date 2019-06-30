@@ -200,7 +200,7 @@
                         </div>
                         <div class="form-group col-md-4">
                             {!! Form::label('total_repairs', 'Total Repair Products*', ['class' => 'control-label']) !!}
-                            {!! Form::number('total_repairs', old('total_repairs'), ['id' => 'total_repairs', 'min' => '1', 'readonly' => true, 'class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
+                            {!! Form::number('total_repairs', old('total_repairs'), ['id' => 'total_repairs', 'min' => '0', 'readonly' => true, 'class' => 'form-control', 'placeholder' => '']) !!}
                             @if($errors->has('total_repairs'))
                                 <p class="help-block">
                                     {{ $errors->first('total_repairs') }}

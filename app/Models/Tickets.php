@@ -230,8 +230,12 @@ class Tickets extends BaseModal
             $data['total_products'] = count($data['product_id']);
         }
 
-        if(is_array($data['repair_product_id']) && count($data['repair_product_id'])) {
-            $data['total_repairs'] = count($data['repair_product_id']);
+        if(isset($data['repair_product_id'])) {
+            if(is_array($data['repair_product_id']) && count($data['repair_product_id'])) {
+                $data['total_repairs'] = count($data['repair_product_id']);
+            }
+        } else {
+            $data['total_repairs'] = 0;
         }
 
         $record = self::create($data);
@@ -266,19 +270,21 @@ class Tickets extends BaseModal
             'ticket_id' => $record->id
         ])->forceDelete();
 
-        if(is_array($data['repair_product_id']) && count($data['repair_product_id'])) {
-            $ticket_products = [];
-            foreach($data['repair_product_id'] as $key => $product_id) {
-                $ticket_products[] = array(
-                    'ticket_id' => $record->id,
-                    'serial_number' => $data['repair_serial_number'][$key],
-                    'customer_feedback' => $data['repair_customer_feedback'][$key],
-                    'variant_id' => $data['repair_variant_id'][$key],
-                    'product_id' => $product_id
-                );
-            }
-            if(count($ticket_products)) {
-                TicketRepairs::insert($ticket_products);
+        if(isset($data['repair_product_id'])) {
+            if(is_array($data['repair_product_id']) && count($data['repair_product_id'])) {
+                $ticket_products = [];
+                foreach($data['repair_product_id'] as $key => $product_id) {
+                    $ticket_products[] = array(
+                        'ticket_id' => $record->id,
+                        'serial_number' => $data['repair_serial_number'][$key],
+                        'customer_feedback' => $data['repair_customer_feedback'][$key],
+                        'variant_id' => $data['repair_variant_id'][$key],
+                        'product_id' => $product_id
+                    );
+                }
+                if(count($ticket_products)) {
+                    TicketRepairs::insert($ticket_products);
+                }
             }
         }
 
@@ -391,8 +397,12 @@ class Tickets extends BaseModal
             $data['total_products'] = count($data['product_id']);
         }
 
-        if(is_array($data['repair_product_id']) && count($data['repair_product_id'])) {
-            $data['total_repairs'] = count($data['repair_product_id']);
+        if(isset($data['repair_product_id'])) {
+            if(is_array($data['repair_product_id']) && count($data['repair_product_id'])) {
+                $data['total_repairs'] = count($data['repair_product_id']);
+            }
+        } else {
+            $data['total_repairs'] = 0;
         }
 
         $record = self::where([
@@ -436,19 +446,21 @@ class Tickets extends BaseModal
             'ticket_id' => $record->id
         ])->forceDelete();
 
-        if(is_array($data['repair_product_id']) && count($data['repair_product_id'])) {
-            $ticket_products = [];
-            foreach($data['repair_product_id'] as $key => $product_id) {
-                $ticket_products[] = array(
-                    'ticket_id' => $record->id,
-                    'serial_number' => $data['repair_serial_number'][$key],
-                    'customer_feedback' => $data['repair_customer_feedback'][$key],
-                    'variant_id' => $data['repair_variant_id'][$key],
-                    'product_id' => $product_id
-                );
-            }
-            if(count($ticket_products)) {
-                TicketRepairs::insert($ticket_products);
+        if(isset($data['repair_product_id'])) {
+            if(is_array($data['repair_product_id']) && count($data['repair_product_id'])) {
+                $ticket_products = [];
+                foreach($data['repair_product_id'] as $key => $product_id) {
+                    $ticket_products[] = array(
+                        'ticket_id' => $record->id,
+                        'serial_number' => $data['repair_serial_number'][$key],
+                        'customer_feedback' => $data['repair_customer_feedback'][$key],
+                        'variant_id' => $data['repair_variant_id'][$key],
+                        'product_id' => $product_id
+                    );
+                }
+                if(count($ticket_products)) {
+                    TicketRepairs::insert($ticket_products);
+                }
             }
         }
 
