@@ -60,7 +60,7 @@
                                         <span id="productText{{ $counter }}">{{ $ticket_product->title }}</span>
                                     </td>
                                     <td>
-                                        <input type="text" id="serialNumber{{ $counter }}" value="{{ $ticket_product->serial_number }}" class="form-control" name="serial_number[{{ $counter }}]" placeholder="Searil Number" />
+                                        <input type="text" id="serialNumber{{ $counter }}" value="{{ $ticket_product->serial_number }}" class="form-control" name="serial_number[{{ $counter }}]" placeholder="Serial Number" />
                                     </td>
                                     <td>
                                         <textarea id="customerFeedback{{ $counter }}" class="form-control" value="{{ $ticket_product->customer_feedback }}" name="customer_feedback[{{ $counter }}]" rows="2">{{ $ticket_product->customer_feedback }}</textarea>
@@ -94,7 +94,7 @@
             <span id="productTextAAA"></span>
         </td>
         <td>
-            <input type="text" id="serialNumberAAA" class="form-control" name="serial_number[AAA]" placeholder="Searil Number" />
+            <input type="text" id="serialNumberAAA" class="form-control" name="serial_number[AAA]" placeholder="Serial Number" />
         </td>
         <td>
             <textarea id="customerFeedbackAAA" class="form-control" name="customer_feedback[AAA]" rows="2"></textarea>

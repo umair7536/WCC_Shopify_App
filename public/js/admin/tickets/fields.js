@@ -114,7 +114,9 @@ var FormValidation = function () {
     }
 
     var total_products = parseInt($('#total_productsCount').val());
+    var total_repairs = parseInt($('#total_repairsCount').val());
     var counter = 1000;
+    var repair_counter = 1000;
 
     var addRow = function () {
         if($('#product_id').val() != '') {
@@ -161,6 +163,51 @@ var FormValidation = function () {
         }
     }
 
+    var addRepairRow = function () {
+        if($('#repair_product_id').val() != '') {
+
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                url: route('admin.tickets.get_product_detail'),
+                type: 'GET',
+                data: {
+                    variant_id: $('#repair_product_id').val()
+                },
+                cache: false,
+                success: function (response) {
+
+                    if(response.status == '1') {
+
+                        // Add count on row
+                        repair_counter = repair_counter + 1;
+
+                        var singleRow = $('#rowRepairGenerator').html();
+                        singleRow = singleRow.replace(/AAA/g, repair_counter);
+                        singleRow = singleRow.replace(/BBB/g, '');
+                        $('#table_repairs').append(singleRow);
+
+
+                        $("#repair_productID" + repair_counter).val(response.product.product_id);
+                        $("#repair_variantID" + repair_counter).val(response.product.variant_id);
+                        $("#repair_productText" + repair_counter).html(response.product.product_title);
+                        $("#repair_productImageSrc" + repair_counter).html("<img src=' " + response.product.product_image + "' height='60' />");
+                        $("#repair_productPrice" + repair_counter).html(response.product.product_price);
+
+                        // Increment Total Products count
+                        total_repairs = total_repairs + 1;
+                        $('#total_repairs').val(total_repairs);
+                        $('#total_repairsCount').val(total_repairs);
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+
+                }
+            });
+        }
+    }
+
     var calculateProductsTotal = function () {
         var totalPrice = 0;
         $('.productPriceValue').each(function (index, value) {
@@ -178,8 +225,18 @@ var FormValidation = function () {
             total_products = total_products - 1;
             $('#total_products').val(total_products);
             $('#total_productsCount').val(total_products);
+        }
+    }
 
-            // calculateProductsTotal();
+    var deleteRepairRow = function (id) {
+        if(confirm('Are you sure to delete')) {
+
+            $("#repair_singleRow" + id).remove();
+
+            // Decrement Total Products count
+            total_repairs = total_repairs - 1;
+            $('#total_repairs').val(total_repairs);
+            $('#total_repairsCount').val(total_repairs);
         }
     }
 
@@ -188,7 +245,9 @@ var FormValidation = function () {
             e();
         },
         addRow: addRow,
+        addRepairRow: addRepairRow,
         deleteRow: deleteRow,
+        deleteRepairRow: deleteRepairRow,
     }
 }();
 jQuery(document).ready(function () {
@@ -263,6 +322,40 @@ jQuery(document).ready(function () {
         templateResult: formatRepo,
         templateSelection: formatProductSelection
     });
+
+    $("#repair_product_id").select2({
+        placeholder: 'Search a Product with 2 or more characters',
+        ajax: {
+            url: route('admin.tickets.get_product'),
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return {
+                    q: params.term, // search term
+                    page: params.page
+                };
+            },
+            processResults: function (data, params) {
+                params.page = params.page || 1;
+
+                return {
+                    results: $.map(data, function (item) {
+                        return {
+                            text: item.name,
+                            id: item.id
+                        }
+                    }),
+                };
+            },
+            cache: true
+        },
+        escapeMarkup: function (markup) {
+            return markup;
+        },
+        minimumInputLength: 3,
+        templateResult: formatRepo,
+        templateSelection: formatRepairProductSelection
+    });
 });
 
 function formatRepo(item) {
@@ -295,4 +388,16 @@ function formatProductSelection(item) {
 
 function setProducts() {
     $('.product_id').val(null).trigger('change');
+};
+
+function formatRepairProductSelection(item) {
+    if (item.id) {
+        return item.text + " <button onclick='setRepairProducts()' class='croxcli' style='float: right;border: 0; background: none;padding: 0 0 0;'><i class='fa fa-times' aria-hidden='true'></i></button>";
+    } else {
+        return 'Search a Product with 2 or more characters';
+    }
+}
+
+function setRepairProducts() {
+    $('.repair_product_id').val(null).trigger('change');
 };

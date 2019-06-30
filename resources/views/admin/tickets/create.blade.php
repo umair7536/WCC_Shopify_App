@@ -127,7 +127,7 @@
 
                 <div class="row">
                     <div class="form-group col-md-8">
-                        {!! Form::label('product_id', 'Products', ['class' => 'control-label']) !!}
+                        {!! Form::label('product_id', 'Repair Products', ['class' => 'control-label']) !!}
                         <div class="input-group">
                             <select name="product_id" id="product_id" class="product_id form-control"></select>
                             <span class="input-group-btn"><button class="btn blue" type="button" onclick="FormValidation.addRow();"><i class="fa fa-plus"></i>&nbsp;Add</button></span>
@@ -162,6 +162,46 @@
                     </div>
                 </div>
 
+                <div class="clearfix"></div>
+                <h4>Repairt Parts</h4>
+
+                <div class="row">
+                    <div class="form-group col-md-8">
+                        {!! Form::label('repair_product_id', 'Products', ['class' => 'control-label']) !!}
+                        <div class="input-group">
+                            <select name="repair_product_id" id="repair_product_id" class="repair_product_id form-control"></select>
+                            <span class="input-group-btn"><button class="btn blue" type="button" onclick="FormValidation.addRepairRow();"><i class="fa fa-plus"></i>&nbsp;Add</button></span>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-4">
+                        {!! Form::label('total_repairs', 'Total Repair Products*', ['class' => 'control-label']) !!}
+                        {!! Form::number('total_repairs', old('total_repairs'), ['id' => 'total_repairs', 'min' => '1', 'readonly' => true, 'class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
+                        @if($errors->has('total_repairs'))
+                            <p class="help-block">
+                                {{ $errors->first('total_repairs') }}
+                            </p>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="clearfix"></div>
+
+                <div class="form-body col-md-12">
+                    <div class="table-responsive">
+                        <table id="table_repairs" class="table table-striped table-bordered table-advance table-hover">
+                            <thead>
+                            <tr>
+                                <th width="10%">Image</th>
+                                <th>Name</th>
+                                <th>Serial Number</th>
+                                <th>Customer Feedback</th>
+                                <th width="5%">Action</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+
                 <div class="form-actions">
                     {!! Form::submit(trans('global.app_save'), ['class' => 'btn btn-success']) !!}
                 </div>
@@ -171,6 +211,8 @@
         </div>
     </div>
     <input type="hidden" value="0" id="total_productsCount"/>
+    <input type="hidden" value="0" id="total_repairsCount"/>
+
     <table id="rowGenerator" style="display: none;">
         <tr id="singleRowAAA">
             <td id="productImageSrcAAA"></td>
@@ -187,6 +229,28 @@
             </td>
             <td>
                 <button class="btn btn-xs btn-danger" type="button" onclick="FormValidation.deleteRow('AAA')">
+                    <i class="fa fa-trash"></i>&nbsp;Delete
+                </button>
+            </td>
+        </tr>
+    </table>
+
+    <table id="rowRepairGenerator" style="display: none;">
+        <tr id="repair_singleRowAAA">
+            <td id="repair_productImageSrcAAA"></td>
+            <td>
+                <input type="hidden" value="" id="repair_productIDAAA" name="repair_product_id[AAA]" />
+                <input type="hidden" value="" id="repair_variantIDAAA" name="repair_variant_id[AAA]" />
+                <span id="repair_productTextAAA"></span>
+            </td>
+            <td>
+                <input type="text" id="repair_serialNumberAAA" class="form-control" name="repair_serial_number[AAA]" placeholder="Serial Number" />
+            </td>
+            <td>
+                <textarea id="repair_customerFeedbackAAA" class="form-control" name="repair_customer_feedback[AAA]" rows="2"></textarea>
+            </td>
+            <td>
+                <button class="btn btn-xs btn-danger" type="button" onclick="FormValidation.deleteRepairRow('AAA')">
                     <i class="fa fa-trash"></i>&nbsp;Delete
                 </button>
             </td>

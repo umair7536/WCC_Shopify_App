@@ -14,9 +14,9 @@ class Tickets extends BaseModal
 {
     use SoftDeletes;
 
-    protected $fillable = ['number', 'technician_remarks', 'customer_complain', 'total_products', 'ticket_status_id', 'customer_id', 'created_by', 'updated_by',  'active', 'created_at', 'updated_at','account_id'];
+    protected $fillable = ['number', 'technician_remarks', 'customer_complain', 'total_products', 'total_repairs', 'ticket_status_id', 'customer_id', 'created_by', 'updated_by',  'active', 'created_at', 'updated_at','account_id'];
 
-    protected static $_fillable = ['number', 'technician_remarks', 'customer_complain', 'total_products', 'ticket_status_id', 'customer_id', 'created_by', 'updated_by',];
+    protected static $_fillable = ['number', 'technician_remarks', 'customer_complain', 'total_products', 'total_repairs', 'ticket_status_id', 'customer_id', 'created_by', 'updated_by',];
 
     protected $table = 'tickets';
 
@@ -222,6 +222,10 @@ class Tickets extends BaseModal
             $data['total_products'] = count($data['product_id']);
         }
 
+        if(is_array($data['repair_product_id']) && count($data['repair_product_id'])) {
+            $data['total_repairs'] = count($data['repair_product_id']);
+        }
+
         $record = self::create($data);
 
         /**
@@ -244,6 +248,29 @@ class Tickets extends BaseModal
             }
             if(count($ticket_products)) {
                 TicketProducts::insert($ticket_products);
+            }
+        }
+
+        /**
+         * Create Ticket Repairs Records
+         */
+        TicketRepairs::where([
+            'ticket_id' => $record->id
+        ])->forceDelete();
+
+        if(is_array($data['repair_product_id']) && count($data['repair_product_id'])) {
+            $ticket_products = [];
+            foreach($data['repair_product_id'] as $key => $product_id) {
+                $ticket_products[] = array(
+                    'ticket_id' => $record->id,
+                    'serial_number' => $data['repair_serial_number'][$key],
+                    'customer_feedback' => $data['repair_customer_feedback'][$key],
+                    'variant_id' => $data['repair_variant_id'][$key],
+                    'product_id' => $product_id
+                );
+            }
+            if(count($ticket_products)) {
+                TicketRepairs::insert($ticket_products);
             }
         }
 
@@ -356,6 +383,10 @@ class Tickets extends BaseModal
             $data['total_products'] = count($data['product_id']);
         }
 
+        if(is_array($data['repair_product_id']) && count($data['repair_product_id'])) {
+            $data['total_repairs'] = count($data['repair_product_id']);
+        }
+
         $record = self::where([
             'id' => $id,
             'account_id' => $account_id
@@ -387,6 +418,29 @@ class Tickets extends BaseModal
             }
             if(count($ticket_products)) {
                 TicketProducts::insert($ticket_products);
+            }
+        }
+
+        /**
+         * Create Ticket Repairs Records
+         */
+        TicketRepairs::where([
+            'ticket_id' => $record->id
+        ])->forceDelete();
+
+        if(is_array($data['repair_product_id']) && count($data['repair_product_id'])) {
+            $ticket_products = [];
+            foreach($data['repair_product_id'] as $key => $product_id) {
+                $ticket_products[] = array(
+                    'ticket_id' => $record->id,
+                    'serial_number' => $data['repair_serial_number'][$key],
+                    'customer_feedback' => $data['repair_customer_feedback'][$key],
+                    'variant_id' => $data['repair_variant_id'][$key],
+                    'product_id' => $product_id
+                );
+            }
+            if(count($ticket_products)) {
+                TicketRepairs::insert($ticket_products);
             }
         }
 

@@ -7,6 +7,7 @@ use App\Models\ShopifyProducts;
 use App\Models\ShopifyProductVariants;
 use App\Models\ShopifyShops;
 use App\Models\TicketProducts;
+use App\Models\TicketRepairs;
 use App\Models\Tickets;
 use App\Models\TicketStatuses;
 use Carbon\Carbon;
@@ -383,7 +384,32 @@ class TicketsController extends Controller
                 ->get()->getDictionary();
         }
 
-        return view('admin.tickets.edit', compact('ticket', 'ticket_products', 'relationships', 'products', 'ticket_statuses', 'shopify_customer'));
+        /**
+         * Product Repairs
+         */
+        $repair_relationships = TicketRepairs::where(array(
+            'ticket_id' => $ticket->id
+        ))->select('product_id')->get();
+
+        $ticket_repairs = collect(new ShopifyProducts());
+
+        if ($repair_relationships->count()) {
+            $ticket_repairs = ShopifyProducts
+                ::join('ticket_repairs', 'ticket_repairs.product_id', '=', 'shopify_products.product_id')
+                ->whereIn('shopify_products.product_id', $repair_relationships)
+                ->where(['shopify_products.account_id' => Auth::User()->account_id])
+                ->select(
+                    'shopify_products.*',
+                    'ticket_repairs.id',
+                    'ticket_repairs.serial_number',
+                    'ticket_repairs.variant_id',
+                    'ticket_repairs.customer_feedback'
+                )
+                ->groupBy('ticket_repairs.id')
+                ->get()->getDictionary();
+        }
+
+        return view('admin.tickets.edit', compact('ticket', 'ticket_products', 'ticket_repairs', 'relationships', 'repair_relationships', 'products', 'ticket_statuses', 'shopify_customer'));
     }
 
     /**

@@ -27,7 +27,7 @@
         <tr>
             <th>Image</th>
             <th>Product</th>
-            <th>Searil Number</th>
+            <th>Serial Number</th>
             <th>Customer Feedback</th>
         </tr>
         </tbody>
