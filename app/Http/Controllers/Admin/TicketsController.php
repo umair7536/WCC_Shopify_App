@@ -372,7 +372,10 @@ class TicketsController extends Controller
             $ticket_products = ShopifyProducts
                 ::join('ticket_products', 'ticket_products.product_id', '=', 'shopify_products.product_id')
                 ->whereIn('shopify_products.product_id', $relationships)
-                ->where(['shopify_products.account_id' => Auth::User()->account_id])
+                ->where([
+                    'shopify_products.account_id' => Auth::User()->account_id,
+                    'ticket_id' => $ticket->id
+                ])
                 ->select(
                     'shopify_products.*',
                     'ticket_products.id',
@@ -397,7 +400,10 @@ class TicketsController extends Controller
             $ticket_repairs = ShopifyProducts
                 ::join('ticket_repairs', 'ticket_repairs.product_id', '=', 'shopify_products.product_id')
                 ->whereIn('shopify_products.product_id', $repair_relationships)
-                ->where(['shopify_products.account_id' => Auth::User()->account_id])
+                ->where([
+                    'shopify_products.account_id' => Auth::User()->account_id,
+                    'ticket_id' => $ticket->id
+                ])
                 ->select(
                     'shopify_products.*',
                     'ticket_repairs.id',
@@ -573,7 +579,16 @@ class TicketsController extends Controller
         $ticket_products = collect(new ShopifyProducts());
 
         if ($relationships->count()) {
-            $ticket_products = ShopifyProducts::join('ticket_products', 'ticket_products.product_id', '=', 'shopify_products.product_id')->whereIn('shopify_products.product_id', $relationships)->where(['shopify_products.account_id' => Auth::User()->account_id])->select('shopify_products.*', 'ticket_products.id', 'ticket_products.serial_number', 'ticket_products.customer_feedback')->groupBy('ticket_products.id')->get()->getDictionary();
+            $ticket_products = ShopifyProducts
+                ::join('ticket_products', 'ticket_products.product_id', '=', 'shopify_products.product_id')
+                ->whereIn('shopify_products.product_id', $relationships)
+                ->where([
+                    'shopify_products.account_id' => Auth::User()->account_id,
+                    'ticket_id' => $ticket->id
+                ])
+                ->select('shopify_products.*', 'ticket_products.id', 'ticket_products.serial_number', 'ticket_products.customer_feedback')
+                ->groupBy('ticket_products.id')
+                ->get()->getDictionary();
         }
 
 
@@ -590,7 +605,10 @@ class TicketsController extends Controller
             $ticket_repairs = ShopifyProducts
                 ::join('ticket_repairs', 'ticket_repairs.product_id', '=', 'shopify_products.product_id')
                 ->whereIn('shopify_products.product_id', $repair_relationships)
-                ->where(['shopify_products.account_id' => Auth::User()->account_id])
+                ->where([
+                    'shopify_products.account_id' => Auth::User()->account_id,
+                    'ticket_id' => $ticket->id
+                ])
                 ->select(
                     'shopify_products.*',
                     'ticket_repairs.id',
