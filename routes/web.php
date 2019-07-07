@@ -134,5 +134,19 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::resource('tickets', 'Admin\TicketsController');
     Route::get('tickets/draft/{id}', ['uses' => 'Admin\TicketsController@createDraftOrder', 'as' => 'tickets.draft_order']);
     // Tickets Routes end
+
+    // Shopify Plans Routes start
+    Route::post('shopify_plans/datatable', ['uses' => 'Admin\ShopifyPlansController@datatable', 'as' => 'shopify_plans.datatable']);
+    Route::patch('shopify_plans/active/{id}', ['uses' => 'Admin\ShopifyPlansController@active', 'as' => 'shopify_plans.active']);
+    Route::patch('shopify_plans/inactive/{id}', ['uses' => 'Admin\ShopifyPlansController@inactive', 'as' => 'shopify_plans.inactive']);
+    Route::get('shopify_plans/sort', ['uses' => 'Admin\ShopifyPlansController@sortorder', 'as' => 'shopify_plans.sort']);
+    Route::get('shopify_plans/sort-save', ['uses' => 'Admin\ShopifyPlansController@sortorder_save', 'as' => 'shopify_plans.sort_save']);
+    Route::resource('shopify_plans', 'Admin\ShopifyPlansController');
+    // Shopify Plans Routes end
+
+    // Shopify Billings Routes start
+    Route::get('shopify_billings/callback', ['uses' => 'Admin\ShopifyBillingsController@callback', 'as' => 'shopify_billings.callback']);
+    Route::resource('shopify_billings', 'Admin\ShopifyBillingsController');
+    // Shopify Billings Routes end
 });
 

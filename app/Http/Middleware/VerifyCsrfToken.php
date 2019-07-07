@@ -12,11 +12,5 @@ class VerifyCsrfToken extends BaseVerifier
      * @var array
      */
     protected $except = [
-        'prices/get-price',
-        'prices/map',
-        'custom/save',
-        'custom/delete',
-        'custom/list',
-        'custom/rates'
     ];
 }

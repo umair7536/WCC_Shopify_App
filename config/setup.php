@@ -31,6 +31,51 @@ return [
         ]
     ),
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Default Shopify Plans Array
+    |--------------------------------------------------------------------------
+    */
+    'shopify_plans' => array(
+        [
+            'name' => 'Starter',
+            'price' => '0.00',
+            'quota' => '10',
+            'slug' => 'free',
+        ],
+        [
+            'name' => 'Essential',
+            'price' => '9.00',
+            'quota' => '100',
+            'slug' => 'essential',
+        ],
+        [
+            'name' => 'Growth',
+            'price' => '29.00',
+            'quota' => '500',
+            'slug' => 'growth',
+        ],
+        [
+            'name' => 'Pro',
+            'price' => '49.00',
+            'quota' => '2000',
+            'slug' => 'pro',
+        ],
+        [
+            'name' => 'Advanced',
+            'price' => '99.00',
+            'quota' => '5000',
+            'slug' => 'advanced',
+        ],
+        [
+            'name' => 'Platinum',
+            'price' => '199.00',
+            'quota' => '10000',
+            'slug' => 'platinum',
+        ],
+    ),
+
     /*
     |--------------------------------------------------------------------------
     | Default Product Types Array

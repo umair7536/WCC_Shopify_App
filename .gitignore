@@ -11,6 +11,7 @@
 Homestead.json
 Homestead.yaml
 npm-debug.log
+.DB_Store
 .env
 /composer.lock
 /package-lock.json

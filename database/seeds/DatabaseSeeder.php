@@ -49,5 +49,11 @@ class DatabaseSeeder extends Seeder
 
         // Tickets Seeder
         $this->call(TicketsSeed::class);
+
+        // Tickets Seeder
+        $this->call(ShopifyPlansSeed::class);
+
+        // Tickets Seeder
+        $this->call(ShopifyBillingsSeed::class);
     }
 }

@@ -7,6 +7,7 @@ use App\Events\Shopify\Products\SyncProductsFire;
 use App\Events\Shopify\Products\UploadVariantsFire;
 use App\Models\Accounts;
 use App\Models\ShopifyCustomers;
+use App\Models\ShopifyPlans;
 use Auth;
 use Config;
 

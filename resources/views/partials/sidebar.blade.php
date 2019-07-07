@@ -153,12 +153,16 @@
 
             @if(
                     Gate::allows('settings_manage') ||
+                    Gate::allows('shopify_plans_manage') ||
+                    Gate::allows('shopify_billings_manage') ||
                     Gate::allows('shopify_webhooks_manage') ||
                     Gate::allows('ticket_statuses_manage')
 
                 )
                 <li class="nav-item start @if(
                 $request->segment(2) == 'settings' ||
+                $request->segment(2) == 'shopify_plans' ||
+                $request->segment(2) == 'shopify_billings' ||
                 $request->segment(2) == 'shopify_webhooks' ||
                 $request->segment(2) == 'ticket_statuses'
             ) active open @endif">
@@ -172,6 +176,20 @@
                             <li class="nav-item start {{ $request->segment(2) == 'settings' ? 'active active-sub' : '' }}">
                                 <a href="{{ route('admin.settings.index') }}">
                                     <span class="title">@lang('global.settings.title')</span>
+                                </a>
+                            </li>
+                        @endif
+                        @if(Gate::allows('shopify_plans_manage'))
+                            <li class="nav-item start {{ $request->segment(2) == 'shopify_plans' ? 'active active-sub' : '' }}">
+                                <a href="{{ route('admin.shopify_plans.index') }}">
+                                    <span class="title">@lang('global.shopify_plans.title')</span>
+                                </a>
+                            </li>
+                        @endif
+                        @if(Gate::allows('shopify_billings_manage'))
+                            <li class="nav-item start {{ $request->segment(2) == 'shopify_billings' ? 'active active-sub' : '' }}">
+                                <a href="{{ route('admin.shopify_billings.index') }}">
+                                    <span class="title">@lang('global.shopify_billings.title')</span>
                                 </a>
                             </li>
                         @endif

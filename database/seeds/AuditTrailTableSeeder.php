@@ -78,6 +78,20 @@ class AuditTrailTableSeeder extends Seeder
                 'created_at' => \Carbon\Carbon::now(),
                 'updated_at' => \Carbon\Carbon::now(),
             ),
+            21 => array(
+                'id' => 21,
+                'name' => 'shopify_plans',
+                'screen' => 'Shopify Plans',
+                'created_at' => \Carbon\Carbon::now(),
+                'updated_at' => \Carbon\Carbon::now(),
+            ),
+            22 => array(
+                'id' => 22,
+                'name' => 'shopify_billings',
+                'screen' => 'Shopify Billings',
+                'created_at' => \Carbon\Carbon::now(),
+                'updated_at' => \Carbon\Carbon::now(),
+            ),
         ];
 
         if(count($audit_trail_tables)) {
