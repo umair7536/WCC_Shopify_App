@@ -29,6 +29,8 @@ var TableDatatablesAjax = function () {
                 "columns": [
                     { "data": "id","bSortable": false },
                     { "data": "name" },
+                    { "data": "show_color" },
+                    { "data": "color" },
                     { "data": "actions","bSortable": false }
                 ],
                 ajax: {

@@ -36,7 +36,13 @@ class TicketsController extends Controller
         $ticket_statuses = TicketStatuses::getTicketStatuses();
         $ticket_statuses->prepend('Select a Status', '');
 
-        return view('admin.tickets.index', compact('ticket_statuses'));
+        $color_ticket_statuses = TicketStatuses::where([
+            'account_id' => Auth::User()->account_id
+        ])
+            ->select('id', 'show_color', 'color')
+            ->get();
+
+        return view('admin.tickets.index', compact('ticket_statuses', 'color_ticket_statuses'));
     }
 
     /**
@@ -98,11 +104,13 @@ class TicketsController extends Controller
 
                 $records["data"][] = array(
                     'id' => '<label class="mt-checkbox mt-checkbox-single mt-checkbox-outline"><input name="id[]" type="checkbox" class="checkboxes" value="' . $ticket->id . '"/><span></span></label>',
-                    'number' => $ticket->number,
+                    'ticket_id' => $ticket->id,
+                    'number' => '<a href="' .  route('admin.tickets.edit',[$ticket->id]) . '">' . $ticket->number . '</a>',
                     'customer_name' => $ticket->first_name . ' ' . $ticket->last_name . '<br/>' . $ticket->email . (($ticket->phone) ? '<br/>' . $ticket->phone : ''),
                     'total_products' => $ticket->total_products,
                     'serial_number' => isset($ticket_products_mapping[$ticket->id]) ? implode('<br/>', $ticket_products_mapping[$ticket->id]) : '',
                     'ticket_status_id' => view('admin.tickets.ticket_status', compact('ticket'))->render(),
+                    'status_id' => $ticket->ticket_status_id,
                     'created_at' => Carbon::parse($ticket->created_at)->format('F j,Y h:i A'),
                     'actions' => view('admin.tickets.actions', compact('ticket'))->render(),
                 );
@@ -688,7 +696,7 @@ class TicketsController extends Controller
             $patient = ShopifyCustomers::where([
                 ['account_id', '=', $account_id],
                 ['phone', 'LIKE', "%{$name}%"]
-            ])->select('name', 'customer_id', 'phone')->get();
+            ])->select('name', 'email', 'customer_id', 'phone')->get();
         } else {
             $patient = ShopifyCustomers::where([
                 ['account_id', '=', $account_id],
@@ -698,7 +706,7 @@ class TicketsController extends Controller
                     ['account_id', '=', $account_id],
                     ['email', 'LIKE', "%{$name}%"]
                 ])
-                ->select('name', 'customer_id', 'phone')->get();
+                ->select('name', 'email', 'customer_id', 'phone')->get();
         }
 
         return response()->json($patient);
@@ -759,6 +767,27 @@ class TicketsController extends Controller
         }
 
         $ticket = Tickets::findOrFail($id);
+
+
+        /**
+         * If complete status found, set complete status to ticket
+         */
+        $ticket_status = TicketStatuses::where(array(
+            'account_id' => Auth::User()->account_id,
+            'slug' => 'complete',
+        ))->first();
+
+        if($ticket_status) {
+            Tickets::where(array(
+                'account_id' => Auth::User()->account_id,
+                'id' => $ticket->id
+            ))->update(array(
+                'ticket_status_id' => $ticket_status->id
+            ));
+        }
+        /**
+         * Ticket status complete porton ends here
+         */
 
         if (!$ticket) {
             return view('error', compact('lead_statuse'));

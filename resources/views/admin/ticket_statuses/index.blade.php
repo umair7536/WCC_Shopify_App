@@ -63,6 +63,8 @@
                             </label>
                         </th>
                         <th>@lang('global.ticket_statuses.fields.name')</th>
+                        <th>@lang('global.ticket_statuses.fields.show_color')</th>
+                        <th>@lang('global.ticket_statuses.fields.color')</th>
                         <th width="20%">@lang('global.ticket_statuses.fields.actions')</th>
                     </tr>
                     <tr role="row" class="filter">
@@ -70,6 +72,8 @@
                         <td>
                             <input type="text" class="form-control form-filter input-sm" name="name">
                         </td>
+                        <td></td>
+                        <td></td>
                         <td>
                             <div class="margin-bottom-5">
                                 <button class="btn btn-sm green btn-outline filter-submit margin-bottom">

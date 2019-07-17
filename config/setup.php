@@ -19,7 +19,7 @@ return [
         ],
         [
             'name' => 'Repaired',
-            'slug' => 'default',
+            'slug' => 'repaired',
         ],
         [
             'name' => 'Waiting on Customer',

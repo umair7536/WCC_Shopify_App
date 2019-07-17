@@ -52,7 +52,7 @@
                                 <div class="form-group col-md-4">
                                     {!! Form::label('product_id', 'Customer', ['class' => 'control-label']) !!}
                                     <select name="customer_id" id="customer_id" class="customer_id form-control">
-                                        <option selected="selected" value="{{ $shopify_customer->customer_id }}">{{ $shopify_customer->first_name . ' ' . $shopify_customer->last_name . ' - ' . $shopify_customer->phone }}</option>
+                                        <option selected="selected" value="{{ $shopify_customer->customer_id }}">{{ $shopify_customer->first_name . ' ' . $shopify_customer->last_name . ' - ' . $shopify_customer->email }}</option>
                                     </select>
                                 </div>
 
@@ -246,7 +246,7 @@
                                             <th width="10%">Image</th>
                                             <th>Name</th>
                                             <th>Serial Number</th>
-                                            <th>Customer Feedback</th>
+                                            <th>Technician Feedback</th>
                                             <th width="5%">Action</th>
                                         </tr>
                                         </thead>

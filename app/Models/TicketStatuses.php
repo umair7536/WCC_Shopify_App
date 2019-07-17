@@ -12,9 +12,9 @@ class TicketStatuses extends BaseModal
 {
     use SoftDeletes;
 
-    protected $fillable = ['account_id', 'slug', 'name', 'active', 'created_at', 'updated_at', 'sort_number'];
+    protected $fillable = ['account_id', 'slug', 'name', 'active', 'show_color', 'color', 'created_at', 'updated_at', 'sort_number'];
 
-    protected static $_fillable = ['name', 'slug', 'active'];
+    protected static $_fillable = ['name', 'slug', 'active', 'show_color', 'color'];
 
     protected $table = 'ticket_statuses';
 
@@ -183,6 +183,13 @@ class TicketStatuses extends BaseModal
         // Set Account ID
         $data['account_id'] = $account_id;
 
+        if(isset($data['show_color']) && $data['show_color']) {
+            $data['show_color'] = 1;
+        } else {
+            $data['show_color'] = 0;
+            $data['color'] = null;
+        }
+
         $record = self::create($data);
 
         $record->update(['sort_no' => $record->id]);
@@ -291,6 +298,13 @@ class TicketStatuses extends BaseModal
 
         // Set Account ID
         $data['account_id'] = $account_id;
+
+        if(isset($data['show_color']) && $data['show_color']) {
+            $data['show_color'] = 1;
+        } else {
+            $data['show_color'] = 0;
+            $data['color'] = null;
+        }
 
         $record = self::where([
             'id' => $id,

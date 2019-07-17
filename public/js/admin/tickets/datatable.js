@@ -44,7 +44,23 @@ var TableDatatablesAjax = function () {
                     }
                 },
                 ordering: !0,
-                order: [[6, "desc"]]
+                order: [[6, "desc"]],
+                "createdRow": function( row, data, dataIndex ) {
+                    console.log(data);
+                    // $(row).attr('style', 'background-color: lightgreen !important');
+                    if(data.status_id && $('#show_color' + data.status_id).val() != '0') {
+                        console.log('Yay' + data.status_id);
+                        console.log('Yay' + data.status_id);
+                        $(row).children(':nth-child(1)').attr('style', 'background-color: ' + $('#color' + data.status_id).val() + ' !important;');
+                        $(row).children(':nth-child(2)').attr('style', 'background-color: ' + $('#color' + data.status_id).val() + ' !important;');
+                        $(row).children(':nth-child(3)').attr('style', 'background-color: ' + $('#color' + data.status_id).val() + ' !important;');
+                        $(row).children(':nth-child(4)').attr('style', 'background-color: ' + $('#color' + data.status_id).val() + ' !important;');
+                        $(row).children(':nth-child(5)').attr('style', 'background-color: ' + $('#color' + data.status_id).val() + ' !important;');
+                        $(row).children(':nth-child(6)').attr('style', 'background-color: ' + $('#color' + data.status_id).val() + ' !important;');
+                        $(row).children(':nth-child(7)').attr('style', 'background-color: ' + $('#color' + data.status_id).val() + ' !important;');
+                        $(row).children(':nth-child(8)').attr('style', 'background-color: ' + $('#color' + data.status_id).val() + ' !important;');
+                    }
+                },
             }
         }), a.getTableWrapper().on("click", ".table-group-action-submit", function (e) {
             e.preventDefault();

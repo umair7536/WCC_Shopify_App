@@ -47,7 +47,16 @@ var FormValidation = function () {
             }
         });
         $('.form-control.inpt-focus').focus();
-        
+
+        $('#show_color').change(function () {
+            if ($(this).is(":checked")) {
+                $('#show_color').val('1');
+                $('.show_color').show();
+            } else {
+                $('#show_color').val('0');
+                $('.show_color').hide();
+            }
+        });
     }
 
     var x = function (action, method, data, callback) {

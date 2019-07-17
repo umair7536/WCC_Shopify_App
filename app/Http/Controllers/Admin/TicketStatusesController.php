@@ -72,6 +72,8 @@ class TicketStatusesController extends Controller
                 $records["data"][] = array(
                     'id' => '<label class="mt-checkbox mt-checkbox-single mt-checkbox-outline"><input name="id[]" type="checkbox" class="checkboxes" value="'.$ticket_statuse->id.'"/><span></span></label>',
                     'name' => $ticket_statuse->name,
+                    'show_color' => ($ticket_statuse->show_color) ? 'Yes' : 'No',
+                    'color' => ($ticket_statuse->show_color) ? '<span class="btn btn-xs" style="background-color: ' . $ticket_statuse->color . ' !important;">' . $ticket_statuse->color . '</span>' : '',
                     'actions' => view('admin.ticket_statuses.actions', compact('ticket_statuse'))->render(),
                 );
             }
@@ -95,7 +97,9 @@ class TicketStatusesController extends Controller
             return abort(401);
         }
 
-        return view('admin.ticket_statuses.create',compact('city'));
+        $show_colors = 0;
+
+        return view('admin.ticket_statuses.create',compact('show_colors'));
     }
 
 
@@ -190,7 +194,9 @@ class TicketStatusesController extends Controller
             return view('error', compact('lead_statuse'));
         }
 
-        return view('admin.ticket_statuses.edit', compact('ticket_statuse'));
+        $show_colors = $ticket_statuse->show_color;
+
+        return view('admin.ticket_statuses.edit', compact('ticket_statuse', 'show_colors'));
     }
 
     /**

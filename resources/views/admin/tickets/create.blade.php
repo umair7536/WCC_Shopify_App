@@ -219,7 +219,7 @@
                                             <th width="10%">Image</th>
                                             <th>Name</th>
                                             <th>Serial Number</th>
-                                            <th>Customer Feedback</th>
+                                            <th>Technician Feedback</th>
                                             <th width="5%">Action</th>
                                         </tr>
                                         </thead>

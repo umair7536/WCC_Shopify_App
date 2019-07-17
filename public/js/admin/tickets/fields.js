@@ -273,7 +273,7 @@ jQuery(document).ready(function () {
                 return {
                     results: $.map(data, function (item) {
                         return {
-                            text: item.name + ' - ' + item.phone,
+                            text: item.name + ' - ' + item.email,
                             id: item.customer_id
                         }
                     }),
