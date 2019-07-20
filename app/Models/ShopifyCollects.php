@@ -9,27 +9,23 @@ use Illuminate\Support\Facades\Schema;
 use Auth;
 
 
-class ShopifyCustomCollections extends BaseModal
+class ShopifyCollects extends BaseModal
 {
     use SoftDeletes;
 
     protected $fillable = [
-        'collection_id', 'account_id', 'title', 'body_html', 'handle',
-        'active', 'published_at', 'updated_at', 'image', 'image_link', 'metafields',
-        'published', 'published_at', 'updated_at', 'sort_order', 'template_suffix',
-        'created_by', 'updated_by'
+        'collect_id', 'collection_id', 'account_id', 'product_id', 'featured',
+        'created_at', 'updated_at', 'position', 'sort_value'
     ];
 
     protected static $_fillable = [
-        'collection_id', 'account_id', 'title', 'body_html', 'handle',
-        'active', 'published_at', 'updated_at', 'image', 'image_link', 'metafields',
-        'published', 'published_at', 'updated_at', 'sort_order', 'template_suffix',
-        'created_by', 'updated_by'
+        'collect_id', 'collection_id', 'account_id', 'product_id', 'featured',
+        'created_at', 'updated_at', 'position', 'sort_value'
     ];
 
-    protected $table = 'shopify_custom_collections';
+    protected $table = 'shopify_collects';
 
-    protected static $_table = 'shopify_custom_collections';
+    protected static $_table = 'shopify_collects';
 
     public $timestamps = false;
 
@@ -40,7 +36,7 @@ class ShopifyCustomCollections extends BaseModal
      */
     public function charge_per_units()
     {
-        return $this->hasMany('App\Models\ChargePerUnits', 'custom_collection_id');
+        return $this->hasMany('App\Models\ChargePerUnits', 'collect_id');
     }
 
     /**
@@ -48,7 +44,7 @@ class ShopifyCustomCollections extends BaseModal
      */
     public function unit_placements()
     {
-        return $this->hasMany('App\Models\UnitPlacements', 'custom_collection_id');
+        return $this->hasMany('App\Models\UnitPlacements', 'collect_id');
     }
 
     /**
@@ -56,7 +52,7 @@ class ShopifyCustomCollections extends BaseModal
      */
     public function setup_charges()
     {
-        return $this->hasMany('App\Models\SetupCharges', 'custom_collection_id');
+        return $this->hasMany('App\Models\SetupCharges', 'collect_id');
     }
 
     /**
@@ -64,7 +60,7 @@ class ShopifyCustomCollections extends BaseModal
      */
     public function charge_placements()
     {
-        return $this->hasMany('App\Models\ChargePlacements', 'custom_collection_id');
+        return $this->hasMany('App\Models\ChargePlacements', 'collect_id');
     }
 
     /**
@@ -249,14 +245,14 @@ class ShopifyCustomCollections extends BaseModal
     static public function inactiveRecord($id)
     {
 
-        $custom_collection = ShopifyCustomCollections::getData($id);
+        $collect = ShopifyCollects::getData($id);
 
-        if (!$custom_collection) {
+        if (!$collect) {
             flash('Resource not found.')->error()->important();
-            return redirect()->route('admin.custom_collections.index');
+            return redirect()->route('admin.collects.index');
         }
 
-        $record = $custom_collection->update([
+        $record = $collect->update([
             'active' => 0,
             'updated_at' => Carbon::now()->toDateTimeString(),
         ]);
@@ -278,14 +274,14 @@ class ShopifyCustomCollections extends BaseModal
     static public function activeRecord($id)
     {
 
-        $custom_collection = ShopifyCustomCollections::getData($id);
+        $collect = ShopifyCollects::getData($id);
 
-        if (!$custom_collection) {
+        if (!$collect) {
             flash('Resource not found.')->error()->important();
-            return redirect()->route('admin.custom_collections.index');
+            return redirect()->route('admin.collects.index');
         }
 
-        $record = $custom_collection->update([
+        $record = $collect->update([
             'active' => 1,
             'updated_at' => Carbon::now()->toDateTimeString()
         ]);
@@ -307,20 +303,20 @@ class ShopifyCustomCollections extends BaseModal
     static public function deleteRecord($id)
     {
 
-        $custom_collection = ShopifyCustomCollections::getData($id);
+        $collect = ShopifyCollects::getData($id);
 
-        if (!$custom_collection) {
+        if (!$collect) {
             flash('Resource not found.')->error()->important();
-            return redirect()->route('admin.custom_collections.index');
+            return redirect()->route('admin.collects.index');
         }
 
         // Check if child records exists or not, If exist then disallow to delete it.
-        if (ShopifyCustomCollections::isChildExists($id, Auth::User()->account_id)) {
+        if (ShopifyCollects::isChildExists($id, Auth::User()->account_id)) {
             flash('Child records exist, unable to delete resource')->error()->important();
-            return redirect()->route('admin.custom_collections.index');
+            return redirect()->route('admin.collects.index');
         }
 
-        $record = $custom_collection->delete();
+        $record = $collect->delete();
 
         AuditTrails::deleteEventLogger(self::$_table, 'delete', self::$_fillable, $id);
 
@@ -338,7 +334,7 @@ class ShopifyCustomCollections extends BaseModal
      */
     static public function updateRecord($id, $request, $account_id)
     {
-        $old_data = (ShopifyCustomCollections::find($id))->toArray();
+        $old_data = (ShopifyCollects::find($id))->toArray();
 
         $data = $request->all();
 
@@ -404,7 +400,7 @@ class ShopifyCustomCollections extends BaseModal
             /*
              * Set DateTimes format
              */
-            $timestamps = ['created_at', 'updated_at', 'published_at'];
+            $timestamps = ['created_at', 'updated_at'];
             if(in_array($column, $timestamps)) {
                 $value = Carbon::parse($value)->toDateTimeString();
             }

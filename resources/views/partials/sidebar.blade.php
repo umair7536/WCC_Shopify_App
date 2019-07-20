@@ -95,6 +95,7 @@
                 )
                 <li class="nav-item start @if(
                     $request->segment(2) == 'shopify_tags'
+                    || $request->segment(2) == 'shopify_custom_collections'
                     || $request->segment(2) == 'shopify_products'
                 ) active open @endif">
                     <a href="javascript:;" class="nav-link nav-toggle">
@@ -111,11 +112,11 @@
                             </li>
                         @endif
                         @if(Gate::allows('shopify_custom_collections_manage'))
-                            {{--<li class="nav-item start {{ $request->segment(2) == 'shopify_custom_collections' ? 'active active-sub' : '' }}">--}}
-                                {{--<a href="{{ route('admin.shopify_custom_collections.index') }}">--}}
-                                    {{--<span class="title">@lang('global.shopify_custom_collections.title')</span>--}}
-                                {{--</a>--}}
-                            {{--</li>--}}
+                            <li class="nav-item start {{ $request->segment(2) == 'shopify_custom_collections' ? 'active active-sub' : '' }}">
+                                <a href="{{ route('admin.shopify_custom_collections.index') }}">
+                                    <span class="title">@lang('global.shopify_custom_collections.title')</span>
+                                </a>
+                            </li>
                         @endif
                         @if(Gate::allows('shopify_products_manage'))
                             <li class="nav-item start {{ $request->segment(2) == 'shopify_products' ? 'active active-sub' : '' }}">

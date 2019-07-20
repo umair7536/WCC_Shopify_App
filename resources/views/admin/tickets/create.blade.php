@@ -49,7 +49,7 @@
                     <div class="portlet portlet-fit">
                         <div class="portlet-title">
                             <div class="caption">
-                                <span class="caption-subject bold font-dark uppercase">Step 01: Select Customer</span><br/>
+                                <span class="caption-subject bold font-dark uppercase margin-bottom-10">Step 01: Select Customer</span><br/>
                                 <span class="caption-helper">Which customer submitted the returned product(s)?</span>
                             </div>
                         </div>
@@ -137,7 +137,7 @@
                     <div class="portlet portlet-fit">
                         <div class="portlet-title">
                             <div class="caption">
-                                <span class="caption-subject bold font-dark uppercase">Step 02: Book in Returns</span><br/>
+                                <span class="caption-subject bold font-dark uppercase margin-bottom-10">Step 02: Book in Returns</span><br/>
                                 <span class="caption-helper">Which customer submitted the returned product(s)?</span>
                             </div>
                         </div>
@@ -185,7 +185,7 @@
                     <div class="portlet portlet-fit">
                         <div class="portlet-title">
                             <div class="caption">
-                                <span class="caption-subject bold font-dark uppercase">Step 03: Repair Worksheet</span><br/>
+                                <span class="caption-subject bold font-dark uppercase margin-bottom-10">Step 03: Repair Worksheet</span><br/>
                                 <span class="caption-helper">What parts are replaced and why?</span>
                             </div>
                         </div>

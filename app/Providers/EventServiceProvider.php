@@ -22,6 +22,12 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\Shopify\Products\SyncCustomersFire' => [
             'App\Listeners\Shopify\Products\SyncCustomersListener',
         ],
+        'App\Events\Shopify\Products\SyncCustomCollecionsFire' => [
+            'App\Listeners\Shopify\Products\SyncCustomCollectionsListener',
+        ],
+        'App\Events\Shopify\Products\SyncCollectsFire' => [
+            'App\Listeners\Shopify\Products\SyncCollectsListener',
+        ],
     ];
 
     /**

@@ -60,7 +60,7 @@ class AuditTrailTableSeeder extends Seeder
             18 => array(
                 'id' => 18,
                 'name' => 'shopify_custom_collections',
-                'screen' => 'Collects',
+                'screen' => 'Custom Collections',
                 'created_at' => \Carbon\Carbon::now(),
                 'updated_at' => \Carbon\Carbon::now(),
             ),
@@ -75,6 +75,13 @@ class AuditTrailTableSeeder extends Seeder
                 'id' => 20,
                 'name' => 'ticket_statuses',
                 'screen' => 'Ticket Statuses',
+                'created_at' => \Carbon\Carbon::now(),
+                'updated_at' => \Carbon\Carbon::now(),
+            ),
+            21 => array(
+                'id' => 21,
+                'name' => 'shopify_collects',
+                'screen' => 'Collects',
                 'created_at' => \Carbon\Carbon::now(),
                 'updated_at' => \Carbon\Carbon::now(),
             ),

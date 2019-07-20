@@ -102,6 +102,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::post('shopify_custom_collections/datatable', ['uses' => 'Admin\ShopifyCustomCollectionsController@datatable', 'as' => 'shopify_custom_collections.datatable']);
     Route::patch('shopify_custom_collections/active/{id}', ['uses' => 'Admin\ShopifyCustomCollectionsController@active', 'as' => 'shopify_custom_collections.active']);
     Route::patch('shopify_custom_collections/inactive/{id}', ['uses' => 'Admin\ShopifyCustomCollectionsController@inactive', 'as' => 'shopify_custom_collections.inactive']);
+    Route::get('shopify_custom_collections/sync-custom-collections', ['uses' => 'Admin\ShopifyCustomCollectionsController@syncCustomCollections', 'as' => 'shopify_custom_collections.custom_collections']);
     Route::resource('shopify_custom_collections', 'Admin\ShopifyCustomCollectionsController');
     // Shopify Custom Collections Routes end
 

@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\Shopify\Products\SyncCollectsFire;
+use App\Events\Shopify\Products\SyncCustomCollecionsFire;
+use App\Models\Accounts;
+use App\Models\ShopifyCollects;
 use App\Models\ShopifyCustomCollections;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -252,6 +256,34 @@ class ShopifyCustomCollectionsController extends Controller
             return abort(401);
         }
         ShopifyCustomCollections::activeRecord($id);
+
+        return redirect()->route('admin.shopify_custom_collections.index');
+    }
+
+    /**
+     * Dispatch event for sync custom collections.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function syncCustomCollections()
+    {
+        if (! Gate::allows('shopify_custom_collections_manage')) {
+            return abort(401);
+        }
+
+        event(new SyncCustomCollecionsFire(Accounts::find(Auth::User()->account_id)));
+
+        /**
+         * Dispatch Collects Event and Delte existing records
+         */
+
+        ShopifyCollects::where([
+            'account_id' => Auth::User()->account_id
+        ])->forceDelete();
+
+        event(new SyncCollectsFire(Accounts::find(Auth::User()->account_id)));
+
+        flash('Custom Collectons Sync Event is dispatched successfully.')->success()->important();
 
         return redirect()->route('admin.shopify_custom_collections.index');
     }
