@@ -7,7 +7,6 @@ use App\Events\Shopify\Products\UploadVariantsFire;
 use App\Models\Accounts;
 use Auth;
 use Config;
-use ZfrShopify\ShopifyClient;
 
 class HomeController extends Controller
 {

@@ -154,12 +154,14 @@
 
             @if(
                     Gate::allows('settings_manage') ||
+                    Gate::allows('general_settings_manage') ||
                     Gate::allows('shopify_webhooks_manage') ||
                     Gate::allows('ticket_statuses_manage')
 
                 )
                 <li class="nav-item start @if(
                 $request->segment(2) == 'settings' ||
+                $request->segment(2) == 'general_settings' ||
                 $request->segment(2) == 'shopify_webhooks' ||
                 $request->segment(2) == 'ticket_statuses'
             ) active open @endif">
@@ -173,6 +175,13 @@
                             <li class="nav-item start {{ $request->segment(2) == 'settings' ? 'active active-sub' : '' }}">
                                 <a href="{{ route('admin.settings.index') }}">
                                     <span class="title">@lang('global.settings.title')</span>
+                                </a>
+                            </li>
+                        @endif
+                        @if(Gate::allows('general_settings_manage'))
+                            <li class="nav-item start {{ $request->segment(2) == 'general_settings' ? 'active active-sub' : '' }}">
+                                <a href="{{ route('admin.general_settings.index') }}">
+                                    <span class="title">@lang('global.general_settings.title')</span>
                                 </a>
                             </li>
                         @endif

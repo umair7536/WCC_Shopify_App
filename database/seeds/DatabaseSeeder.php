@@ -49,5 +49,8 @@ class DatabaseSeeder extends Seeder
 
         // Tickets Seeder
         $this->call(TicketsSeed::class);
+
+        // General Settings Seeder
+        $this->call(GeneralSettingsSeed::class);
     }
 }

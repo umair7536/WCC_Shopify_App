@@ -85,6 +85,13 @@ class AuditTrailTableSeeder extends Seeder
                 'created_at' => \Carbon\Carbon::now(),
                 'updated_at' => \Carbon\Carbon::now(),
             ),
+            22 => array(
+                'id' => 22,
+                'name' => 'general_settings',
+                'screen' => 'General Settings',
+                'created_at' => \Carbon\Carbon::now(),
+                'updated_at' => \Carbon\Carbon::now(),
+            ),
         ];
 
         if(count($audit_trail_tables)) {

@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\Shopify\Products\SyncCollectsFire;
+use App\Events\Shopify\Products\SyncCustomCollecionsFire;
 use App\Events\Shopify\Products\SyncCustomersFire;
 use App\Events\Shopify\Products\SyncProductsFire;
 use App\Http\Controllers\Controller;
 use App\Models\Accounts;
+use App\Models\GeneralSettings;
+use App\Models\ShopifyCollects;
 use App\Models\ShopifyShops;
 use App\Models\TicketStatuses;
 use App\User;
@@ -324,6 +328,14 @@ class ShopifyController extends Controller
          */
         event(new SyncProductsFire(Accounts::find($account_id)));
         event(new SyncCustomersFire(Accounts::find($account_id)));
+        event(new SyncCustomCollecionsFire(Accounts::find(Auth::User()->account_id)));
+        /**
+         * Dispatch Collects Event and Delte existing records
+         */
+        ShopifyCollects::where([
+            'account_id' => Auth::User()->account_id
+        ])->forceDelete();
+        event(new SyncCollectsFire(Accounts::find(Auth::User()->account_id)));
 
 
         $global_ticket_statuses = Config::get('setup.ticket_statuses');
@@ -342,6 +354,27 @@ class ShopifyController extends Controller
         }
 
         TicketStatuses::insert($ticket_statuses);
+
+        /**
+         * General Settings
+         */
+        $global_general_settings = Config::get('setup.general_settings');
+
+        $general_settings = [];
+        $sort_number = 0;
+        foreach($global_general_settings as $general_setting) {
+            $general_settings[] = array(
+                'name' => $general_setting['name'],
+                'slug' => $general_setting['slug'],
+                'data' => null,
+                'sort_number'=> $sort_number++,
+                'account_id' => $account_id,
+                'created_at' => \Carbon\Carbon::now(),
+                'updated_at' => \Carbon\Carbon::now(),
+            );
+        }
+
+        GeneralSettings::insert($general_settings);
 
         return $account_id;
     }

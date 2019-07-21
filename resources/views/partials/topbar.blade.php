@@ -16,6 +16,18 @@
         'account_id' => Auth::User()->account_id,
     ])->count()
 )
+@php(
+    $syncCustomCollections = \App\Models\ShopifyJobs::where([
+        'type' => 'sync-custom-collections',
+        'account_id' => Auth::User()->account_id,
+    ])->count()
+)
+@php(
+    $syncCollects = \App\Models\ShopifyJobs::where([
+        'type' => 'sync-collects',
+        'account_id' => Auth::User()->account_id,
+    ])->count()
+)
 <div class="page-header navbar navbar-fixed-top">
     <!-- BEGIN HEADER INNER -->
     <div class="page-header-inner ">
@@ -42,11 +54,11 @@
                     <li class="dropdown dropdown-extended dropdown-notification" id="header_notification_bar">
                         <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true" aria-expanded="true">
                             <i class="icon-refresh"></i>
-                            <span class="badge badge-default"> {{ (($syncProducts + $syncCustomers + $uploadVariants) > 1000) ? number_format(($syncProducts + $syncCustomers + $uploadVariants) / 1000, 2) . 'K' : ($syncProducts + $syncCustomers + $uploadVariants) }} </span>
+                            <span class="badge badge-default"> {{ (($syncProducts + $syncCustomers + $uploadVariants + $syncCustomCollections + $syncCollects) > 1000) ? number_format(($syncProducts + $syncCustomers + $uploadVariants + $syncCustomCollections + $syncCollects) / 1000, 2) . 'K' : ($syncProducts + $syncCustomers + $uploadVariants + $syncCustomCollections + $syncCollects) }} </span>
                         </a>
                         <ul class="dropdown-menu">
                             <li class="external">
-                                <h3><span class="bold">{{ (($syncProducts + $syncCustomers + $uploadVariants) > 1000) ? number_format(($syncProducts + $syncCustomers + $uploadVariants) / 1000, 2) . 'K' : ($syncProducts  + $syncCustomers + $uploadVariants) }} pending</span> processes</h3>
+                                <h3><span class="bold">{{ (($syncProducts + $syncCustomers + $uploadVariants + $syncCustomCollections + $syncCollects) > 1000) ? number_format(($syncProducts + $syncCustomers + $uploadVariants + $syncCustomCollections + $syncCollects) / 1000, 2) . 'K' : ($syncProducts  + $syncCustomers + $uploadVariants + $syncCustomCollections + $syncCollects) }} pending</span> processes</h3>
                             </li>
                             <li>
                                 <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 150px;">
@@ -83,6 +95,30 @@
                                                         <span class="label label-sm label-icon label-danger">
                                                             <i class="fa fa-download"></i>
                                                         </span> Sync Customers.
+                                                    </span>
+                                                </a>
+                                            </li>
+                                        @endif
+                                        @if($syncCustomCollections)
+                                            <li>
+                                                <a href="javascript:;">
+                                                    <span class="time">{{ ($syncCustomCollections > 1000) ? number_format($syncCustomCollections / 1000, 2) . 'K' : $syncCustomCollections }}</span>
+                                                    <span class="details">
+                                                        <span class="label label-sm label-icon label-danger">
+                                                            <i class="fa fa-download"></i>
+                                                        </span> Sync Custom Collections.
+                                                    </span>
+                                                </a>
+                                            </li>
+                                        @endif
+                                        @if($syncCollects)
+                                            <li>
+                                                <a href="javascript:;">
+                                                    <span class="time">{{ ($syncCollects > 1000) ? number_format($syncCollects / 1000, 2) . 'K' : $syncCollects }}</span>
+                                                    <span class="details">
+                                                        <span class="label label-sm label-icon label-danger">
+                                                            <i class="fa fa-download"></i>
+                                                        </span> Sync Collects.
                                                     </span>
                                                 </a>
                                             </li>

@@ -135,5 +135,14 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::resource('tickets', 'Admin\TicketsController');
     Route::get('tickets/draft/{id}', ['uses' => 'Admin\TicketsController@createDraftOrder', 'as' => 'tickets.draft_order']);
     // Tickets Routes end
+
+    // GeneralSettings Routes start
+    Route::post('general_settings/datatable', ['uses' => 'Admin\GeneralSettingsController@datatable', 'as' => 'general_settings.datatable']);
+    Route::patch('general_settings/active/{id}', ['uses' => 'Admin\GeneralSettingsController@active', 'as' => 'general_settings.active']);
+    Route::patch('general_settings/inactive/{id}', ['uses' => 'Admin\GeneralSettingsController@inactive', 'as' => 'general_settings.inactive']);
+    Route::get('general_settings/sort', ['uses' => 'Admin\GeneralSettingsController@sortorder', 'as' => 'general_settings.sort']);
+    Route::get('general_settings/sort-save', ['uses' => 'Admin\GeneralSettingsController@sortorder_save', 'as' => 'general_settings.sort_save']);
+    Route::resource('general_settings', 'Admin\GeneralSettingsController');
+    // GeneralSettings Routes end
 });
 
