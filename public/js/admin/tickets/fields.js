@@ -298,7 +298,8 @@ jQuery(document).ready(function () {
             data: function (params) {
                 return {
                     q: params.term, // search term
-                    page: params.page
+                    page: params.page,
+                    search_type: 'bookin',
                 };
             },
             processResults: function (data, params) {
@@ -332,7 +333,8 @@ jQuery(document).ready(function () {
             data: function (params) {
                 return {
                     q: params.term, // search term
-                    page: params.page
+                    page: params.page,
+                    search_type: 'repair',
                 };
             },
             processResults: function (data, params) {
