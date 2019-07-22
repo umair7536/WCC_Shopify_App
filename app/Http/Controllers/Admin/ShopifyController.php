@@ -328,14 +328,14 @@ class ShopifyController extends Controller
          */
         event(new SyncProductsFire(Accounts::find($account_id)));
         event(new SyncCustomersFire(Accounts::find($account_id)));
-        event(new SyncCustomCollecionsFire(Accounts::find(Auth::User()->account_id)));
+        event(new SyncCustomCollecionsFire(Accounts::find($account_id)));
         /**
          * Dispatch Collects Event and Delte existing records
          */
         ShopifyCollects::where([
-            'account_id' => Auth::User()->account_id
+            'account_id' => $account_id
         ])->forceDelete();
-        event(new SyncCollectsFire(Accounts::find(Auth::User()->account_id)));
+        event(new SyncCollectsFire(Accounts::find($account_id)));
 
 
         $global_ticket_statuses = Config::get('setup.ticket_statuses');
