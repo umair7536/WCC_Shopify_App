@@ -44,6 +44,7 @@ var FormValidation = function () {
             submitHandler: function (event) {
                 i.show(), r.hide();
                 $("input[type=submit]", e).attr('disabled', true);
+                $("#mark_repaired", e).attr('disabled', true);
 
                 x(e.attr('action'), e.attr('method'), e.serialize(), function (response) {
                     if (response.status == '1') {
@@ -52,6 +53,7 @@ var FormValidation = function () {
                         window.location = route('admin.tickets.index');
                     } else {
                         $("input[type=submit]", e).removeAttr('disabled');
+                        $("#mark_repaired", e).removeAttr('disabled');
                         i.hide();
                         r.html(response.message);
                         r.show();
@@ -73,6 +75,10 @@ var FormValidation = function () {
             }
         });
 
+        $('#mark_repaired').click(function () {
+            $('#repaired').val(1);
+            e.submit();
+        });
     }
 
     var x = function (action, method, data, callback) {

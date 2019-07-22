@@ -992,9 +992,6 @@ class TicketsController extends Controller
             $collections = array();
         }
 
-
-
-
         $query = ShopifyProducts
             ::join('shopify_product_variants', 'shopify_product_variants.product_id', '=', 'shopify_products.product_id')
             ->where([

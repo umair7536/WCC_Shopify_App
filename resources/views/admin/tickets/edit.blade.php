@@ -209,6 +209,14 @@
                         </div>
                     </div>
 
+                    <div class="clearfix">
+                        <hr/>
+                    </div>
+
+                    <div class="form-actions">
+                        {!! Form::submit(trans('global.app_update'), ['class' => 'btn btn-success']) !!}
+                    </div>
+
                     <div class="portlet portlet-fit">
                         <div class="portlet-title">
                             <div class="caption">
@@ -284,9 +292,17 @@
                         </div>
                     </div>
 
-                    <div class="form-actions">
-                        {!! Form::submit(trans('global.app_update'), ['class' => 'btn btn-success']) !!}
+                    <div class="clearfix">
+                        <hr/>
                     </div>
+
+                    <div class="form-actions">
+                        {!! Form::hidden('repaired', 0, ['id' => 'repaired']) !!}
+                        <button type="button" class="btn btn-success" id="mark_repaired">
+                            Mark as repaired
+                        </button>
+                    </div>
+
                 {!! Form::close() !!}
             </div>
 

@@ -464,6 +464,28 @@ class Tickets extends BaseModal
             }
         }
 
+        /**
+         * If repaired status found, set status to ticket
+         */
+        if($request->get('repaired') == '1') {
+            $ticket_status = TicketStatuses::where(array(
+                'account_id' => $account_id,
+                'slug' => 'repaired',
+            ))->first();
+
+            if($ticket_status) {
+                self::where(array(
+                    'account_id' => $account_id,
+                    'id' => $record->id
+                ))->update(array(
+                    'ticket_status_id' => $ticket_status->id
+                ));
+            }
+        }
+        /**
+         * Ticket status modification ends here
+         */
+
         return $record;
     }
 
