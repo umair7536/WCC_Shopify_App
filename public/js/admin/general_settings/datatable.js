@@ -28,39 +28,19 @@ var TableDatatablesAjax = function () {
                 pageLength: 25,
                 "columns": [
                     { "data": "id","bSortable": false },
-                    { "data": "number" },
-                    { "data": "customer_name" },
-                    { "data": "serial_number" },
-                    { "data": "total_products" },
-                    { "data": "ticket_status_id" },
-                    { "data": "created_at" },
+                    { "data": "name" },
+                    { "data": "data" },
                     { "data": "actions","bSortable": false }
                 ],
                 ajax: {
                     // url: "../demo/table_ajax.php",
-                    url: route('admin.tickets.datatable'),
+                    url: route('admin.general_settings.datatable'),
                     'beforeSend': function (request) {
                         request.setRequestHeader("X-CSRF-TOKEN", $('meta[name="csrf-token"]').attr('content'));
                     }
                 },
-                ordering: !0,
-                order: [[6, "desc"]],
-                "createdRow": function( row, data, dataIndex ) {
-                    console.log(data);
-                    // $(row).attr('style', 'background-color: lightgreen !important');
-                    if(data.status_id && $('#show_color' + data.status_id).val() != '0') {
-                        console.log('Yay' + data.status_id);
-                        console.log('Yay' + data.status_id);
-                        $(row).children(':nth-child(1)').attr('style', 'background-color: ' + $('#color' + data.status_id).val() + ' !important;');
-                        $(row).children(':nth-child(2)').attr('style', 'background-color: ' + $('#color' + data.status_id).val() + ' !important;');
-                        $(row).children(':nth-child(3)').attr('style', 'background-color: ' + $('#color' + data.status_id).val() + ' !important;');
-                        $(row).children(':nth-child(4)').attr('style', 'background-color: ' + $('#color' + data.status_id).val() + ' !important;');
-                        $(row).children(':nth-child(5)').attr('style', 'background-color: ' + $('#color' + data.status_id).val() + ' !important;');
-                        $(row).children(':nth-child(6)').attr('style', 'background-color: ' + $('#color' + data.status_id).val() + ' !important;');
-                        $(row).children(':nth-child(7)').attr('style', 'background-color: ' + $('#color' + data.status_id).val() + ' !important;');
-                        $(row).children(':nth-child(8)').attr('style', 'background-color: ' + $('#color' + data.status_id).val() + ' !important;');
-                    }
-                },
+                ordering: !1,
+                order: [[1, "asc"]]
             }
         }), a.getTableWrapper().on("click", ".table-group-action-submit", function (e) {
             e.preventDefault();

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\GeneralSettings;
+use App\Models\ShopifyCollects;
 use App\Models\ShopifyCustomers;
 use App\Models\ShopifyProducts;
 use App\Models\ShopifyProductVariants;
@@ -36,7 +38,13 @@ class TicketsController extends Controller
         $ticket_statuses = TicketStatuses::getTicketStatuses();
         $ticket_statuses->prepend('Select a Status', '');
 
-        return view('admin.tickets.index', compact('ticket_statuses'));
+        $color_ticket_statuses = TicketStatuses::where([
+            'account_id' => Auth::User()->account_id
+        ])
+            ->select('id', 'show_color', 'color')
+            ->get();
+
+        return view('admin.tickets.index', compact('ticket_statuses', 'color_ticket_statuses'));
     }
 
     /**
@@ -98,11 +106,13 @@ class TicketsController extends Controller
 
                 $records["data"][] = array(
                     'id' => '<label class="mt-checkbox mt-checkbox-single mt-checkbox-outline"><input name="id[]" type="checkbox" class="checkboxes" value="' . $ticket->id . '"/><span></span></label>',
-                    'number' => $ticket->number,
+                    'ticket_id' => $ticket->id,
+                    'number' => '<a href="' .  route('admin.tickets.edit',[$ticket->id]) . '">' . $ticket->number . '</a>',
                     'customer_name' => $ticket->first_name . ' ' . $ticket->last_name . '<br/>' . $ticket->email . (($ticket->phone) ? '<br/>' . $ticket->phone : ''),
                     'total_products' => $ticket->total_products,
                     'serial_number' => isset($ticket_products_mapping[$ticket->id]) ? implode('<br/>', $ticket_products_mapping[$ticket->id]) : '',
                     'ticket_status_id' => view('admin.tickets.ticket_status', compact('ticket'))->render(),
+                    'status_id' => $ticket->ticket_status_id,
                     'created_at' => Carbon::parse($ticket->created_at)->format('F j,Y h:i A'),
                     'actions' => view('admin.tickets.actions', compact('ticket'))->render(),
                 );
@@ -688,7 +698,7 @@ class TicketsController extends Controller
             $patient = ShopifyCustomers::where([
                 ['account_id', '=', $account_id],
                 ['phone', 'LIKE', "%{$name}%"]
-            ])->select('name', 'customer_id', 'phone')->get();
+            ])->select('name', 'email', 'customer_id', 'phone')->get();
         } else {
             $patient = ShopifyCustomers::where([
                 ['account_id', '=', $account_id],
@@ -698,7 +708,7 @@ class TicketsController extends Controller
                     ['account_id', '=', $account_id],
                     ['email', 'LIKE', "%{$name}%"]
                 ])
-                ->select('name', 'customer_id', 'phone')->get();
+                ->select('name', 'email', 'customer_id', 'phone')->get();
         }
 
         return response()->json($patient);
@@ -759,6 +769,27 @@ class TicketsController extends Controller
         }
 
         $ticket = Tickets::findOrFail($id);
+
+
+        /**
+         * If complete status found, set complete status to ticket
+         */
+        $ticket_status = TicketStatuses::where(array(
+            'account_id' => Auth::User()->account_id,
+            'slug' => 'complete',
+        ))->first();
+
+        if($ticket_status) {
+            Tickets::where(array(
+                'account_id' => Auth::User()->account_id,
+                'id' => $ticket->id
+            ))->update(array(
+                'ticket_status_id' => $ticket_status->id
+            ));
+        }
+        /**
+         * Ticket status complete porton ends here
+         */
 
         if (!$ticket) {
             return view('error', compact('lead_statuse'));
@@ -937,7 +968,31 @@ class TicketsController extends Controller
         $account_id = Auth::User()->account_id;
 
 
-        $products = ShopifyProducts
+        if($request->get('search_type') == 'bookin') {
+            $found_settings = GeneralSettings::where([
+                'account_id' => $account_id,
+                'slug' => 'bookin',
+            ])->select('data')->first();
+            if($found_settings->data) {
+                $collections = explode(', ', $found_settings->data);
+            } else {
+                $collections = array();
+            }
+        } else if($request->get('search_type') == 'repair') {
+            $found_settings = GeneralSettings::where([
+                'account_id' => $account_id,
+                'slug' => 'repair',
+            ])->select('data')->first();
+            if($found_settings->data) {
+                $collections = explode(', ', $found_settings->data);
+            } else {
+                $collections = array();
+            }
+        } else {
+            $collections = array();
+        }
+
+        $query = ShopifyProducts
             ::join('shopify_product_variants', 'shopify_product_variants.product_id', '=', 'shopify_products.product_id')
             ->where([
                 'shopify_products.account_id' => $account_id
@@ -945,8 +1000,19 @@ class TicketsController extends Controller
             ->where(function ($query) use ($name) {
                 $query->orWhere('shopify_products.title', 'LIKE', "%{$name}%");
                 $query->orWhere('shopify_product_variants.title', 'LIKE', "%{$name}%");
-            })
-            ->select('shopify_product_variants.variant_id', 'shopify_product_variants.product_id', 'shopify_products.title as product_title', 'shopify_product_variants.title as variant_title')
+            });
+
+        if(count($collections)) {
+            $query->whereIn('shopify_products.product_id',
+                ShopifyCollects::where([
+                    'account_id' => $account_id
+                ])
+                    ->whereIn('collection_id', $collections)
+                    ->select('product_id')->get()
+            );
+        }
+
+        $products = $query->select('shopify_product_variants.variant_id', 'shopify_product_variants.product_id', 'shopify_products.title as product_title', 'shopify_product_variants.title as variant_title')
             ->orderBy('shopify_products.title', 'asc')
             ->orderBy('shopify_product_variants.position', 'asc')
             ->get();

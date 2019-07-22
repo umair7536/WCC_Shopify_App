@@ -140,6 +140,12 @@
         </div>
     </div>
     <!--Edit View model End-->
+    @if($color_ticket_statuses)
+        @foreach($color_ticket_statuses as $color_ticket_status)
+            <input type="hidden" id="show_color{{ $color_ticket_status->id }}" value="{{ $color_ticket_status->show_color }}" />
+            <input type="hidden" id="color{{ $color_ticket_status->id }}" value="{{ $color_ticket_status->color }}" />
+        @endforeach
+    @endif
 @stop
 
 @section('javascript')

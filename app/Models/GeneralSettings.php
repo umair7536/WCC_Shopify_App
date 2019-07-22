@@ -2,70 +2,23 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Schema;
+use App\Models\AuditTrails;
 use Auth;
 
 
-class ShopifyCustomCollections extends BaseModal
+class GeneralSettings extends BaseModal
 {
     use SoftDeletes;
 
-    protected $fillable = [
-        'collection_id', 'account_id', 'title', 'body_html', 'handle',
-        'active', 'published_at', 'updated_at', 'image', 'image_link', 'metafields',
-        'published', 'published_at', 'updated_at', 'sort_order', 'template_suffix',
-        'created_by', 'updated_by'
-    ];
+    protected $fillable = ['account_id', 'slug', 'name',  'data', 'active', 'created_at', 'updated_at', 'sort_number'];
 
-    protected static $_fillable = [
-        'collection_id', 'account_id', 'title', 'body_html', 'handle',
-        'active', 'published_at', 'updated_at', 'image', 'image_link', 'metafields',
-        'published', 'published_at', 'updated_at', 'sort_order', 'template_suffix',
-        'created_by', 'updated_by'
-    ];
+    protected static $_fillable = ['name', 'slug', 'data', 'active'];
 
-    protected $table = 'shopify_custom_collections';
+    protected $table = 'general_settings';
 
-    protected static $_table = 'shopify_custom_collections';
-
-    public $timestamps = false;
-
-    protected static $skip_columns = [];
-
-    /**
-     * Get Charge per Units.
-     */
-    public function charge_per_units()
-    {
-        return $this->hasMany('App\Models\ChargePerUnits', 'custom_collection_id');
-    }
-
-    /**
-     * Get Unit Placements.
-     */
-    public function unit_placements()
-    {
-        return $this->hasMany('App\Models\UnitPlacements', 'custom_collection_id');
-    }
-
-    /**
-     * Get Charge per Units.
-     */
-    public function setup_charges()
-    {
-        return $this->hasMany('App\Models\SetupCharges', 'custom_collection_id');
-    }
-
-    /**
-     * Get Unit Placements.
-     */
-    public function charge_placements()
-    {
-        return $this->hasMany('App\Models\ChargePlacements', 'custom_collection_id');
-    }
+    protected static $_table = 'general_settings';
 
     /**
      * Get active and sorted data only.
@@ -87,16 +40,16 @@ class ShopifyCustomCollections extends BaseModal
 
         if($id) {
             if(is_array($skip_slug) && count($skip_slug)) {
-                return self::whereIn('id', $id)->whereNotIn('slug', $skip_slug)->where(['account_id' => $account_id])->get()->pluck('title','id');
+                return self::whereIn('id', $id)->whereNotIn('slug', $skip_slug)->where(['account_id' => $account_id])->get()->pluck('name','id');
             }
 
-            return self::whereIn('id', $id)->where(['account_id' => $account_id])->get()->pluck('title','id');
+            return self::whereIn('id', $id)->where(['account_id' => $account_id])->get()->pluck('name','id');
         } else {
             if(is_array($skip_slug) && count($skip_slug)) {
-                return self::where(['account_id' => $account_id, 'active' => 1])->whereNotIn('slug', $skip_slug)->get()->pluck('title','id');
+                return self::where(['account_id' => $account_id, 'active' => 1])->whereNotIn('slug', $skip_slug)->get()->pluck('name','id');
             }
 
-            return self::where(['account_id' => $account_id, 'active' => 1])->get()->pluck('title','id');
+            return self::where(['account_id' => $account_id, 'active' => 1])->get()->pluck('name','id');
         }
     }
 
@@ -112,7 +65,7 @@ class ShopifyCustomCollections extends BaseModal
         if($Id) {
             $query->whereIn('id',$Id);
         }
-        return $query->OrderBy('title','asc')->get();
+        return $query->OrderBy('sort_number','asc')->get();
     }
 
     /**
@@ -135,19 +88,19 @@ class ShopifyCustomCollections extends BaseModal
             );
         }
 
-        if($request->get('title')) {
+        if($request->get('name')) {
             $where[] = array(
-                'title',
+                'name',
                 'like',
-                '%' . $request->get('title') . '%'
+                '%' . $request->get('name') . '%'
             );
         }
 
-        if($request->get('payment_type') != '') {
+        if($request->get('data') != '') {
             $where[] = array(
-                'payment_type',
-                '=',
-                $request->get('payment_type')
+                'data',
+                'like',
+                '%' . $request->get('data') . '%'
             );
         }
 
@@ -180,19 +133,19 @@ class ShopifyCustomCollections extends BaseModal
             );
         }
 
-        if($request->get('title')) {
+        if($request->get('name')) {
             $where[] = array(
-                'title',
+                'name',
                 'like',
-                '%' . $request->get('title') . '%'
+                '%' . $request->get('name') . '%'
             );
         }
 
-        if($request->get('payment_type') != '') {
+        if($request->get('data')) {
             $where[] = array(
-                'payment_type',
-                '=',
-                $request->get('payment_type')
+                'data',
+                'like',
+                '%' . $request->get('data') . '%'
             );
         }
 
@@ -229,10 +182,16 @@ class ShopifyCustomCollections extends BaseModal
 
         // Set Account ID
         $data['account_id'] = $account_id;
-        $data['published_at'] = Carbon::now()->toDateTimeString();
-        $data['updated_at'] = Carbon::now()->toDateTimeString();
+
+        if(isset($data['data']) && is_array($data['data'])) {
+            $data['data'] = implode(', ', $data['data']);
+        } else {
+            $data['data'] = '';
+        }
 
         $record = self::create($data);
+
+        $record->update(['sort_no' => $record->id]);
 
         AuditTrails::addEventLogger(self::$_table, 'create', $data, self::$_fillable, $record);
 
@@ -249,17 +208,14 @@ class ShopifyCustomCollections extends BaseModal
     static public function inactiveRecord($id)
     {
 
-        $custom_collection = ShopifyCustomCollections::getData($id);
+        $general_setting = GeneralSettings::getData($id);
 
-        if (!$custom_collection) {
+        if (!$general_setting) {
             flash('Resource not found.')->error()->important();
-            return redirect()->route('admin.custom_collections.index');
+            return redirect()->route('admin.general_settings.index');
         }
 
-        $record = $custom_collection->update([
-            'active' => 0,
-            'updated_at' => Carbon::now()->toDateTimeString(),
-        ]);
+        $record = $general_setting->update(['active' => 0]);
 
         flash('Record has been inactivated successfully.')->success()->important();
 
@@ -278,17 +234,14 @@ class ShopifyCustomCollections extends BaseModal
     static public function activeRecord($id)
     {
 
-        $custom_collection = ShopifyCustomCollections::getData($id);
+        $general_setting = GeneralSettings::getData($id);
 
-        if (!$custom_collection) {
+        if (!$general_setting) {
             flash('Resource not found.')->error()->important();
-            return redirect()->route('admin.custom_collections.index');
+            return redirect()->route('admin.general_settings.index');
         }
 
-        $record = $custom_collection->update([
-            'active' => 1,
-            'updated_at' => Carbon::now()->toDateTimeString()
-        ]);
+        $record = $general_setting->update(['active' => 1]);
 
         flash('Record has been inactivated successfully.')->success()->important();
 
@@ -307,20 +260,20 @@ class ShopifyCustomCollections extends BaseModal
     static public function deleteRecord($id)
     {
 
-        $custom_collection = ShopifyCustomCollections::getData($id);
+        $general_setting = GeneralSettings::getData($id);
 
-        if (!$custom_collection) {
+        if (!$general_setting) {
             flash('Resource not found.')->error()->important();
-            return redirect()->route('admin.custom_collections.index');
+            return redirect()->route('admin.general_settings.index');
         }
 
         // Check if child records exists or not, If exist then disallow to delete it.
-        if (ShopifyCustomCollections::isChildExists($id, Auth::User()->account_id)) {
+        if (GeneralSettings::isChildExists($id, Auth::User()->account_id)) {
             flash('Child records exist, unable to delete resource')->error()->important();
-            return redirect()->route('admin.custom_collections.index');
+            return redirect()->route('admin.general_settings.index');
         }
 
-        $record = $custom_collection->delete();
+        $record = $general_setting->delete();
 
         AuditTrails::deleteEventLogger(self::$_table, 'delete', self::$_fillable, $id);
 
@@ -338,13 +291,18 @@ class ShopifyCustomCollections extends BaseModal
      */
     static public function updateRecord($id, $request, $account_id)
     {
-        $old_data = (ShopifyCustomCollections::find($id))->toArray();
+        $old_data = (GeneralSettings::find($id))->toArray();
 
         $data = $request->all();
 
         // Set Account ID
         $data['account_id'] = $account_id;
-        $data['updated_at'] = Carbon::now()->toDateTimeString();
+
+        if(isset($data['data']) && is_array($data['data'])) {
+            $data['data'] = implode(', ', $data['data']);
+        } else {
+            $data['data'] = '';
+        }
 
         $record = self::where([
             'id' => $id,
@@ -362,6 +320,26 @@ class ShopifyCustomCollections extends BaseModal
         return $record;
     }
 
+    static public function getGeneralSettings($excludeIds = false)
+    {
+        $where = [
+            ['account_id', '=', Auth::User()->account_id],
+            ['active', '=', '1'],
+        ];
+
+        if($excludeIds && !is_array($excludeIds)) {
+            $excludeIds = array($excludeIds);
+        } else {
+            $excludeIds = [];
+        }
+
+        if(count($excludeIds)) {
+            return self::where($where)->whereNotIn('id', $excludeIds)->OrderBy('sort_number', 'asc')->get()->pluck('name', 'id');
+        } else {
+            return self::where($where)->OrderBy('sort_number', 'asc')->get()->pluck('name', 'id');
+        }
+    }
+
     /**
      * Check if child records exist
      *
@@ -373,50 +351,5 @@ class ShopifyCustomCollections extends BaseModal
     static public function isChildExists($id, $account_id)
     {
         return false;
-    }
-
-    /*
-     * Prepare provided record
-     */
-    static public function prepareRecord($record) {
-
-        $prepared_record = [];
-
-        /*
-         * Get table columns and prepare record
-         */
-        $columns = Schema::getColumnListing(self::$_table); // users table
-        foreach($record as $column => $value) {
-            // Skip those records which are in skipped columns array
-            if(count(self::$skip_columns)) {
-                if(in_array($column, self::$skip_columns)) {
-                    continue;
-                }
-            }
-
-            /*
-             * Remove records which are not in columns
-             */
-            if(!in_array($column, $columns)) {
-                continue;
-            }
-
-            /*
-             * Set DateTimes format
-             */
-            $timestamps = ['created_at', 'updated_at', 'published_at'];
-            if(in_array($column, $timestamps)) {
-                $value = Carbon::parse($value)->toDateTimeString();
-            }
-
-            if(is_array($value)) {
-                $prepared_record[$column] = json_encode($value);
-            } else {
-                $prepared_record[$column] = $value;
-            }
-
-        }
-
-        return $prepared_record;
     }
 }

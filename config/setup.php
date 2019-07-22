@@ -19,7 +19,7 @@ return [
         ],
         [
             'name' => 'Repaired',
-            'slug' => 'default',
+            'slug' => 'repaired',
         ],
         [
             'name' => 'Waiting on Customer',
@@ -74,6 +74,22 @@ return [
             'quota' => '10000',
             'slug' => 'platinum',
         ],
+    ),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Default General Settings Array
+    |--------------------------------------------------------------------------
+    */
+    'general_settings' => array(
+        [
+            'name' => 'Book In Products',
+            'slug' => 'bookin',
+        ],
+        [
+            'name' => 'Repair Products',
+            'slug' => 'repair',
+        ]
     ),
 
     /*

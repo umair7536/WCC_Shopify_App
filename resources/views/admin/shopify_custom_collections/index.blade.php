@@ -32,8 +32,9 @@
             </div>
             <div class="actions">
                 @if(Gate::allows('shopify_custom_collections_create'))
-                    <a class="btn btn-success" href="{{ route('admin.shopify_custom_collections.create') }}"
-                       data-target="#ajax_shopify_custom_collections" data-toggle="modal">@lang('global.app_add_new')</a>
+                    <a class="btn btn-success" href="{{ route('admin.shopify_custom_collections.custom_collections') }}" data-toggle="modal">Sync Custom Collections</a>
+                    {{--<a class="btn btn-success" href="{{ route('admin.shopify_custom_collections.create') }}"--}}
+                       {{--data-target="#ajax_shopify_custom_collections" data-toggle="modal">@lang('global.app_add_new')</a>--}}
                 @endif
             </div>
         </div>

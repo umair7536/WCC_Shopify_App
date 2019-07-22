@@ -53,7 +53,7 @@ return [
         ),
         2 => array(
             'name' => 'Repaired',
-            'slug' => 'default',
+            'slug' => 'repaired',
             'sort_number' => 1,
             'created_at' => \Carbon\Carbon::now(),
             'updated_at' => \Carbon\Carbon::now(),

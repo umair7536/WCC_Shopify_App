@@ -18,7 +18,7 @@
 
 @section('title')
     <!-- BEGIN PAGE TITLE-->
-    <h1 class="page-title">@lang('global.ticket_statuses.title')</h1>
+    <h1 class="page-title">@lang('global.general_settings.title')</h1>
     <!-- END PAGE TITLE-->
 @endsection
 
@@ -31,13 +31,13 @@
                 <span class="caption-subject font-dark sbold uppercase">@lang('global.app_list')</span>
             </div>
             <div class="actions">
-                @if(Gate::allows('ticket_statuses_create'))
-                    <a class="btn btn-success" href="{{ route('admin.ticket_statuses.create') }}"
-                       data-target="#ajax_ticket_statuses" data-toggle="modal">@lang('global.app_add_new')</a>
+                @if(Gate::allows('general_settings_create'))
+                    <a class="btn btn-success" href="{{ route('admin.general_settings.create') }}"
+                       data-target="#ajax_general_settings" data-toggle="modal">@lang('global.app_add_new')</a>
                 @endif
-                @if(Gate::allows('ticket_statuses_sort'))
-                    <a href="{{ route('admin.ticket_statuses.sort') }}"
-                       class="btn btn-success">@lang('global.ticket_statuses.fields.sort')</a>
+                @if(Gate::allows('general_settings_sort'))
+                    <a href="{{ route('admin.general_settings.sort') }}"
+                       class="btn btn-success">@lang('global.general_settings.fields.sort')</a>
                 @endif
             </div>
         </div>
@@ -62,17 +62,15 @@
                                 <span></span>
                             </label>
                         </th>
-                        <th>@lang('global.ticket_statuses.fields.name')</th>
-                        <th>@lang('global.ticket_statuses.fields.show_color')</th>
-                        <th>@lang('global.ticket_statuses.fields.color')</th>
-                        <th width="20%">@lang('global.ticket_statuses.fields.actions')</th>
+                        <th>@lang('global.general_settings.fields.name')</th>
+                        <th>@lang('global.general_settings.fields.data')</th>
+                        <th width="20%">@lang('global.general_settings.fields.actions')</th>
                     </tr>
                     <tr role="row" class="filter">
                         <td></td>
                         <td>
                             <input type="text" class="form-control form-filter input-sm" name="name">
                         </td>
-                        <td></td>
                         <td></td>
                         <td>
                             <div class="margin-bottom-5">
@@ -95,7 +93,7 @@
     </div>
     <!-- End: Demo Datatable 1 -->
     <!--Add New View model Start-->
-    <div class="modal fade" id="ajax_ticket_statuses" role="basic" aria-hidden="true"
+    <div class="modal fade" id="ajax_general_settings" role="basic" aria-hidden="true"
          style=" left:10%; width: 80%; top:2%;">
         <div class="modal-content">
             <div class="modal-body">
@@ -114,7 +112,7 @@
     <!-- END PAGE LEVEL PLUGINS -->
     <!-- BEGIN PAGE LEVEL SCRIPTS -->
     <script src="{{ url('metronic/assets/global/scripts/datatable.js') }}" type="text/javascript"></script>
-    <script src="{{ url('js/admin/ticket_statuses/datatable.js') }}" type="text/javascript"></script>
+    <script src="{{ url('js/admin/general_settings/datatable.js') }}" type="text/javascript"></script>
     <!-- END PAGE LEVEL SCRIPTS -->
     <script src="{{ url('metronic/assets/global/plugins/jquery-validation/js/jquery.validate.min.js') }}" type="text/javascript"></script>
     <script src="{{ url('metronic/assets/global/plugins/jquery-validation/js/additional-methods.min.js') }}" type="text/javascript"></script>

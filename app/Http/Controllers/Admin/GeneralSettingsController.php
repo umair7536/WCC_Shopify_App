@@ -2,10 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Events\Shopify\Products\SyncCollectsFire;
-use App\Events\Shopify\Products\SyncCustomCollecionsFire;
-use App\Models\Accounts;
-use App\Models\ShopifyCollects;
+use App\Models\GeneralSettings;
 use App\Models\ShopifyCustomCollections;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -16,7 +13,7 @@ use Auth;
 use Config;
 use Validator;
 
-class ShopifyCustomCollectionsController extends Controller
+class GeneralSettingsController extends Controller
 {
     /**
      * Display a listing of Permission.
@@ -25,11 +22,11 @@ class ShopifyCustomCollectionsController extends Controller
      */
     public function index()
     {
-        if (! Gate::allows('shopify_custom_collections_manage')) {
+        if (! Gate::allows('general_settings_manage')) {
             return abort(401);
         }
 
-        return view('admin.shopify_custom_collections.index');
+        return view('admin.general_settings.index');
     }
 
     /**
@@ -44,11 +41,11 @@ class ShopifyCustomCollectionsController extends Controller
         $records["data"] = array();
 
         if ($request->get('customActionType') && $request->get('customActionType') == "group_action") {
-            $ShopifyCustomCollections = ShopifyCustomCollections::getBulkData($request->get('id'));
-            if($ShopifyCustomCollections) {
-                foreach($ShopifyCustomCollections as $city) {
+            $GeneralSettings = GeneralSettings::getBulkData($request->get('id'));
+            if($GeneralSettings) {
+                foreach($GeneralSettings as $city) {
                     // Check if child records exists or not, If exist then disallow to delete it.
-                    if(!ShopifyCustomCollections::isChildExists($city->id, Auth::User()->account_id)) {
+                    if(!GeneralSettings::isChildExists($city->id, Auth::User()->account_id)) {
                         $city->delete();
                     }
                 }
@@ -58,7 +55,7 @@ class ShopifyCustomCollectionsController extends Controller
         }
 
         // Get Total Records
-        $iTotalRecords = ShopifyCustomCollections::getTotalRecords($request, Auth::User()->account_id);
+        $iTotalRecords = GeneralSettings::getTotalRecords($request, Auth::User()->account_id);
 
 
         $iDisplayLength = intval($request->get('length'));
@@ -69,14 +66,36 @@ class ShopifyCustomCollectionsController extends Controller
         $end = $iDisplayStart + $iDisplayLength;
         $end = $end > $iTotalRecords ? $iTotalRecords : $end;
 
-        $ShopifyCustomCollections = ShopifyCustomCollections::getRecords($request, $iDisplayStart, $iDisplayLength, Auth::User()->account_id);
+        $GeneralSettings = GeneralSettings::getRecords($request, $iDisplayStart, $iDisplayLength, Auth::User()->account_id);
 
-        if($ShopifyCustomCollections) {
-            foreach($ShopifyCustomCollections as $shopify_custom_collection) {
+        $custom_collections = ShopifyCustomCollections::where([
+            'account_id' => Auth::User()->account_id
+        ])->select('title', 'collection_id')->get()->keyBy('collection_id');
+
+        if($GeneralSettings) {
+            foreach($GeneralSettings as $general_setting) {
+                if($general_setting->slug == 'bookin' || $general_setting->slug == 'repair') {
+                    if($general_setting->data) {
+                        $names_array = [];
+                        $names = explode(', ', $general_setting->data);
+                        foreach($names as $single_name) {
+                            if(isset($custom_collections[$single_name])) {
+                                $names_array[] = $custom_collections[$single_name]->title;
+                            }
+                        }
+                        $names_array = implode(', ', $names_array);
+                    } else {
+                        $names_array = $general_setting->data;
+                    }
+                } else {
+                    $names_array = $general_setting->data;
+                }
+
                 $records["data"][] = array(
-                    'id' => '<label class="mt-checkbox mt-checkbox-single mt-checkbox-outline"><input name="id[]" type="checkbox" class="checkboxes" value="'.$shopify_custom_collection->id.'"/><span></span></label>',
-                    'title' => $shopify_custom_collection->title,
-                    'actions' => view('admin.shopify_custom_collections.actions', compact('shopify_custom_collection'))->render(),
+                    'id' => '<label class="mt-checkbox mt-checkbox-single mt-checkbox-outline"><input name="id[]" type="checkbox" class="checkboxes" value="'.$general_setting->id.'"/><span></span></label>',
+                    'name' => $general_setting->name,
+                    'data' => $names_array,
+                    'actions' => view('admin.general_settings.actions', compact('general_setting'))->render(),
                 );
             }
         }
@@ -95,13 +114,39 @@ class ShopifyCustomCollectionsController extends Controller
      */
     public function create()
     {
-        if (! Gate::allows('shopify_custom_collections_create')) {
+        if (! Gate::allows('general_settings_create')) {
             return abort(401);
         }
 
-        return view('admin.shopify_custom_collections.create',compact('city'));
+        $show_colors = 0;
+
+        return view('admin.general_settings.create',compact('show_colors'));
     }
 
+
+    public function sortorder_save(){
+
+        $city = DB::table('general_settings')->whereNull('deleted_at')->where(['account_id' => Auth::User()->account_id])->orderBy('sort_number', 'ASC')->get();
+        $itemID=Input::get('itemID');
+        $itemIndex=Input::get('itemIndex');
+        if($itemID){
+            foreach ($city as $cit) {
+                $sort=DB::table('general_settings')->where('id', '=', $itemID)->update(array('sort_number' => $itemIndex));
+                $myarray=['status'=>"Data Sort Successfully"];
+                return response()->json($myarray);
+            }
+        }
+        else{
+            $myarray=['status'=>"Data Not Sort"];
+            return response()->json($myarray);
+        }
+    }
+
+    public function sortorder(){
+
+        $city = DB::table('general_settings')->whereNull('deleted_at')->where(['account_id' => Auth::User()->account_id])->orderby('sort_number', 'ASC')->get();
+        return view('admin.general_settings.sort', compact('city'));
+    }
     /**
      * Store a newly created Permission in storage.
      *
@@ -110,7 +155,7 @@ class ShopifyCustomCollectionsController extends Controller
      */
     public function store(Request $request)
     {
-        if (! Gate::allows('shopify_custom_collections_create')) {
+        if (! Gate::allows('general_settings_create')) {
             return abort(401);
         }
 
@@ -123,7 +168,7 @@ class ShopifyCustomCollectionsController extends Controller
             ));
         }
 
-        if(ShopifyCustomCollections::createRecord($request, Auth::User()->account_id, Auth::User()->id)) {
+        if(GeneralSettings::createRecord($request, Auth::User()->account_id)) {
             flash('Record has been created successfully.')->success()->important();
 
             return response()->json(array(
@@ -147,7 +192,7 @@ class ShopifyCustomCollectionsController extends Controller
     protected function verifyFields(Request $request)
     {
         return $validator = Validator::make($request->all(), [
-            'title' => 'required',
+            'name' => 'required',
         ]);
     }
 
@@ -160,17 +205,26 @@ class ShopifyCustomCollectionsController extends Controller
      */
     public function edit($id)
     {
-        if (! Gate::allows('shopify_custom_collections_edit')) {
+        if (! Gate::allows('general_settings_edit')) {
             return abort(401);
         }
 
-        $shopify_custom_collection = ShopifyCustomCollections::getData($id);
+        $general_setting = GeneralSettings::getData($id);
 
-        if(!$shopify_custom_collection) {
+        if(!$general_setting) {
             return view('error', compact('lead_statuse'));
         }
 
-        return view('admin.shopify_custom_collections.edit', compact('shopify_custom_collection'));
+        if($general_setting->slug == 'bookin' || $general_setting->slug == 'repair') {
+            $general_setting->data = explode(', ', $general_setting->data);
+            $custom_collections = ShopifyCustomCollections::where([
+                'account_id' => Auth::User()->account_id
+            ])->select('title', 'collection_id')->get()->pluck('title', 'collection_id');
+        } else {
+            $custom_collections = [];
+        }
+
+        return view('admin.general_settings.edit', compact('general_setting', 'custom_collections'));
     }
 
     /**
@@ -182,7 +236,7 @@ class ShopifyCustomCollectionsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if (! Gate::allows('shopify_custom_collections_edit')) {
+        if (! Gate::allows('general_settings_edit')) {
             return abort(401);
         }
 
@@ -195,7 +249,7 @@ class ShopifyCustomCollectionsController extends Controller
             ));
         }
 
-        if(ShopifyCustomCollections::updateRecord($id, $request, Auth::User()->account_id)) {
+        if(GeneralSettings::updateRecord($id, $request, Auth::User()->account_id)) {
             flash('Record has been updated successfully.')->success()->important();
 
             return response()->json(array(
@@ -219,13 +273,13 @@ class ShopifyCustomCollectionsController extends Controller
      */
     public function destroy($id)
     {
-        if (! Gate::allows('shopify_custom_collections_destroy')) {
+        if (! Gate::allows('general_settings_destroy')) {
             return abort(401);
         }
 
-        ShopifyCustomCollections::deleteRecord($id);
+        GeneralSettings::deleteRecord($id);
 
-        return redirect()->route('admin.shopify_custom_collections.index');
+        return redirect()->route('admin.general_settings.index');
     }
 
     /**
@@ -236,12 +290,12 @@ class ShopifyCustomCollectionsController extends Controller
      */
     public function inactive($id)
     {
-        if (! Gate::allows('shopify_custom_collections_inactive')) {
+        if (! Gate::allows('general_settings_inactive')) {
             return abort(401);
         }
-        ShopifyCustomCollections::inactiveRecord($id);
+        GeneralSettings::inactiveRecord($id);
 
-        return redirect()->route('admin.shopify_custom_collections.index');
+        return redirect()->route('admin.general_settings.index');
     }
 
     /**
@@ -252,39 +306,11 @@ class ShopifyCustomCollectionsController extends Controller
      */
     public function active($id)
     {
-        if (! Gate::allows('shopify_custom_collections_active')) {
+        if (! Gate::allows('general_settings_active')) {
             return abort(401);
         }
-        ShopifyCustomCollections::activeRecord($id);
+        GeneralSettings::activeRecord($id);
 
-        return redirect()->route('admin.shopify_custom_collections.index');
-    }
-
-    /**
-     * Dispatch event for sync custom collections.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function syncCustomCollections()
-    {
-        if (! Gate::allows('shopify_custom_collections_manage')) {
-            return abort(401);
-        }
-
-        event(new SyncCustomCollecionsFire(Accounts::find(Auth::User()->account_id)));
-
-        /**
-         * Dispatch Collects Event and Delte existing records
-         */
-
-        ShopifyCollects::where([
-            'account_id' => Auth::User()->account_id
-        ])->forceDelete();
-
-        event(new SyncCollectsFire(Accounts::find(Auth::User()->account_id)));
-
-        flash('Custom Collectons Sync Event is dispatched successfully.')->success()->important();
-
-        return redirect()->route('admin.shopify_custom_collections.index');
+        return redirect()->route('admin.general_settings.index');
     }
 }

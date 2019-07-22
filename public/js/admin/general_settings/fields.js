@@ -35,7 +35,7 @@ var FormValidation = function () {
                     if (response.status == '1') {
                         r.hide();
                         i.html(response.message);
-                        window.location = route('admin.ticket_statuses.index');
+                        window.location = route('admin.general_settings.index');
                     } else {
                         $("input[type=submit]", e).removeAttr('disabled');
                         i.hide();

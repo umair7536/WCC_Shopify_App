@@ -55,5 +55,8 @@ class DatabaseSeeder extends Seeder
 
         // Tickets Seeder
         $this->call(ShopifyBillingsSeed::class);
+
+        // General Settings Seeder
+        $this->call(GeneralSettingsSeed::class);
     }
 }

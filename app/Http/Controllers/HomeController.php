@@ -2,12 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\Shopify\Products\SyncCustomersFire;
 use App\Events\Shopify\Products\SyncProductsFire;
 use App\Events\Shopify\Products\UploadVariantsFire;
 use App\Models\Accounts;
-use App\Models\ShopifyCustomers;
-use App\Models\ShopifyPlans;
 use Auth;
 use Config;
 
@@ -30,8 +27,6 @@ class HomeController extends Controller
      */
     public function index()
     {
-//        event(new SyncCustomersFire(Accounts::find(Auth::User()->account_id)));
-
         return view('home');
     }
 
