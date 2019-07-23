@@ -24,6 +24,7 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\Shopify\HandleHeavyLifting',
         '\App\Console\Commands\Shopify\SyncCustomCollections',
         '\App\Console\Commands\Shopify\SyncCollects',
+        '\App\Console\Commands\Shopify\SyncOrders',
     ];
 
     /**
@@ -66,6 +67,13 @@ class Kernel extends ConsoleKernel
          * Sync Customers from Shopify
          */
         $schedule->command('shopify:sync-collects')
+            ->withoutOverlapping()
+            ->everyMinute();
+
+        /*
+         * Sync Customers from Shopify
+         */
+        $schedule->command('shopify:sync-orders')
             ->withoutOverlapping()
             ->everyMinute();
 

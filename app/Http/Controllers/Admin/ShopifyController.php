@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\Shopify\Orders\SyncOrdersFire;
 use App\Events\Shopify\Products\SyncCollectsFire;
 use App\Events\Shopify\Products\SyncCustomCollecionsFire;
 use App\Events\Shopify\Products\SyncCustomersFire;
@@ -326,16 +327,18 @@ class ShopifyController extends Controller
         /**
          * Dispatch Events
          */
-        event(new SyncProductsFire(Accounts::find($account_id)));
-        event(new SyncCustomersFire(Accounts::find($account_id)));
-        event(new SyncCustomCollecionsFire(Accounts::find($account_id)));
+        $account = Accounts::find($account_id);
+        event(new SyncProductsFire($account));
+        event(new SyncCustomersFire($account));
+        event(new SyncOrdersFire($account));
+        event(new SyncCustomCollecionsFire($account));
         /**
          * Dispatch Collects Event and Delte existing records
          */
         ShopifyCollects::where([
             'account_id' => $account_id
         ])->forceDelete();
-        event(new SyncCollectsFire(Accounts::find($account_id)));
+        event(new SyncCollectsFire($account));
 
 
         $global_ticket_statuses = Config::get('setup.ticket_statuses');

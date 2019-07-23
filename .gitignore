@@ -7,7 +7,7 @@
 /storage/*.key
 /vendor
 /.idea
-/.vagrant
+/.vagranttable_static_responsive.html
 Homestead.json
 Homestead.yaml
 npm-debug.log
