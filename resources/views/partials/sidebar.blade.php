@@ -153,6 +153,29 @@
             @endif
 
             @if(
+                    Gate::allows('shopify_orders_manage')
+                )
+                <li class="nav-item start @if(
+                    $request->segment(2) == 'shopify_orders'
+                ) active open @endif">
+                    <a href="javascript:;" class="nav-link nav-toggle">
+                        <i class="icon-star"></i>
+                        <span class="title">@lang('global.shopify_orders.title') Management</span>
+                        <span class="arrow"></span>
+                    </a>
+                    <ul class="sub-menu">
+                        @if(Gate::allows('shopify_products_manage'))
+                            <li class="nav-item start {{ $request->segment(2) == 'shopify_orders' ? 'active active-sub' : '' }}">
+                                <a href="{{ route('admin.shopify_orders.index') }}">
+                                    <span class="title">@lang('global.shopify_orders.title')</span>
+                                </a>
+                            </li>
+                        @endif
+                    </ul>
+                </li>
+            @endif
+
+            @if(
                     Gate::allows('settings_manage') ||
                     Gate::allows('shopify_plans_manage') ||
                     Gate::allows('shopify_billings_manage') ||

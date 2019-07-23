@@ -58,5 +58,8 @@ class DatabaseSeeder extends Seeder
 
         // General Settings Seeder
         $this->call(GeneralSettingsSeed::class);
+
+        // Shopify Orders Seeder
+        $this->call(ShopifyOrdersSeed::class);
     }
 }

@@ -158,5 +158,13 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::get('general_settings/sort-save', ['uses' => 'Admin\GeneralSettingsController@sortorder_save', 'as' => 'general_settings.sort_save']);
     Route::resource('general_settings', 'Admin\GeneralSettingsController');
     // GeneralSettings Routes end
+
+    // Shopify Orders Routes start
+    Route::post('shopify_orders/datatable', ['uses' => 'Admin\ShopifyOrdersController@datatable', 'as' => 'shopify_orders.datatable']);
+    Route::patch('shopify_orders/active/{id}', ['uses' => 'Admin\ShopifyOrdersController@active', 'as' => 'shopify_orders.active']);
+    Route::patch('shopify_orders/inactive/{id}', ['uses' => 'Admin\ShopifyOrdersController@inactive', 'as' => 'shopify_orders.inactive']);
+    Route::get('shopify_orders/sync-custom-collections', ['uses' => 'Admin\ShopifyOrdersController@syncOrders', 'as' => 'shopify_orders.orders']);
+    Route::resource('shopify_orders', 'Admin\ShopifyOrdersController');
+    // Shopify Orders Routes end
 });
 
