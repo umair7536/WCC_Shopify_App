@@ -87,6 +87,8 @@ class CreateShopifyOrdersTable extends Migration
             $table->string('fulfillments')->nullable();
             $table->string('refunds')->nullable();
 
+            $table->string('customer_id')->nullable();
+
             $table->unsignedInteger('account_id')->nullable();
             // Manage Foreign Key Relationships
             $table->foreign('account_id')->references('id')->on('accounts');

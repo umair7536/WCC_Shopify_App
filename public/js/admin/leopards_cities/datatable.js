@@ -29,16 +29,11 @@ var TableDatatablesAjax = function () {
                 "columns": [
                     { "data": "id","bSortable": false },
                     { "data": "name" },
-                    { "data": "closed_at" },
-                    { "data": "customer_name" },
-                    { "data": "customer_email" },
-                    { "data": "customer_phone" },
-                    { "data": "fulfillment_status" },
                     { "data": "actions","bSortable": false }
                 ],
                 ajax: {
                     // url: "../demo/table_ajax.php",
-                    url: route('admin.shopify_orders.datatable'),
+                    url: route('admin.leopards_cities.datatable'),
                     'beforeSend': function (request) {
                         request.setRequestHeader("X-CSRF-TOKEN", $('meta[name="csrf-token"]').attr('content'));
                     }

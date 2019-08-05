@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands\Shopify;
 
+use App\Models\ShopifyCustomers;
 use App\Models\ShopifyJobs;
 use App\Models\ShopifyOrderItems;
 use App\Models\ShopifyOrders;
@@ -115,6 +116,9 @@ class SyncOrders extends Command
                     unset($order['id']);
                     $order_processed = ShopifyOrders::prepareRecord($order);
                     $order_processed['account_id'] = $shop['account_id'];
+                    if(count($order['customer'])) {
+                        $order_processed['customer_id'] = $order['customer']['id'];
+                    }
 
                     $order_record = ShopifyOrders::where([
                         'order_id' => $order_processed['order_id'],
@@ -129,6 +133,55 @@ class SyncOrders extends Command
                     } else {
                         //echo 'Order Created: ' . $order_processed['title'] . "\n";
                         ShopifyOrders::create($order_processed);
+                    }
+
+                    /**
+                     * Sync Order Customer
+                     */
+                    if(count($order['customer'])) {
+
+                        $customer = $order['customer'];
+
+                        /*
+                        * Prepare record before insert
+                        */
+                        $customer['customer_id'] = $customer['id'];
+                        unset($customer['id']);
+
+                        if(isset($customer['default_address']) && count($customer['default_address'])) {
+                            $default_address = $customer['default_address'];
+                            unset($default_address['id']);
+                            unset($default_address['customer_id']);
+                            $customer = array_merge($customer, $default_address);
+                            $customer['default_address'] = json_encode($customer['default_address']);
+                        }
+
+                        /**
+                         * Set Address based on array provided
+                         */
+                        if(isset($customer['addresses']) && count($customer['addresses'])) {
+                            $customer['addresses'] = json_encode($customer['addresses']);
+                        }
+
+                        $customer_processed = ShopifyCustomers::prepareRecord($customer);
+                        $customer_processed['account_id'] = $shop['account_id'];
+
+                        $customer_record = ShopifyCustomers::where([
+                            'customer_id' => $customer_processed['customer_id'],
+                            'account_id' => $customer_processed['account_id'],
+                        ])->select('id')->first();
+
+                        if($customer_record) {
+                            //echo 'Product Updated: ' . $customer_processed['title'] . "\n";
+                            ShopifyCustomers::where([
+                                'customer_id' => $customer_processed['customer_id'],
+                                'account_id' => $customer_processed['account_id'],
+                            ])->update($customer_processed);
+                        } else {
+                            //echo 'Product Created: ' . $customer_processed['title'] . "\n";
+                            ShopifyCustomers::create($customer_processed);
+                        }
+
                     }
 
 

@@ -2,17 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Events\Shopify\Orders\SyncOrdersFire;
+use App\Events\Leopards\SyncLeopardsCitiesFire;
 use App\Models\Accounts;
-use App\Models\ShopifyOrders;
-use Carbon\Carbon;
+use App\Models\LeopardsCities;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
 use Auth;
 use Validator;
 
-class ShopifyOrdersController extends Controller
+class LeopardsCitiesController extends Controller
 {
     /**
      * Display a listing of Permission.
@@ -21,11 +20,11 @@ class ShopifyOrdersController extends Controller
      */
     public function index()
     {
-        if (! Gate::allows('shopify_orders_manage')) {
+        if (! Gate::allows('leopards_cities_manage')) {
             return abort(401);
         }
 
-        return view('admin.shopify_orders.index');
+        return view('admin.leopards_cities.index');
     }
 
     /**
@@ -40,11 +39,11 @@ class ShopifyOrdersController extends Controller
         $records["data"] = array();
 
         if ($request->get('customActionType') && $request->get('customActionType') == "group_action") {
-            $ShopifyOrders = ShopifyOrders::getBulkData($request->get('id'));
-            if($ShopifyOrders) {
-                foreach($ShopifyOrders as $city) {
+            $LeopardsCities = LeopardsCities::getBulkData($request->get('id'));
+            if($LeopardsCities) {
+                foreach($LeopardsCities as $city) {
                     // Check if child records exists or not, If exist then disallow to delete it.
-                    if(!ShopifyOrders::isChildExists($city->id, Auth::User()->account_id)) {
+                    if(!LeopardsCities::isChildExists($city->id, Auth::User()->account_id)) {
                         $city->delete();
                     }
                 }
@@ -54,7 +53,7 @@ class ShopifyOrdersController extends Controller
         }
 
         // Get Total Records
-        $iTotalRecords = ShopifyOrders::getTotalRecords($request, Auth::User()->account_id);
+        $iTotalRecords = LeopardsCities::getTotalRecords($request, Auth::User()->account_id);
 
 
         $iDisplayLength = intval($request->get('length'));
@@ -65,24 +64,14 @@ class ShopifyOrdersController extends Controller
         $end = $iDisplayStart + $iDisplayLength;
         $end = $end > $iTotalRecords ? $iTotalRecords : $end;
 
-        $ShopifyOrders = ShopifyOrders::getRecords($request, $iDisplayStart, $iDisplayLength, Auth::User()->account_id);
+        $LeopardsCities = LeopardsCities::getRecords($request, $iDisplayStart, $iDisplayLength, Auth::User()->account_id);
 
-        if($ShopifyOrders) {
-            $customer_ids = array();
-            foreach($ShopifyOrders as $shopify_order) {
-
-            }
-            foreach($ShopifyOrders as $shopify_order) {
+        if($LeopardsCities) {
+            foreach($LeopardsCities as $leopards_citie) {
                 $records["data"][] = array(
-                    'id' => '<label class="mt-checkbox mt-checkbox-single mt-checkbox-outline"><input name="id[]" type="checkbox" class="checkboxes" value="'.$shopify_order->id.'"/><span></span></label>',
-                    'name' => $shopify_order->name,
-                    'closed_at' => Carbon::parse($shopify_order->created_at)->diffForHumans(),
-                    'customer_name' => $shopify_order->customer_name,
-                    'customer_email' => $shopify_order->customer_email,
-                    'customer_phone' => $shopify_order->customer_phone,
-                    'fulfillment_status' => ($shopify_order->fulfillment_status) ? $shopify_order->fulfillment_status : 'pending',
-                    'customer' => Carbon::parse($shopify_order->created_at)->diffForHumans(),
-                    'actions' => view('admin.shopify_orders.actions', compact('shopify_order'))->render(),
+                    'id' => '<label class="mt-checkbox mt-checkbox-single mt-checkbox-outline"><input name="id[]" type="checkbox" class="checkboxes" value="'.$leopards_citie->id.'"/><span></span></label>',
+                    'name' => $leopards_citie->name,
+                    'actions' => view('admin.leopards_cities.actions', compact('leopards_citie'))->render(),
                 );
             }
         }
@@ -101,11 +90,11 @@ class ShopifyOrdersController extends Controller
      */
     public function create()
     {
-        if (! Gate::allows('shopify_orders_create')) {
+        if (! Gate::allows('leopards_cities_create')) {
             return abort(401);
         }
 
-        return view('admin.shopify_orders.create',compact('city'));
+        return view('admin.leopards_cities.create',compact('city'));
     }
 
     /**
@@ -116,7 +105,7 @@ class ShopifyOrdersController extends Controller
      */
     public function store(Request $request)
     {
-        if (! Gate::allows('shopify_orders_create')) {
+        if (! Gate::allows('leopards_cities_create')) {
             return abort(401);
         }
 
@@ -129,7 +118,7 @@ class ShopifyOrdersController extends Controller
             ));
         }
 
-        if(ShopifyOrders::createRecord($request, Auth::User()->account_id, Auth::User()->id)) {
+        if(LeopardsCities::createRecord($request, Auth::User()->account_id, Auth::User()->id)) {
             flash('Record has been created successfully.')->success()->important();
 
             return response()->json(array(
@@ -153,7 +142,7 @@ class ShopifyOrdersController extends Controller
     protected function verifyFields(Request $request)
     {
         return $validator = Validator::make($request->all(), [
-            'title' => 'required',
+            'name' => 'required',
         ]);
     }
 
@@ -166,17 +155,17 @@ class ShopifyOrdersController extends Controller
      */
     public function edit($id)
     {
-        if (! Gate::allows('shopify_orders_edit')) {
+        if (! Gate::allows('leopards_cities_edit')) {
             return abort(401);
         }
 
-        $shopify_order = ShopifyOrders::getData($id);
+        $leopards_citie = LeopardsCities::getData($id);
 
-        if(!$shopify_order) {
+        if(!$leopards_citie) {
             return view('error', compact('lead_statuse'));
         }
 
-        return view('admin.shopify_orders.edit', compact('shopify_order'));
+        return view('admin.leopards_cities.edit', compact('leopards_citie'));
     }
 
     /**
@@ -188,7 +177,7 @@ class ShopifyOrdersController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if (! Gate::allows('shopify_orders_edit')) {
+        if (! Gate::allows('leopards_cities_edit')) {
             return abort(401);
         }
 
@@ -201,7 +190,7 @@ class ShopifyOrdersController extends Controller
             ));
         }
 
-        if(ShopifyOrders::updateRecord($id, $request, Auth::User()->account_id)) {
+        if(LeopardsCities::updateRecord($id, $request, Auth::User()->account_id)) {
             flash('Record has been updated successfully.')->success()->important();
 
             return response()->json(array(
@@ -225,13 +214,13 @@ class ShopifyOrdersController extends Controller
      */
     public function destroy($id)
     {
-        if (! Gate::allows('shopify_orders_destroy')) {
+        if (! Gate::allows('leopards_cities_destroy')) {
             return abort(401);
         }
 
-        ShopifyOrders::deleteRecord($id);
+        LeopardsCities::deleteRecord($id);
 
-        return redirect()->route('admin.shopify_orders.index');
+        return redirect()->route('admin.leopards_cities.index');
     }
 
     /**
@@ -242,12 +231,12 @@ class ShopifyOrdersController extends Controller
      */
     public function inactive($id)
     {
-        if (! Gate::allows('shopify_orders_inactive')) {
+        if (! Gate::allows('leopards_cities_inactive')) {
             return abort(401);
         }
-        ShopifyOrders::inactiveRecord($id);
+        LeopardsCities::inactiveRecord($id);
 
-        return redirect()->route('admin.shopify_orders.index');
+        return redirect()->route('admin.leopards_cities.index');
     }
 
     /**
@@ -258,12 +247,12 @@ class ShopifyOrdersController extends Controller
      */
     public function active($id)
     {
-        if (! Gate::allows('shopify_orders_active')) {
+        if (! Gate::allows('leopards_cities_active')) {
             return abort(401);
         }
-        ShopifyOrders::activeRecord($id);
+        LeopardsCities::activeRecord($id);
 
-        return redirect()->route('admin.shopify_orders.index');
+        return redirect()->route('admin.leopards_cities.index');
     }
 
     /**
@@ -271,16 +260,24 @@ class ShopifyOrdersController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function syncOrders()
+    public function syncLeopardsCities()
     {
-        if (! Gate::allows('shopify_orders_manage')) {
+        if (! Gate::allows('leopards_cities_manage')) {
             return abort(401);
         }
 
-        event(new SyncOrdersFire(Accounts::find(Auth::User()->account_id)));
+        /**
+         * Dispatch Collects Event and Delte existing records
+         */
 
-        flash('Orders Sync Event is dispatched successfully.')->success()->important();
+        LeopardsCities::where([
+            'account_id' => Auth::User()->account_id
+        ])->forceDelete();
+        event(new SyncLeopardsCitiesFire(Accounts::find(Auth::User()->account_id)));
 
-        return redirect()->route('admin.shopify_orders.index');
+
+        flash('Leopards Cities Sync Event is dispatched successfully.')->success()->important();
+
+        return redirect()->route('admin.leopards_cities.index');
     }
 }

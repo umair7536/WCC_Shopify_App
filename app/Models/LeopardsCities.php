@@ -9,41 +9,57 @@ use Illuminate\Support\Facades\Schema;
 use Auth;
 
 
-class ShopifyOrders extends BaseModal
+class LeopardsCities extends BaseModal
 {
     use SoftDeletes;
 
     protected $fillable = [
-        'order_id', 'email', 'name', 'number', 'order_number', 'note', 'token','gateway', 'test',
-        'total_price', 'subtotal_price', 'total_weight', 'total_tax', 'taxes_included', 'currency', 'financial_status',
-        'confirmed', 'total_discounts', 'total_line_items_price', 'cart_token', 'buyer_accepts_marketing', 'referring_site', 'landing_site',
-        'cancelled_at', 'cancel_reason', 'total_price_usd', 'checkout_token', 'reference', 'user_id', 'location_id',
-        'source_identifier', 'source_url', 'device_id', 'phone', 'customer_locale', 'app_id', 'browser_ip', 'landing_site_ref',
-        'discount_applications', 'discount_codes', 'note_attributes', 'payment_gateway_names', 'processing_method', 'checkout_id', 'source_name',
-        'fulfillment_status', 'tax_lines', 'tags', 'contact_email', 'order_status_url', 'presentment_currency', 'total_line_items_price_set',
-        'total_discounts_set', 'total_shipping_price_set', 'subtotal_price_set', 'total_price_set', 'total_tax_set', 'total_tip_received', 'admin_graphql_api_id',
-        'shipping_lines', 'fulfillments', 'refunds', 'created_at', 'updated_at', 'account_id', 'processed_at', 'closed_at', 'customer_id'
+        'city_id', 'name', 'shipment_type', 'account_id', 'created_at', 'updated_at'
     ];
 
     protected static $_fillable = [
-        'order_id', 'email', 'name', 'number', 'order_number', 'note', 'token','gateway', 'test',
-        'total_price', 'subtotal_price', 'total_weight', 'total_tax', 'taxes_included', 'currency', 'financial_status',
-        'confirmed', 'total_discounts', 'total_line_items_price', 'cart_token', 'buyer_accepts_marketing', 'referring_site', 'landing_site',
-        'cancelled_at', 'cancel_reason', 'total_price_usd', 'checkout_token', 'reference', 'user_id', 'location_id',
-        'source_identifier', 'source_url', 'device_id', 'phone', 'customer_locale', 'app_id', 'browser_ip', 'landing_site_ref',
-        'discount_applications', 'discount_codes', 'note_attributes', 'payment_gateway_names', 'processing_method', 'checkout_id', 'source_name',
-        'fulfillment_status', 'tax_lines', 'tags', 'contact_email', 'order_status_url', 'presentment_currency', 'total_line_items_price_set',
-        'total_discounts_set', 'total_shipping_price_set', 'subtotal_price_set', 'total_price_set', 'total_tax_set', 'total_tip_received', 'admin_graphql_api_id',
-        'shipping_lines', 'fulfillments', 'refunds', 'created_at', 'updated_at', 'account_id', 'processed_at', 'closed_at', 'customer_id'
+        'city_id', 'name', 'shipment_type', 'account_id', 'created_at', 'updated_at'
     ];
 
-    protected $table = 'shopify_orders';
+    protected $table = 'leopards_cities';
 
-    protected static $_table = 'shopify_orders';
+    protected static $_table = 'leopards_cities';
 
     public $timestamps = false;
 
-    protected static $skip_columns = ['line_items', 'customer'];
+    protected static $skip_columns = [];
+
+    /**
+     * Get Charge per Units.
+     */
+    public function charge_per_units()
+    {
+        return $this->hasMany('App\Models\ChargePerUnits', 'custom_collection_id');
+    }
+
+    /**
+     * Get Unit Placements.
+     */
+    public function unit_placements()
+    {
+        return $this->hasMany('App\Models\UnitPlacements', 'custom_collection_id');
+    }
+
+    /**
+     * Get Charge per Units.
+     */
+    public function setup_charges()
+    {
+        return $this->hasMany('App\Models\SetupCharges', 'custom_collection_id');
+    }
+
+    /**
+     * Get Unit Placements.
+     */
+    public function charge_placements()
+    {
+        return $this->hasMany('App\Models\ChargePlacements', 'custom_collection_id');
+    }
 
     /**
      * Get active and sorted data only.
@@ -113,11 +129,11 @@ class ShopifyOrders extends BaseModal
             );
         }
 
-        if($request->get('title')) {
+        if($request->get('name')) {
             $where[] = array(
-                'title',
+                'name',
                 'like',
-                '%' . $request->get('title') . '%'
+                '%' . $request->get('name') . '%'
             );
         }
 
@@ -152,7 +168,7 @@ class ShopifyOrders extends BaseModal
 
         if($account_id) {
             $where[] = array(
-                'shopify_orders.account_id',
+                'account_id',
                 '=',
                 $account_id
             );
@@ -160,50 +176,22 @@ class ShopifyOrders extends BaseModal
 
         if($request->get('name')) {
             $where[] = array(
-                'shopify_orders.name',
+                'name',
                 'like',
                 '%' . $request->get('name') . '%'
             );
         }
 
-
-        if($request->get('customer_name')) {
+        if($request->get('payment_type') != '') {
             $where[] = array(
-                'shopify_customers.name',
-                'like',
-                '%' . $request->get('customer_name') . '%'
-            );
-        }
-
-
-        if($request->get('customer_email')) {
-            $where[] = array(
-                'shopify_customers.email',
-                'like',
-                '%' . $request->get('customer_email') . '%'
-            );
-        }
-
-
-        if($request->get('customer_phone')) {
-            $where[] = array(
-                'shopify_customers.phone',
-                'like',
-                '%' . $request->get('customer_phone') . '%'
+                'payment_type',
+                '=',
+                $request->get('payment_type')
             );
         }
 
         if(count($where)) {
-            return self::join('shopify_customers','shopify_customers.customer_id', '=', 'shopify_orders.customer_id')
-                ->where($where)
-                ->limit($iDisplayLength)->offset($iDisplayStart)
-                ->select(
-                    'shopify_customers.name as customer_name',
-                    'shopify_customers.email as customer_email',
-                    'shopify_customers.phone as customer_phone',
-                    'shopify_orders.*'
-                )
-                ->get();
+            return self::where($where)->limit($iDisplayLength)->offset($iDisplayStart)->get();
         } else {
             return self::limit($iDisplayLength)->offset($iDisplayStart)->get();
         }
@@ -255,14 +243,14 @@ class ShopifyOrders extends BaseModal
     static public function inactiveRecord($id)
     {
 
-        $order = ShopifyOrders::getData($id);
+        $custom_collection = LeopardsCities::getData($id);
 
-        if (!$order) {
+        if (!$custom_collection) {
             flash('Resource not found.')->error()->important();
-            return redirect()->route('admin.orders.index');
+            return redirect()->route('admin.custom_collections.index');
         }
 
-        $record = $order->update([
+        $record = $custom_collection->update([
             'active' => 0,
             'updated_at' => Carbon::now()->toDateTimeString(),
         ]);
@@ -284,14 +272,14 @@ class ShopifyOrders extends BaseModal
     static public function activeRecord($id)
     {
 
-        $order = ShopifyOrders::getData($id);
+        $custom_collection = LeopardsCities::getData($id);
 
-        if (!$order) {
+        if (!$custom_collection) {
             flash('Resource not found.')->error()->important();
-            return redirect()->route('admin.orders.index');
+            return redirect()->route('admin.custom_collections.index');
         }
 
-        $record = $order->update([
+        $record = $custom_collection->update([
             'active' => 1,
             'updated_at' => Carbon::now()->toDateTimeString()
         ]);
@@ -313,20 +301,20 @@ class ShopifyOrders extends BaseModal
     static public function deleteRecord($id)
     {
 
-        $order = ShopifyOrders::getData($id);
+        $custom_collection = LeopardsCities::getData($id);
 
-        if (!$order) {
+        if (!$custom_collection) {
             flash('Resource not found.')->error()->important();
-            return redirect()->route('admin.orders.index');
+            return redirect()->route('admin.custom_collections.index');
         }
 
         // Check if child records exists or not, If exist then disallow to delete it.
-        if (ShopifyOrders::isChildExists($id, Auth::User()->account_id)) {
+        if (LeopardsCities::isChildExists($id, Auth::User()->account_id)) {
             flash('Child records exist, unable to delete resource')->error()->important();
-            return redirect()->route('admin.orders.index');
+            return redirect()->route('admin.custom_collections.index');
         }
 
-        $record = $order->delete();
+        $record = $custom_collection->delete();
 
         AuditTrails::deleteEventLogger(self::$_table, 'delete', self::$_fillable, $id);
 
@@ -344,7 +332,7 @@ class ShopifyOrders extends BaseModal
      */
     static public function updateRecord($id, $request, $account_id)
     {
-        $old_data = (ShopifyOrders::find($id))->toArray();
+        $old_data = (LeopardsCities::find($id))->toArray();
 
         $data = $request->all();
 
@@ -410,7 +398,7 @@ class ShopifyOrders extends BaseModal
             /*
              * Set DateTimes format
              */
-            $timestamps = ['created_at', 'updated_at', 'processed_at', 'closed_at'];
+            $timestamps = ['created_at', 'updated_at', 'published_at'];
             if(in_array($column, $timestamps)) {
                 $value = Carbon::parse($value)->toDateTimeString();
             }

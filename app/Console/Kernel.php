@@ -93,6 +93,12 @@ class Kernel extends ConsoleKernel
             ->timezone('America/Los_Angeles')
             ->at('23:59');
 
+        /**
+         * =========================
+         * Process Leopards Requests
+         * =========================
+         */
+
     }
 
     /**

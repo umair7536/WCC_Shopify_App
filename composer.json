@@ -8,6 +8,7 @@
         "php": "^7.1.3",
         "barryvdh/laravel-cors": "^0.11.3",
         "barryvdh/laravel-dompdf": "^0.8.2",
+        "developifynet/leopardscod-php": "^1.0",
         "doctrine/dbal": "^2.5",
         "fideloper/proxy": "^4.0",
         "filp/whoops": "~2.0",

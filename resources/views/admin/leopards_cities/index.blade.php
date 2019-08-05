@@ -18,7 +18,7 @@
 
 @section('title')
     <!-- BEGIN PAGE TITLE-->
-    <h1 class="page-title">@lang('global.shopify_orders.title')</h1>
+    <h1 class="page-title">@lang('global.leopards_cities.title')</h1>
     <!-- END PAGE TITLE-->
 @endsection
 
@@ -31,25 +31,15 @@
                 <span class="caption-subject font-dark sbold uppercase">@lang('global.app_list')</span>
             </div>
             <div class="actions">
-                @if(Gate::allows('shopify_orders_create'))
-                    <a class="btn btn-success" href="{{ route('admin.shopify_orders.orders') }}" data-toggle="modal">Sync @lang('global.shopify_orders.title')</a>
-                    {{--<a class="btn btn-success" href="{{ route('admin.shopify_orders.create') }}"--}}
-                       {{--data-target="#ajax_shopify_orders" data-toggle="modal">@lang('global.app_add_new')</a>--}}
+                @if(Gate::allows('leopards_cities_create'))
+                    <a class="btn btn-success" href="{{ route('admin.leopards_cities.sync_leopards_cities') }}" data-toggle="modal">Sync Leopards Cities</a>
+                    {{--<a class="btn btn-success" href="{{ route('admin.leopards_cities.create') }}"--}}
+                       {{--data-target="#ajax_leopards_cities" data-toggle="modal">@lang('global.app_add_new')</a>--}}
                 @endif
             </div>
         </div>
         <div class="portlet-body">
             <div class="table-container">
-                <div class="table-actions-wrapper">
-                    <span> </span>
-                    <select class="table-group-action-input form-control input-inline input-small input-sm">
-                        <option value="">Select</option>
-                        <option value="Delete">Delete</option>
-                    </select>
-                    <button class="btn btn-sm red table-group-action-submit">
-                        <i class="fa fa-check"></i> Submit
-                    </button>
-                </div>
                 <table class="table table-striped table-bordered table-hover table-checkable" id="datatable_ajax">
                     <thead>
                     <tr role="row" class="heading">
@@ -59,30 +49,14 @@
                                 <span></span>
                             </label>
                         </th>
-                        <th>@lang('global.shopify_orders.fields.name')</th>
-                        <th>@lang('global.shopify_orders.fields.closed_at')</th>
-                        <th>@lang('global.shopify_orders.fields.customer_name')</th>
-                        <th>@lang('global.shopify_orders.fields.customer_email')</th>
-                        <th>@lang('global.shopify_orders.fields.customer_phone')</th>
-                        <th>@lang('global.shopify_orders.fields.fulfillment_status')</th>
-                        <th width="20%">@lang('global.shopify_orders.fields.actions')</th>
+                        <th>@lang('global.leopards_cities.fields.name')</th>
+                        <th width="20%">@lang('global.leopards_cities.fields.actions')</th>
                     </tr>
                     <tr role="row" class="filter">
                         <td></td>
                         <td>
                             <input type="text" class="form-control form-filter input-sm" name="name">
                         </td>
-                        <td></td>
-                        <td>
-                            <input type="text" class="form-control form-filter input-sm" name="customer_name">
-                        </td>
-                        <td>
-                            <input type="text" class="form-control form-filter input-sm" name="customer_email">
-                        </td>
-                        <td>
-                            <input type="text" class="form-control form-filter input-sm" name="customer_phone">
-                        </td>
-                        <td></td>
                         <td>
                             <div class="margin-bottom-5">
                                 <button class="btn btn-sm green btn-outline filter-submit margin-bottom">
@@ -104,7 +78,7 @@
     </div>
     <!-- End: Demo Datatable 1 -->
     <!--Add New View model Start-->
-    <div class="modal fade" id="ajax_shopify_orders" role="basic" aria-hidden="true"
+    <div class="modal fade" id="ajax_leopards_cities" role="basic" aria-hidden="true"
          style=" left:10%; width: 80%; top:2%;">
         <div class="modal-content">
             <div class="modal-body">
@@ -123,7 +97,7 @@
     <!-- END PAGE LEVEL PLUGINS -->
     <!-- BEGIN PAGE LEVEL SCRIPTS -->
     <script src="{{ url('metronic/assets/global/scripts/datatable.js') }}" type="text/javascript"></script>
-    <script src="{{ url('js/admin/shopify_orders/datatable.js') }}" type="text/javascript"></script>
+    <script src="{{ url('js/admin/leopards_cities/datatable.js') }}" type="text/javascript"></script>
     <!-- END PAGE LEVEL SCRIPTS -->
     <script src="{{ url('metronic/assets/global/plugins/jquery-validation/js/jquery.validate.min.js') }}" type="text/javascript"></script>
     <script src="{{ url('metronic/assets/global/plugins/jquery-validation/js/additional-methods.min.js') }}" type="text/javascript"></script>

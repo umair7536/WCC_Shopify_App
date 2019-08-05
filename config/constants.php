@@ -37,5 +37,16 @@ return [
         'products/create' => 'Product Creation',
         'products/delete' => 'Product Deletion',
         'products/update' => 'Product Update',
+    ),
+
+    'shopify_payment_status' => array(
+        'authorized' => 'Authorized',
+        'paid' => 'Paid',
+        'partially_refunded' => 'Partially Refunded',
+        'partially_paid' => 'Partially Paid',
+        'pending' => 'Pending',
+        'refunded' => 'Refunded',
+        'unpaid' => 'Unpaid',
+        'voided' => 'Voided',
     )
 ];

@@ -166,5 +166,24 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::get('shopify_orders/sync-custom-collections', ['uses' => 'Admin\ShopifyOrdersController@syncOrders', 'as' => 'shopify_orders.orders']);
     Route::resource('shopify_orders', 'Admin\ShopifyOrdersController');
     // Shopify Orders Routes end
+
+    // Leopards Settings Routes start
+    Route::post('leopards_settings/datatable', ['uses' => 'Admin\LeopardsSettingsController@datatable', 'as' => 'leopards_settings.datatable']);
+    Route::patch('leopards_settings/active/{id}', ['uses' => 'Admin\LeopardsSettingsController@active', 'as' => 'leopards_settings.active']);
+    Route::patch('leopards_settings/inactive/{id}', ['uses' => 'Admin\LeopardsSettingsController@inactive', 'as' => 'leopards_settings.inactive']);
+    Route::get('leopards_settings/sort', ['uses' => 'Admin\LeopardsSettingsController@sortorder', 'as' => 'leopards_settings.sort']);
+    Route::get('leopards_settings/sort-save', ['uses' => 'Admin\LeopardsSettingsController@sortorder_save', 'as' => 'leopards_settings.sort_save']);
+    Route::resource('leopards_settings', 'Admin\LeopardsSettingsController');
+    // Leopards Settings Routes end
+
+    // Leopards Cities Routes start
+    Route::post('leopards_cities/datatable', ['uses' => 'Admin\LeopardsCitiesController@datatable', 'as' => 'leopards_cities.datatable']);
+    Route::patch('leopards_cities/active/{id}', ['uses' => 'Admin\LeopardsCitiesController@active', 'as' => 'leopards_cities.active']);
+    Route::patch('leopards_cities/inactive/{id}', ['uses' => 'Admin\LeopardsCitiesController@inactive', 'as' => 'leopards_cities.inactive']);
+    Route::get('leopards_cities/sort', ['uses' => 'Admin\LeopardsCitiesController@sortorder', 'as' => 'leopards_cities.sort']);
+    Route::get('leopards_cities/sort-save', ['uses' => 'Admin\LeopardsCitiesController@sortorder_save', 'as' => 'leopards_cities.sort_save']);
+    Route::get('leopards_cities/sync-leopards-cities', ['uses' => 'Admin\LeopardsCitiesController@syncLeopardsCities', 'as' => 'leopards_cities.sync_leopards_cities']);
+    Route::resource('leopards_cities', 'Admin\LeopardsCitiesController');
+    // Leopards Cities Routes end
 });
 

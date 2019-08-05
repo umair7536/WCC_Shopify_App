@@ -61,5 +61,11 @@ class DatabaseSeeder extends Seeder
 
         // Shopify Orders Seeder
         $this->call(ShopifyOrdersSeed::class);
+
+        // Leopards Cities Seeder
+        $this->call(leopardsCitiesSeed::class);
+
+        // Leopards Settings Seeder
+        $this->call(LeopardsSettingsSeed::class);
     }
 }

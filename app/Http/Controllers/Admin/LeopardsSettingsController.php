@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Events\Shopify\Orders\SyncOrdersFire;
-use App\Models\Accounts;
-use App\Models\ShopifyOrders;
-use Carbon\Carbon;
+use App\Models\LeopardsSettings;
+use App\Models\ShopifyCustomCollections;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
+use DB;
+use Illuminate\Support\Facades\Input;
 use Auth;
+use Config;
 use Validator;
 
-class ShopifyOrdersController extends Controller
+class LeopardsSettingsController extends Controller
 {
     /**
      * Display a listing of Permission.
@@ -21,11 +22,11 @@ class ShopifyOrdersController extends Controller
      */
     public function index()
     {
-        if (! Gate::allows('shopify_orders_manage')) {
+        if (! Gate::allows('leopards_settings_manage')) {
             return abort(401);
         }
 
-        return view('admin.shopify_orders.index');
+        return view('admin.leopards_settings.index');
     }
 
     /**
@@ -40,11 +41,11 @@ class ShopifyOrdersController extends Controller
         $records["data"] = array();
 
         if ($request->get('customActionType') && $request->get('customActionType') == "group_action") {
-            $ShopifyOrders = ShopifyOrders::getBulkData($request->get('id'));
-            if($ShopifyOrders) {
-                foreach($ShopifyOrders as $city) {
+            $LeopardsSettings = LeopardsSettings::getBulkData($request->get('id'));
+            if($LeopardsSettings) {
+                foreach($LeopardsSettings as $city) {
                     // Check if child records exists or not, If exist then disallow to delete it.
-                    if(!ShopifyOrders::isChildExists($city->id, Auth::User()->account_id)) {
+                    if(!LeopardsSettings::isChildExists($city->id, Auth::User()->account_id)) {
                         $city->delete();
                     }
                 }
@@ -54,7 +55,7 @@ class ShopifyOrdersController extends Controller
         }
 
         // Get Total Records
-        $iTotalRecords = ShopifyOrders::getTotalRecords($request, Auth::User()->account_id);
+        $iTotalRecords = LeopardsSettings::getTotalRecords($request, Auth::User()->account_id);
 
 
         $iDisplayLength = intval($request->get('length'));
@@ -65,24 +66,36 @@ class ShopifyOrdersController extends Controller
         $end = $iDisplayStart + $iDisplayLength;
         $end = $end > $iTotalRecords ? $iTotalRecords : $end;
 
-        $ShopifyOrders = ShopifyOrders::getRecords($request, $iDisplayStart, $iDisplayLength, Auth::User()->account_id);
+        $LeopardsSettings = LeopardsSettings::getRecords($request, $iDisplayStart, $iDisplayLength, Auth::User()->account_id);
 
-        if($ShopifyOrders) {
-            $customer_ids = array();
-            foreach($ShopifyOrders as $shopify_order) {
+        $custom_collections = ShopifyCustomCollections::where([
+            'account_id' => Auth::User()->account_id
+        ])->select('title', 'collection_id')->get()->keyBy('collection_id');
 
-            }
-            foreach($ShopifyOrders as $shopify_order) {
+        if($LeopardsSettings) {
+            foreach($LeopardsSettings as $leopards_setting) {
+                if($leopards_setting->slug == 'bookin' || $leopards_setting->slug == 'repair') {
+                    if($leopards_setting->data) {
+                        $names_array = [];
+                        $names = explode(', ', $leopards_setting->data);
+                        foreach($names as $single_name) {
+                            if(isset($custom_collections[$single_name])) {
+                                $names_array[] = $custom_collections[$single_name]->title;
+                            }
+                        }
+                        $names_array = implode(', ', $names_array);
+                    } else {
+                        $names_array = $leopards_setting->data;
+                    }
+                } else {
+                    $names_array = $leopards_setting->data;
+                }
+
                 $records["data"][] = array(
-                    'id' => '<label class="mt-checkbox mt-checkbox-single mt-checkbox-outline"><input name="id[]" type="checkbox" class="checkboxes" value="'.$shopify_order->id.'"/><span></span></label>',
-                    'name' => $shopify_order->name,
-                    'closed_at' => Carbon::parse($shopify_order->created_at)->diffForHumans(),
-                    'customer_name' => $shopify_order->customer_name,
-                    'customer_email' => $shopify_order->customer_email,
-                    'customer_phone' => $shopify_order->customer_phone,
-                    'fulfillment_status' => ($shopify_order->fulfillment_status) ? $shopify_order->fulfillment_status : 'pending',
-                    'customer' => Carbon::parse($shopify_order->created_at)->diffForHumans(),
-                    'actions' => view('admin.shopify_orders.actions', compact('shopify_order'))->render(),
+                    'id' => '<label class="mt-checkbox mt-checkbox-single mt-checkbox-outline"><input name="id[]" type="checkbox" class="checkboxes" value="'.$leopards_setting->id.'"/><span></span></label>',
+                    'name' => $leopards_setting->name,
+                    'data' => ($leopards_setting->slug == 'mode') ? ($leopards_setting->data ? 'Test Mode' : 'Production') : $leopards_setting->data,
+                    'actions' => view('admin.leopards_settings.actions', compact('leopards_setting'))->render(),
                 );
             }
         }
@@ -101,13 +114,39 @@ class ShopifyOrdersController extends Controller
      */
     public function create()
     {
-        if (! Gate::allows('shopify_orders_create')) {
+        if (! Gate::allows('leopards_settings_create')) {
             return abort(401);
         }
 
-        return view('admin.shopify_orders.create',compact('city'));
+        $show_colors = 0;
+
+        return view('admin.leopards_settings.create',compact('show_colors'));
     }
 
+
+    public function sortorder_save(){
+
+        $city = DB::table('leopards_settings')->whereNull('deleted_at')->where(['account_id' => Auth::User()->account_id])->orderBy('sort_number', 'ASC')->get();
+        $itemID=Input::get('itemID');
+        $itemIndex=Input::get('itemIndex');
+        if($itemID){
+            foreach ($city as $cit) {
+                $sort=DB::table('leopards_settings')->where('id', '=', $itemID)->update(array('sort_number' => $itemIndex));
+                $myarray=['status'=>"Data Sort Successfully"];
+                return response()->json($myarray);
+            }
+        }
+        else{
+            $myarray=['status'=>"Data Not Sort"];
+            return response()->json($myarray);
+        }
+    }
+
+    public function sortorder(){
+
+        $city = DB::table('leopards_settings')->whereNull('deleted_at')->where(['account_id' => Auth::User()->account_id])->orderby('sort_number', 'ASC')->get();
+        return view('admin.leopards_settings.sort', compact('city'));
+    }
     /**
      * Store a newly created Permission in storage.
      *
@@ -116,7 +155,7 @@ class ShopifyOrdersController extends Controller
      */
     public function store(Request $request)
     {
-        if (! Gate::allows('shopify_orders_create')) {
+        if (! Gate::allows('leopards_settings_create')) {
             return abort(401);
         }
 
@@ -129,7 +168,7 @@ class ShopifyOrdersController extends Controller
             ));
         }
 
-        if(ShopifyOrders::createRecord($request, Auth::User()->account_id, Auth::User()->id)) {
+        if(LeopardsSettings::createRecord($request, Auth::User()->account_id)) {
             flash('Record has been created successfully.')->success()->important();
 
             return response()->json(array(
@@ -153,7 +192,7 @@ class ShopifyOrdersController extends Controller
     protected function verifyFields(Request $request)
     {
         return $validator = Validator::make($request->all(), [
-            'title' => 'required',
+            'name' => 'required',
         ]);
     }
 
@@ -166,17 +205,26 @@ class ShopifyOrdersController extends Controller
      */
     public function edit($id)
     {
-        if (! Gate::allows('shopify_orders_edit')) {
+        if (! Gate::allows('leopards_settings_edit')) {
             return abort(401);
         }
 
-        $shopify_order = ShopifyOrders::getData($id);
+        $leopards_setting = LeopardsSettings::getData($id);
 
-        if(!$shopify_order) {
+        if(!$leopards_setting) {
             return view('error', compact('lead_statuse'));
         }
 
-        return view('admin.shopify_orders.edit', compact('shopify_order'));
+        if($leopards_setting->slug == 'bookin' || $leopards_setting->slug == 'repair') {
+            $leopards_setting->data = explode(', ', $leopards_setting->data);
+            $custom_collections = ShopifyCustomCollections::where([
+                'account_id' => Auth::User()->account_id
+            ])->select('title', 'collection_id')->get()->pluck('title', 'collection_id');
+        } else {
+            $custom_collections = [];
+        }
+
+        return view('admin.leopards_settings.edit', compact('leopards_setting', 'custom_collections'));
     }
 
     /**
@@ -188,7 +236,7 @@ class ShopifyOrdersController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if (! Gate::allows('shopify_orders_edit')) {
+        if (! Gate::allows('leopards_settings_edit')) {
             return abort(401);
         }
 
@@ -201,7 +249,7 @@ class ShopifyOrdersController extends Controller
             ));
         }
 
-        if(ShopifyOrders::updateRecord($id, $request, Auth::User()->account_id)) {
+        if(LeopardsSettings::updateRecord($id, $request, Auth::User()->account_id)) {
             flash('Record has been updated successfully.')->success()->important();
 
             return response()->json(array(
@@ -225,13 +273,13 @@ class ShopifyOrdersController extends Controller
      */
     public function destroy($id)
     {
-        if (! Gate::allows('shopify_orders_destroy')) {
+        if (! Gate::allows('leopards_settings_destroy')) {
             return abort(401);
         }
 
-        ShopifyOrders::deleteRecord($id);
+        LeopardsSettings::deleteRecord($id);
 
-        return redirect()->route('admin.shopify_orders.index');
+        return redirect()->route('admin.leopards_settings.index');
     }
 
     /**
@@ -242,12 +290,12 @@ class ShopifyOrdersController extends Controller
      */
     public function inactive($id)
     {
-        if (! Gate::allows('shopify_orders_inactive')) {
+        if (! Gate::allows('leopards_settings_inactive')) {
             return abort(401);
         }
-        ShopifyOrders::inactiveRecord($id);
+        LeopardsSettings::inactiveRecord($id);
 
-        return redirect()->route('admin.shopify_orders.index');
+        return redirect()->route('admin.leopards_settings.index');
     }
 
     /**
@@ -258,29 +306,11 @@ class ShopifyOrdersController extends Controller
      */
     public function active($id)
     {
-        if (! Gate::allows('shopify_orders_active')) {
+        if (! Gate::allows('leopards_settings_active')) {
             return abort(401);
         }
-        ShopifyOrders::activeRecord($id);
+        LeopardsSettings::activeRecord($id);
 
-        return redirect()->route('admin.shopify_orders.index');
-    }
-
-    /**
-     * Dispatch event for sync custom collections.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function syncOrders()
-    {
-        if (! Gate::allows('shopify_orders_manage')) {
-            return abort(401);
-        }
-
-        event(new SyncOrdersFire(Accounts::find(Auth::User()->account_id)));
-
-        flash('Orders Sync Event is dispatched successfully.')->success()->important();
-
-        return redirect()->route('admin.shopify_orders.index');
+        return redirect()->route('admin.leopards_settings.index');
     }
 }

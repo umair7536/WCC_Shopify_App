@@ -164,10 +164,42 @@
                         <span class="arrow"></span>
                     </a>
                     <ul class="sub-menu">
-                        @if(Gate::allows('shopify_products_manage'))
+                        @if(Gate::allows('shopify_orders_manage'))
                             <li class="nav-item start {{ $request->segment(2) == 'shopify_orders' ? 'active active-sub' : '' }}">
                                 <a href="{{ route('admin.shopify_orders.index') }}">
                                     <span class="title">@lang('global.shopify_orders.title')</span>
+                                </a>
+                            </li>
+                        @endif
+                    </ul>
+                </li>
+            @endif
+
+            @if(
+                    Gate::allows('leopards_settings_manage') ||
+                    Gate::allows('leopards_cities_manage')
+                )
+                <li class="nav-item start @if(
+                    $request->segment(2) == 'leopards_settings' ||
+                    $request->segment(2) == 'leopards_cities'
+                ) active open @endif">
+                    <a href="javascript:;" class="nav-link nav-toggle">
+                        <i class="icon-puzzle"></i>
+                        <span class="title">@lang('global.leopards_settings.management') Management</span>
+                        <span class="arrow"></span>
+                    </a>
+                    <ul class="sub-menu">
+                        @if(Gate::allows('leopards_settings_manage'))
+                            <li class="nav-item start {{ $request->segment(2) == 'leopards_settings' ? 'active active-sub' : '' }}">
+                                <a href="{{ route('admin.leopards_settings.index') }}">
+                                    <span class="title">@lang('global.leopards_settings.title')</span>
+                                </a>
+                            </li>
+                        @endif
+                        @if(Gate::allows('leopards_cities_manage'))
+                            <li class="nav-item start {{ $request->segment(2) == 'leopards_cities' ? 'active active-sub' : '' }}">
+                                <a href="{{ route('admin.leopards_cities.index') }}">
+                                    <span class="title">@lang('global.leopards_cities.title')</span>
                                 </a>
                             </li>
                         @endif
