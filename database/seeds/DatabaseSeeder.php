@@ -67,5 +67,11 @@ class DatabaseSeeder extends Seeder
 
         // Leopards Settings Seeder
         $this->call(LeopardsSettingsSeed::class);
+
+        // Shippers Seeder
+        $this->call(ShippersSeed::class);
+
+        // Consignees Seeder
+        $this->call(ConsigneesSeed::class);
     }
 }

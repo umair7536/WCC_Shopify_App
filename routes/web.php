@@ -185,5 +185,21 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::get('leopards_cities/sync-leopards-cities', ['uses' => 'Admin\LeopardsCitiesController@syncLeopardsCities', 'as' => 'leopards_cities.sync_leopards_cities']);
     Route::resource('leopards_cities', 'Admin\LeopardsCitiesController');
     // Leopards Cities Routes end
+
+    // Shippers Routes start
+    Route::post('shippers/datatable', ['uses' => 'Admin\ShippersController@datatable', 'as' => 'shippers.datatable']);
+    Route::patch('shippers/active/{id}', ['uses' => 'Admin\ShippersController@active', 'as' => 'shippers.active']);
+    Route::patch('shippers/inactive/{id}', ['uses' => 'Admin\ShippersController@inactive', 'as' => 'shippers.inactive']);
+    Route::get('shippers/sync-custom-collections', ['uses' => 'Admin\ShippersController@syncCustomCollections', 'as' => 'shippers.custom_collections']);
+    Route::resource('shippers', 'Admin\ShippersController');
+    // Shippers Routes end
+
+    // Consignees Routes start
+    Route::post('consignees/datatable', ['uses' => 'Admin\ConsigneesController@datatable', 'as' => 'consignees.datatable']);
+    Route::patch('consignees/active/{id}', ['uses' => 'Admin\ConsigneesController@active', 'as' => 'consignees.active']);
+    Route::patch('consignees/inactive/{id}', ['uses' => 'Admin\ConsigneesController@inactive', 'as' => 'consignees.inactive']);
+    Route::get('consignees/sync-custom-collections', ['uses' => 'Admin\ConsigneesController@syncCustomCollections', 'as' => 'consignees.custom_collections']);
+    Route::resource('consignees', 'Admin\ConsigneesController');
+    // Consignees Routes end
 });
 

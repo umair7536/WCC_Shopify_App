@@ -16,7 +16,7 @@ class CreateLeopardsCitiesTable extends Migration
         Schema::create('leopards_cities', function (Blueprint $table) {
             $table->increments('id');
 
-            $table->string('city_id')->nullable();
+            $table->unsignedInteger('city_id')->nullable();
             $table->string('name')->nullable();
             $table->text('shipment_type')->nullable();
 

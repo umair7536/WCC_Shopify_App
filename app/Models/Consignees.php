@@ -5,68 +5,44 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Schema;
+use App\Models\AuditTrails;
 use Auth;
 
 
-class LeopardsCities extends BaseModal
+class Consignees extends BaseModal
 {
     use SoftDeletes;
 
-    protected $fillable = [
-        'city_id', 'name', 'shipment_type', 'account_id', 'created_at', 'updated_at'
-    ];
+    private $shopify;
 
-    protected static $_fillable = [
-        'city_id', 'name', 'shipment_type', 'account_id', 'created_at', 'updated_at'
-    ];
+    protected $fillable = ['consignee_id', 'name', 'email', 'phone', 'phone_2', 'phone_3', 'address', 'active', 'account_id', 'city_id', 'created_at', 'updated_at'];
 
-    protected $table = 'leopards_cities';
+    protected static $_fillable = ['consignee_id', 'name', 'email', 'phone', 'phone_2', 'phone_3', 'address', 'active', 'city_id'];
 
-    protected static $_table = 'leopards_cities';
+    protected $table = 'consignees';
 
-    public $timestamps = false;
-
-    protected static $skip_columns = [];
+    protected static $_table = 'consignees';
 
     /**
      * Get City Detail
      */
-    public function shippers()
+    public function leopards_citie()
     {
-        return $this->hasMany('App\Models\Shippers', 'city_id');
+        return $this->belongsTo('App\Models\LeopardsCities', 'city_id');
     }
 
     /**
      * Get active and sorted data only.
-     *
-     * @param: integer $id (optional)
-     * @param: string $skip_slug (optional)
-     * @param: integer $account_id Organizatioin ID
-     *
-     * @return: mixed
      */
-    static public function getActiveSorted($id = false, $skip_slug = false, $account_id)
+    static public function getActiveSorted($id = false)
     {
         if($id && !is_array($id)) {
             $id = array($id);
         }
-        if($skip_slug && !is_array($skip_slug)) {
-            $skip_slug = array($skip_slug);
-        }
-
         if($id) {
-            if(is_array($skip_slug) && count($skip_slug)) {
-                return self::whereIn('id', $id)->whereNotIn('slug', $skip_slug)->where(['account_id' => $account_id])->get()->pluck('title','id');
-            }
-
-            return self::whereIn('id', $id)->where(['account_id' => $account_id])->get()->pluck('title','id');
+            return self::whereIn('id', $id)->get()->pluck('name','id');
         } else {
-            if(is_array($skip_slug) && count($skip_slug)) {
-                return self::where(['account_id' => $account_id, 'active' => 1])->whereNotIn('slug', $skip_slug)->get()->pluck('title','id');
-            }
-
-            return self::where(['account_id' => $account_id, 'active' => 1])->get()->pluck('title','id');
+            return self::get()->pluck('name','id');
         }
     }
 
@@ -82,7 +58,7 @@ class LeopardsCities extends BaseModal
         if($Id) {
             $query->whereIn('id',$Id);
         }
-        return $query->OrderBy('title','asc')->get();
+        return $query->OrderBy('sort_number','asc')->get();
     }
 
     /**
@@ -105,6 +81,14 @@ class LeopardsCities extends BaseModal
             );
         }
 
+        if($request->get('city_id')) {
+            $where[] = array(
+                'city_id',
+                '=',
+                $request->get('city_id')
+            );
+        }
+
         if($request->get('name')) {
             $where[] = array(
                 'name',
@@ -113,11 +97,19 @@ class LeopardsCities extends BaseModal
             );
         }
 
-        if($request->get('payment_type') != '') {
+        if($request->get('email')) {
             $where[] = array(
-                'payment_type',
-                '=',
-                $request->get('payment_type')
+                'email',
+                'like',
+                '%' . $request->get('email') . '%'
+            );
+        }
+
+        if($request->get('phone')) {
+            $where[] = array(
+                'phone',
+                'like',
+                '%' . $request->get('phone') . '%'
             );
         }
 
@@ -150,6 +142,14 @@ class LeopardsCities extends BaseModal
             );
         }
 
+        if($request->get('city_id')) {
+            $where[] = array(
+                'city_id',
+                '=',
+                $request->get('city_id')
+            );
+        }
+
         if($request->get('name')) {
             $where[] = array(
                 'name',
@@ -158,11 +158,19 @@ class LeopardsCities extends BaseModal
             );
         }
 
-        if($request->get('payment_type') != '') {
+        if($request->get('email')) {
             $where[] = array(
-                'payment_type',
-                '=',
-                $request->get('payment_type')
+                'email',
+                'like',
+                '%' . $request->get('email') . '%'
+            );
+        }
+
+        if($request->get('phone')) {
+            $where[] = array(
+                'phone',
+                'like',
+                '%' . $request->get('phone') . '%'
             );
         }
 
@@ -199,10 +207,8 @@ class LeopardsCities extends BaseModal
 
         // Set Account ID
         $data['account_id'] = $account_id;
-        $data['published_at'] = Carbon::now()->toDateTimeString();
-        $data['updated_at'] = Carbon::now()->toDateTimeString();
 
-        $record = self::create($data);
+        $record = Consignees::create($data);
 
         AuditTrails::addEventLogger(self::$_table, 'create', $data, self::$_fillable, $record);
 
@@ -219,17 +225,14 @@ class LeopardsCities extends BaseModal
     static public function inactiveRecord($id)
     {
 
-        $custom_collection = LeopardsCities::getData($id);
+        $consignee = Consignees::getData($id);
 
-        if (!$custom_collection) {
+        if (!$consignee) {
             flash('Resource not found.')->error()->important();
-            return redirect()->route('admin.custom_collections.index');
+            return redirect()->route('admin.consignees.index');
         }
 
-        $record = $custom_collection->update([
-            'active' => 0,
-            'updated_at' => Carbon::now()->toDateTimeString(),
-        ]);
+        $record = $consignee->update(['active' => 0]);
 
         flash('Record has been inactivated successfully.')->success()->important();
 
@@ -248,17 +251,14 @@ class LeopardsCities extends BaseModal
     static public function activeRecord($id)
     {
 
-        $custom_collection = LeopardsCities::getData($id);
+        $consignee = Consignees::getData($id);
 
-        if (!$custom_collection) {
+        if (!$consignee) {
             flash('Resource not found.')->error()->important();
-            return redirect()->route('admin.custom_collections.index');
+            return redirect()->route('admin.consignees.index');
         }
 
-        $record = $custom_collection->update([
-            'active' => 1,
-            'updated_at' => Carbon::now()->toDateTimeString()
-        ]);
+        $record = $consignee->update(['active' => 1]);
 
         flash('Record has been inactivated successfully.')->success()->important();
 
@@ -277,26 +277,24 @@ class LeopardsCities extends BaseModal
     static public function deleteRecord($id)
     {
 
-        $custom_collection = LeopardsCities::getData($id);
+        $consignee = Consignees::getData($id);
 
-        if (!$custom_collection) {
+        if (!$consignee) {
             flash('Resource not found.')->error()->important();
-            return redirect()->route('admin.custom_collections.index');
+            return redirect()->route('admin.consignees.index');
         }
 
         // Check if child records exists or not, If exist then disallow to delete it.
-        if (LeopardsCities::isChildExists($id, Auth::User()->account_id)) {
+        if (Consignees::isChildExists($id, Auth::User()->account_id)) {
             flash('Child records exist, unable to delete resource')->error()->important();
-            return redirect()->route('admin.custom_collections.index');
+            return redirect()->route('admin.consignees.index');
         }
 
-        $record = $custom_collection->delete();
 
-        AuditTrails::deleteEventLogger(self::$_table, 'delete', self::$_fillable, $id);
+        $consignee->delete();
 
         flash('Record has been deleted successfully.')->success()->important();
-
-        return $record;
+        return true;
     }
 
     /**
@@ -308,13 +306,12 @@ class LeopardsCities extends BaseModal
      */
     static public function updateRecord($id, $request, $account_id)
     {
-        $old_data = (LeopardsCities::find($id))->toArray();
+        $old_data = (Consignees::find($id))->toArray();
 
         $data = $request->all();
 
         // Set Account ID
         $data['account_id'] = $account_id;
-        $data['updated_at'] = Carbon::now()->toDateTimeString();
 
         $record = self::where([
             'id' => $id,
@@ -343,50 +340,5 @@ class LeopardsCities extends BaseModal
     static public function isChildExists($id, $account_id)
     {
         return false;
-    }
-
-    /*
-     * Prepare provided record
-     */
-    static public function prepareRecord($record) {
-
-        $prepared_record = [];
-
-        /*
-         * Get table columns and prepare record
-         */
-        $columns = Schema::getColumnListing(self::$_table); // users table
-        foreach($record as $column => $value) {
-            // Skip those records which are in skipped columns array
-            if(count(self::$skip_columns)) {
-                if(in_array($column, self::$skip_columns)) {
-                    continue;
-                }
-            }
-
-            /*
-             * Remove records which are not in columns
-             */
-            if(!in_array($column, $columns)) {
-                continue;
-            }
-
-            /*
-             * Set DateTimes format
-             */
-            $timestamps = ['created_at', 'updated_at', 'published_at'];
-            if(in_array($column, $timestamps)) {
-                $value = Carbon::parse($value)->toDateTimeString();
-            }
-
-            if(is_array($value)) {
-                $prepared_record[$column] = json_encode($value);
-            } else {
-                $prepared_record[$column] = $value;
-            }
-
-        }
-
-        return $prepared_record;
     }
 }
