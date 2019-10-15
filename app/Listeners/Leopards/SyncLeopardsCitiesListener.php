@@ -49,17 +49,30 @@ class SyncLeopardsCitiesListener implements ShouldQueue
 
                 $city_list = [];
                 foreach($cities['city_list'] as $city) {
-                    $city_list[] = array(
+                    $city_data = array(
                         'city_id' => $city['id'],
                         'name' => $city['name'],
                         'shipment_type' => json_encode($city['shipment_type']),
                         'account_id' => $event->account->id,
-                        'created_at' => Carbon::now()->toDateTimeString(),
                         'updated_at' => Carbon::now()->toDateTimeString(),
                     );
-                }
 
-                LeopardsCities::insert($city_list);
+                    $city_record = LeopardsCities::where([
+                        'city_id' => $city['id'],
+                        'account_id' => $event->account->id,
+                    ])->select('id')->first();
+
+                    if($city_record) {
+                        //echo 'Product Updated: ' . $product_processed['title'] . "\n";
+                        LeopardsCities::where([
+                            'city_id' => $city['id'],
+                            'account_id' => $event->account->id,
+                        ])->update($city_data);
+                    } else {
+                        $city_data['created_at'] = Carbon::now()->toDateTimeString();
+                        LeopardsCities::create($city_data);
+                    }
+                }
             }
         }
     }

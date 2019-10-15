@@ -84,7 +84,7 @@ class SyncCustomersListener implements ShouldQueue
                     }
                 }
 
-                echo 'Queue dispatched for sync products' . "\r\n";
+                echo 'Queue dispatched for sync customers' . "\r\n";
             }
         }
     }

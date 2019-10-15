@@ -31,7 +31,6 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\Shopify\Orders\SyncOrdersFire' => [
             'App\Listeners\Shopify\Orders\SyncOrdersListener',
         ],
-
         'App\Events\Leopards\SyncLeopardsCitiesFire' => [
             'App\Listeners\Leopards\SyncLeopardsCitiesListener',
         ],

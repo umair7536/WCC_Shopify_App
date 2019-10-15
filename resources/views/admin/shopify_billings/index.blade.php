@@ -30,8 +30,8 @@
             <div class="pricing-content-1">
                 <div class="row">
                     <div class="col-md-12 margin-bottom-10">
-                        Select a plan based on your @lang('global.tickets.title') volume each month. You can compare features of different plans.<br/>
-                        Upgrade takes place and change your shipment quota immediately. Downgrade or cancellation and any change of @lang('global.tickets.title') quota are effective starting the next billing cycle.
+                        Select a plan based on your @lang('global.shopify_orders.title') volume each month. You can compare features of different plans.<br/>
+                        Upgrade takes place and change your shipment quota immediately. Downgrade or cancellation and any change of @lang('global.shopify_orders.title') quota are effective starting the next billing cycle.
                     </div>
                     @if($plans)
                         @php(
@@ -58,7 +58,7 @@
                                             <div class="col-xs-3 text-right mobile-padding">
                                                 <i class="icon-support"></i>
                                             </div>
-                                            <div class="col-xs-9 text-left mobile-padding">{{ number_format($plan->quota) }} @lang('global.tickets.title') per month</div>
+                                            <div class="col-xs-9 text-left mobile-padding">{{ number_format($plan->quota) }} @lang('global.shopify_orders.title') per month</div>
                                         </div>
                                         <div class="row mobile-padding">
                                             <div class="col-xs-3 text-right mobile-padding">
@@ -108,7 +108,7 @@
                                         <div class="col-xs-3 text-right mobile-padding">
                                             <i class="icon-support"></i>
                                         </div>
-                                        <div class="col-xs-9 text-left mobile-padding">10 @lang('global.tickets.title') per month</div>
+                                        <div class="col-xs-9 text-left mobile-padding">10 @lang('global.shopify_orders.title') per month</div>
                                     </div>
                                     <div class="row mobile-padding">
                                         <div class="col-xs-3 text-right mobile-padding">

@@ -103,6 +103,18 @@ return [
             'slug' => 'mode',
         ],
         [
+            'name' => 'Company ID',
+            'slug' => 'company-id',
+        ],
+        [
+            'name' => 'User ID',
+            'slug' => 'username',
+        ],
+        [
+            'name' => 'Password',
+            'slug' => 'password',
+        ],
+        [
             'name' => 'API Key',
             'slug' => 'api-key',
         ],

@@ -10,6 +10,7 @@
         "barryvdh/laravel-dompdf": "^0.8.2",
         "developifynet/leopardscod-php": "^1.0",
         "doctrine/dbal": "^2.5",
+        "fabpot/goutte": "^3.2",
         "fideloper/proxy": "^4.0",
         "filp/whoops": "~2.0",
         "guzzlehttp/guzzle": "~6.0",

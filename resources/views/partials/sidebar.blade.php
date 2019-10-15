@@ -179,13 +179,15 @@
                     Gate::allows('leopards_settings_manage') ||
                     Gate::allows('leopards_cities_manage') ||
                     Gate::allows('shippers_manage') ||
-                    Gate::allows('consignees_manage')
+                    Gate::allows('consignees_manage') ||
+                    Gate::allows('booked_packets_manage')
                 )
                 <li class="nav-item start @if(
                     $request->segment(2) == 'leopards_settings' ||
                     $request->segment(2) == 'leopards_cities' ||
                     $request->segment(2) == 'shippers' ||
-                    $request->segment(2) == 'consignees'
+                    $request->segment(2) == 'consignees' ||
+                    $request->segment(2) == 'booked_packets'
                 ) active open @endif">
                     <a href="javascript:;" class="nav-link nav-toggle">
                         <i class="icon-puzzle"></i>
@@ -218,6 +220,13 @@
                             <li class="nav-item start {{ $request->segment(2) == 'consignees' ? 'active active-sub' : '' }}">
                                 <a href="{{ route('admin.consignees.index') }}">
                                     <span class="title">@lang('global.consignees.title')</span>
+                                </a>
+                            </li>
+                        @endif
+                        @if(Gate::allows('booked_packets_manage'))
+                            <li class="nav-item start {{ $request->segment(2) == 'booked_packets' ? 'active active-sub' : '' }}">
+                                <a href="{{ route('admin.booked_packets.index') }}">
+                                    <span class="title">@lang('global.booked_packets.title')</span>
                                 </a>
                             </li>
                         @endif

@@ -48,5 +48,32 @@ return [
         'refunded' => 'Refunded',
         'unpaid' => 'Unpaid',
         'voided' => 'Voided',
+    ),
+
+    /**
+     * ********************************
+     * Leopards Mapping
+     * ********************************
+     */
+    'shipment_type' => array(
+        2 => 'Detain',
+        3 => 'Overland',
+        10 => 'Overnight',
+    ),
+    'status' => array(
+        0 => 'Pickup Request not Send',
+        1 => '48 Hours Auto Canceled',
+        2 => 'Pickup Request Sent',
+        3 => 'Cancelled',
+        4 => 'Consignment Booked',
+        5 => 'Assign to Courier',
+        6 => 'Arrived at Station',
+        7 => 'Returned to shipper',
+        8 => 'Missroute',
+        9 => 'Pending',
+        12 => 'Delivered',
+        14 => 'Dispatched',
+        16 => 'Refused',
+        17 => 'Being Return',
     )
 ];

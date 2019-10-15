@@ -10,6 +10,7 @@ use App\Events\Shopify\Products\SyncProductsFire;
 use App\Http\Controllers\Controller;
 use App\Models\Accounts;
 use App\Models\GeneralSettings;
+use App\Models\LeopardsSettings;
 use App\Models\ShopifyCollects;
 use App\Models\ShopifyShops;
 use App\Models\TicketStatuses;
@@ -378,6 +379,27 @@ class ShopifyController extends Controller
         }
 
         GeneralSettings::insert($general_settings);
+
+        /**
+         * LCS Settings
+         */
+        $global_leopards_settings = Config::get('setup.leopards_settings');
+
+        $leopards_settings = [];
+        $sort_number = 0;
+        foreach($global_leopards_settings as $leopards_setting) {
+            $leopards_settings[] = array(
+                'name' => $leopards_setting['name'],
+                'slug' => $leopards_setting['slug'],
+                'data' => null,
+                'sort_number'=> $sort_number++,
+                'account_id' => $account_id,
+                'created_at' => \Carbon\Carbon::now(),
+                'updated_at' => \Carbon\Carbon::now(),
+            );
+        }
+
+        LeopardsSettings::insert($leopards_settings);
 
         return $account_id;
     }

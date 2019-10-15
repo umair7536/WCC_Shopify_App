@@ -267,12 +267,8 @@ class LeopardsCitiesController extends Controller
         }
 
         /**
-         * Dispatch Collects Event and Delte existing records
+         * Dispatch Sync Leopards Cities Event and Delte existing records
          */
-
-        LeopardsCities::where([
-            'account_id' => Auth::User()->account_id
-        ])->forceDelete();
         event(new SyncLeopardsCitiesFire(Accounts::find(Auth::User()->account_id)));
 
 

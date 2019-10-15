@@ -99,7 +99,7 @@ class GeneralSettingsSeed extends Seeder
 //        $application_user->givePermissionTo('general_settings_active');
 //        $application_user->givePermissionTo('general_settings_inactive');
 //        $application_user->givePermissionTo('general_settings_destroy');
-        $application_user->givePermissionTo('general_settings_sort');
+//        $application_user->givePermissionTo('general_settings_sort');
 
         $global_general_settings = Config::get('setup.general_settings');
 
