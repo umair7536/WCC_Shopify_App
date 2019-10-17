@@ -32,3 +32,18 @@
     {!! Form::submit(trans('global.app_delete'), array('class' => 'btn btn-xs btn-danger')) !!}
     {!! Form::close() !!}
 @endif
+@if(Gate::allows('booked_packets_create'))
+    <div class="btn-group">
+        <button type="button" class="btn btn-success btn-sm"><i class="fa fa-truck"></i> Book</button>
+        <button type="button" class="btn btn-success btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+            <i class="fa fa-angle-down"></i>
+        </button>
+        <ul class="dropdown-menu" role="menu">
+            <li>
+                <a href="{{ route('admin.booked_packets.create',['order_id' => $shopify_order->order_id]) }}">
+                    Book in Leopards COD
+                </a>
+            </li>
+        </ul>
+    </div>
+@endif

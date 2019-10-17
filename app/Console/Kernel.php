@@ -87,11 +87,11 @@ class Kernel extends ConsoleKernel
         /*
          * Sync Weekly Products from Shopify
          */
-        $schedule->command('shopify:sync-products-weekly')
-            ->withoutOverlapping()
-            ->saturdays()
-            ->timezone('America/Los_Angeles')
-            ->at('23:59');
+//        $schedule->command('shopify:sync-products-weekly')
+//            ->withoutOverlapping()
+//            ->saturdays()
+//            ->timezone('America/Los_Angeles')
+//            ->at('23:59');
 
         /**
          * =========================

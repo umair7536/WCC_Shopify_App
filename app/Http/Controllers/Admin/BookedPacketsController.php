@@ -2,21 +2,18 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Events\Shopify\Products\SyncCustomersFire;
-use App\Models\Accounts;
 use App\Models\BookedPackets;
 use App\Models\LeopardsCities;
+use App\Models\LeopardsSettings;
 use App\Models\Shippers;
-use App\Models\ShopifyShops;
 use Carbon\Carbon;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
-use DB;
 use Auth;
 use Config;
 use Validator;
-use ZfrShopify\ShopifyClient;
 
 class BookedPacketsController extends Controller
 {
@@ -71,8 +68,15 @@ class BookedPacketsController extends Controller
             $records["customActionMessage"] = "Records has been deleted successfully!"; // pass custom message(useful for getting status of group actions)
         }
 
+        /**
+         * Handle Packet as Production or Test
+         * '1' as Test Mode
+         * '2' as Production Mode
+         */
+        $booking_type = 2;
+
         // Get Total Records
-        $iTotalRecords = BookedPackets::getTotalRecords($request, Auth::User()->account_id);
+        $iTotalRecords = BookedPackets::getTotalRecords($request, Auth::User()->account_id, $booking_type);
 
 
         $iDisplayLength = intval($request->get('length'));
@@ -80,23 +84,45 @@ class BookedPacketsController extends Controller
         $iDisplayStart = intval($request->get('start'));
         $sEcho = intval($request->get('draw'));
 
-        $BookedPackets = BookedPackets::getRecords($request, $iDisplayStart, $iDisplayLength, Auth::User()->account_id);
+        $BookedPackets = BookedPackets::getRecords($request, $iDisplayStart, $iDisplayLength, Auth::User()->account_id, $booking_type);
 
         if($BookedPackets) {
 
+            $cities = [];
             foreach($BookedPackets as $booked_packet) {
+                $cities[] = $booked_packet->origin_city;
+                $cities[] = $booked_packet->destination_city;
+            }
 
+            $shipment_type = Config::get('constants.shipment_type');
+            $status = Config::get('constants.status');
+
+            $leopards_cities = LeopardsCities::where([
+                'account_id' => Auth::User()->account_id,
+            ])->whereIn('city_id', $cities)
+                ->select('city_id', 'name')
+                ->get();
+            if($leopards_cities) {
+                $leopards_cities = $leopards_cities->keyBy('city_id');
+            } else {
+                $leopards_cities = [];
             }
 
             foreach($BookedPackets as $booked_packet) {
                 $records["data"][] = array(
                     'id' => '<label class="mt-checkbox mt-checkbox-single mt-checkbox-outline"><input name="id[]" type="checkbox" class="checkboxes" value="'.$booked_packet->id.'"/><span></span></label>',
-                    'first_name' => $booked_packet->first_name,
-                    'last_name' => $booked_packet->last_name,
-                    'email' => $booked_packet->email,
-                    'phone' => $booked_packet->phone,
-                    'city' => $booked_packet->city,
-                    'province' => $booked_packet->province,
+                    'status' => $status[$booked_packet->status],
+                    'order_id' => $booked_packet->order_id,
+                    'shipment_type_id' => $shipment_type[$booked_packet->shipment_type_id],
+                    'cn_number' => $booked_packet->cn_number,
+                    'origin_city' => isset($booked_packet->origin_city, $leopards_cities) ? $leopards_cities[$booked_packet->origin_city]->name : 'n/a',
+                    'destination_city' => isset($booked_packet->destination_city, $leopards_cities) ? $leopards_cities[$booked_packet->destination_city]->name : 'n/a',
+                    'shipper_name' => $booked_packet->shipper_name,
+                    'consignee_name' => $booked_packet->consignee_name,
+                    'consignee_phone' => $booked_packet->consignee_phone,
+                    'consignee_email' => ($booked_packet->consignee_email) ? $booked_packet->consignee_email : 'n/a',
+                    'booking_date' => $booked_packet->booking_date,
+                    'collect_amount' => number_format($booked_packet->collect_amount, 2),
                     'actions' => view('admin.booked_packets.actions', compact('booked_packet'))->render(),
                 );
             }
@@ -110,15 +136,195 @@ class BookedPacketsController extends Controller
     }
 
     /**
-     * Show the form for creating new Permission.
+     * Display a listing of API Booked Packets.
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function api()
+    {
+        if (! Gate::allows('booked_packets_manage')) {
+            return abort(401);
+        }
+
+        $status = Config::get('constants.status');
+        $shipment_type = Config::get('constants.shipment_type');
+        $leopards_cities = LeopardsCities::where([
+            'account_id' => Auth::User()->account_id,
+        ])->get();
+
+        if($leopards_cities) {
+            $leopards_cities = $leopards_cities->pluck('name', 'city_id');
+        } else {
+            $leopards_cities = [];
+        }
+
+        return view('admin.booked_packets.api', compact('status', 'shipment_type', 'leopards_cities'));
+    }
+
+    /**
+     * Display a listing of Booked Packets.
+     *
+     * @param \Illuminate\Http\Request
+     * @return \Illuminate\Http\Response
+     */
+    public function apidatatable(Request $request)
+    {
+        $records = array();
+        $records["data"] = array();
+
+        /**
+         * Handle Packet as Production or Test
+         * '1' as Test Mode
+         * '2' as Production Mode
+         */
+        $booking_type = 1;
+
+        // Get Total Records
+        $iTotalRecords = BookedPackets::getTotalRecords($request, Auth::User()->account_id, $booking_type);
+
+
+        $iDisplayLength = intval($request->get('length'));
+        $iDisplayLength = $iDisplayLength < 0 ? $iTotalRecords : $iDisplayLength;
+        $iDisplayStart = intval($request->get('start'));
+        $sEcho = intval($request->get('draw'));
+
+        $BookedPackets = BookedPackets::getRecords($request, $iDisplayStart, $iDisplayLength, Auth::User()->account_id, $booking_type);
+
+        if($BookedPackets) {
+
+            $cities = [];
+            foreach($BookedPackets as $booked_packet) {
+                $cities[] = $booked_packet->origin_city;
+                $cities[] = $booked_packet->destination_city;
+            }
+
+            $shipment_type = Config::get('constants.shipment_type');
+            $status = Config::get('constants.status');
+
+            $leopards_cities = LeopardsCities::where([
+                'account_id' => Auth::User()->account_id,
+            ])->whereIn('city_id', $cities)
+                ->select('city_id', 'name')
+                ->get();
+            if($leopards_cities) {
+                $leopards_cities = $leopards_cities->keyBy('city_id');
+            } else {
+                $leopards_cities = [];
+            }
+
+            foreach($BookedPackets as $booked_packet) {
+                $records["data"][] = array(
+                    'status' => $status[$booked_packet->status],
+                    'order_id' => $booked_packet->order_id,
+                    'shipment_type_id' => $shipment_type[$booked_packet->shipment_type_id],
+                    'cn_number' => $booked_packet->cn_number,
+                    'origin_city' => isset($booked_packet->origin_city, $leopards_cities) ? $leopards_cities[$booked_packet->origin_city]->name : 'n/a',
+                    'destination_city' => isset($booked_packet->destination_city, $leopards_cities) ? $leopards_cities[$booked_packet->destination_city]->name : 'n/a',
+                    'shipper_name' => $booked_packet->shipper_name,
+                    'consignee_name' => $booked_packet->consignee_name,
+                    'consignee_phone' => $booked_packet->consignee_phone,
+                    'consignee_email' => ($booked_packet->consignee_email) ? $booked_packet->consignee_email : 'n/a',
+                    'booking_date' => $booked_packet->booking_date,
+                    'collect_amount' => number_format($booked_packet->collect_amount, 2),
+                    'actions' => view('admin.booked_packets.apiactions', compact('booked_packet'))->render(),
+                );
+            }
+        }
+
+        $records["draw"] = $sEcho;
+        $records["recordsTotal"] = $iTotalRecords;
+        $records["recordsFiltered"] = $iTotalRecords;
+
+        return response()->json($records);
+    }
+
+    /**
+     * Get Company Data from LCS.
+     *
+     * @param int
+     * @return array
+     */
+    private function getCompanyData($account_id)
+    {
+        $data = array(
+            'status' => true,
+            'company' => array(),
+        );
+
+        $leopards_settings = LeopardsSettings::where([
+            'account_id' => $account_id
+        ])
+            ->select('slug', 'data')
+            ->orderBy('id', 'asc')
+            ->get()->keyBy('slug');
+
+        if($leopards_settings) {
+            foreach($leopards_settings as $leopards_setting) {
+                if($leopards_setting->slug == 'company-id' && !$leopards_setting->data) {
+                    $data['status'] = false;
+                } else if(
+                        ($leopards_setting->slug == 'api-key' && !$leopards_setting->data)
+                    ||  ($leopards_setting->slug == 'api-password' && !$leopards_setting->data)
+                ) {
+                    $data['status'] = false;
+                }
+            }
+        }
+
+        try {
+            $client = new Client();
+            $response = $client->post(env('LCS_URL') . 'common_calls/getCountryById', array(
+                'form_params' => array(
+                    'company_id' => $leopards_settings['company-id']->data
+                )
+            ));
+
+            if($response->getStatusCode() == 200) {
+                if($response->getBody() != 'null') {
+                    $data['company'] = json_decode($response->getBody(), true);
+                } else {
+                    $data['status'] = false;
+                }
+            } else {
+                $data['status'] = false;
+            }
+        } catch (\Exception $exception) {
+            $data['status'] = false;
+        }
+
+        return $data;
+    }
+
+    /**
+     * Show the form for creating new Permission.
+     *
+     * @param  \Illuminate\Http\Request
+     * @return \Illuminate\Http\Response
+     */
+    public function create(Request $request)
     {
         if (! Gate::allows('booked_packets_create')) {
             return abort(401);
         }
+
+        /**
+         * Grab Company Information from LCS System
+         */
+        $data = $this->getCompanyData(Auth::User()->account_id);
+        if(!$data['status']) {
+            if (Gate::allows('leopards_settings_manage')) {
+                flash('Leopards Credentials are invalid, Please provide correct credentials.')->error()->important();
+                return redirect()->route('admin.leopards_settings.index');
+            } else {
+                flash('Leopards Credentials are invalid, Please provide correct credentials.')->error()->important();
+                return redirect()->route('admin.booked_packets.index');
+            }
+        }
+
+        /**
+         * If Order ID is provided then prepare data to automatically be filled
+         */
+        $data['booked_packet'] = BookedPackets::prepareBookingOrder($request->get('order_id'), Auth::User()->account_id);
 
         $booking_date = Carbon::now()->format('Y-m-d');
 
@@ -163,8 +369,9 @@ class BookedPacketsController extends Controller
         $consignee_id = 'other';
         $consignees = ['other' => 'Other'];
 
-        return view('admin.booked_packets.create',compact('booking_date', 'default_shipment_type', 'shipment_type', 'volumetric_dimensions_calculated', 'leopards_cities', 'shippers', 'consignees', 'shipper_id', 'consignee_id'));
+        return view('admin.booked_packets.create',compact('booking_date', 'default_shipment_type', 'shipment_type', 'volumetric_dimensions_calculated', 'leopards_cities', 'shippers', 'consignees', 'shipper_id', 'consignee_id', 'data'));
     }
+
 
     /**
      * Store a newly created Permission in storage.
@@ -187,122 +394,24 @@ class BookedPacketsController extends Controller
             ));
         }
 
-        /**
-         * Set Customer's Basic Informaton
-         */
-        $shopifyCustomer = array(
-          'first_name' => $request->get('first_name'),
-          'last_name' => $request->get('last_name'),
-          'email' => $request->get('email'),
-          'phone' => $request->get('phone'),
-          'verified_email' => ($request->get('email_verified') != '' && $request->get('email_verified') == '1') ? true : false,
-        );
+        $result = BookedPackets::createRecord($request, Auth::User()->account_id);
 
-        /**
-         * Set Customer's Registraton
-         */
-        if($request->get('password_confirmation') != '' && $request->get('password_confirmation') == '1') {
-            $shopifyCustomer['password'] = $request->get('password');
-            $shopifyCustomer['password_confirmation'] = $request->get('password');
-            $shopifyCustomer['send_email_welcome'] = ($request->get('password_confirmation') != '' && $request->get('password_confirmation') == '1') ? true : false;
-        }
-
-        /**
-         * Set Customer's Address
-         */
-        $shopifyCustomer['addresses'][0] = array(
-            'first_name' => $request->get('first_name'),
-            'last_name' => $request->get('last_name'),
-            'address1' => $request->get('address1'),
-            'city' => $request->get('city'),
-            'province' => $request->get('province'),
-            'phone' => $request->get('phone'),
-            'zip' => $request->get('zip'),
-            'country' => $request->get('country'),
-        );
-
-
-        /**
-         * Create Customer in Shopify
-         */
-        $shop = ShopifyShops::where([
-            'account_id' => Auth::User()->account_id
-        ])->first();
-
-        $customer = [];
-
-        if($shop) {
-            try {
-                $shopifyClient = new ShopifyClient([
-                    'private_app' => false,
-                    'api_key' => env('SHOPIFY_APP_API_KEY'), // In public app, this is the app ID
-                    'version' => env('SHOPIFY_API_VERSION'), // Put API Version
-                    'access_token' => $shop->access_token,
-                    'shop' => $shop->myshopify_domain
-                ]);
-
-                $customer = $shopifyClient->createCustomer($shopifyCustomer);
-            } catch (\Exception $e) {
-                return response()->json(array(
-                    'status' => 0,
-//                    'message' => ['Email/ Phone is already in use or Country/ Province is wrong entered.'],
-                    'message' => [$e->getMessage()],
-                ));
-            }
-        } else {
-            return response()->json(array(
-                'status' => 0,
-                'message' => ['Shop is not connected, Please contact App Administrator.'],
-            ));
-        }
-
-        if(count($customer)) {
-            $customer['customer_id'] = $customer['id'];
-            unset($customer['id']);
-
-            if(isset($customer['default_address']) && count($customer['default_address'])) {
-                $default_address = $customer['default_address'];
-                unset($default_address['id']);
-                unset($default_address['customer_id']);
-                $customer = array_merge($customer, $default_address);
-                $customer['default_address'] = json_encode($customer['default_address']);
-            }
-
-            /**
-             * Set Address based on array provided
-             */
-            if(count($customer['addresses'])) {
-                $customer['addresses'] = json_encode($customer['addresses']);
-            }
-
-            $customer_processed = BookedPackets::prepareRecord($customer);
-            $customer_processed['account_id'] = $shop['account_id'];
-
-            $customer_record = BookedPackets::where([
-                'customer_id' => $customer_processed['customer_id'],
-                'account_id' => $customer_processed['account_id'],
-            ])->select('id')->first();
-
-            if($customer_record) {
-                BookedPackets::where([
-                    'customer_id' => $customer_processed['customer_id'],
-                    'account_id' => $customer_processed['account_id'],
-                ])->update($customer_processed);
+        if($result['status']) {
+            if($result['test_mode']) {
+                flash('Test Packet is booked successfully.')->success()->important();
             } else {
-                //echo 'Product Created: ' . $customer_processed['title'] . "\n";
-                BookedPackets::create($customer_processed);
+                flash('Packet is booked successfully.')->success()->important();
             }
-
-            flash('Record has been created successfully.')->success()->important();
 
             return response()->json(array(
                 'status' => 1,
+                'test_mode' => $result['test_mode'],
                 'message' => 'Record has been created successfully.',
             ));
         } else {
             return response()->json(array(
                 'status' => 0,
-                'message' => 'Something went wrong, please try again later.',
+                'message' => $result['error_msg'],
             ));
         }
     }
@@ -316,9 +425,28 @@ class BookedPacketsController extends Controller
     protected function verifyFields(Request $request)
     {
         return $validator = Validator::make($request->all(), [
-            'first_name' => 'required',
-            'last_name' => 'required',
-            'email' => 'required|email',
+            'shipment_type_id' => 'required',
+            'booking_date' => 'required',
+            'packet_pieces' => 'required|numeric',
+            'net_weight' => 'required|numeric',
+            'collect_amount' => 'required|numeric',
+            'order_id' => 'nullable|numeric',
+            'vol_weight_w' => 'nullable|numeric',
+            'vol_weight_h' => 'nullable|numeric',
+            'vol_weight_l' => 'nullable|numeric',
+            'shipper_id' => 'required',
+            'origin_city' => 'required|numeric',
+            'shipper_name' => 'required',
+            'shipper_email' => 'nullable|email',
+            'shipper_phone' => 'required',
+            'shipper_address' => 'required',
+            'consignee_id' => 'required',
+            'destination_city' => 'required|numeric',
+            'consignee_name' => 'required',
+            'consignee_email' => 'required|email',
+            'consignee_phone' => 'required',
+            'consignee_address' => 'required',
+            'comments' => 'required',
         ]);
     }
 
@@ -340,186 +468,20 @@ class BookedPacketsController extends Controller
             return view('error', compact('lead_statuse'));
         }
 
-//        $customer_variants = BookedPacketVariants::where([
-//            'customer_id' => $booked_packet->customer_id,
-//            'customer_id' => $booked_packet->customer_id,
-//        ]);
+        $shipment_type = Config::get('constants.shipment_type');
 
-        return view('admin.booked_packets.detail', compact('booked_packet'));
-    }
-
-
-    /**
-     * Show the form for editing Permission.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        if (! Gate::allows('booked_packets_edit')) {
-            return abort(401);
-        }
-
-        $booked_packet = BookedPackets::getData($id);
-
-        if(!$booked_packet) {
-            return view('error', compact('lead_statuse'));
-        }
-
-        return view('admin.booked_packets.edit', compact('booked_packet'));
-    }
-
-    /**
-     * Update Permission in storage.
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        if (! Gate::allows('booked_packets_edit')) {
-            return abort(401);
-        }
-
-        $validator = $this->verifyFields($request);
-
-        if ($validator->fails()) {
-            return response()->json(array(
-                'status' => 0,
-                'message' => $validator->messages()->all(),
-            ));
-        }
-
-        $booked_packet = BookedPackets::getData($id);
-
-        if(!$booked_packet) {
-            return response()->json(array(
-                'status' => 0,
-                'message' => ['Provided Customer not found in our database.'],
-            ));
-        }
-
-        /**
-         * Set Customer's Basic Informaton
-         */
-        $shopifyCustomer = array(
-            'id' => (int) $booked_packet['customer_id'],
-            'first_name' => $request->get('first_name'),
-            'last_name' => $request->get('last_name'),
-            'email' => $request->get('email'),
-            'phone' => $request->get('phone'),
-//            'verified_email' => ($request->get('email_verified') != '' && $request->get('email_verified') == '1') ? true : false,
-        );
-
-        /**
-         * Set Customer's Registraton
-         */
-//        if($request->get('password_confirmation') != '' && $request->get('password_confirmation') == '1') {
-//            $shopifyCustomer['password'] = $request->get('password');
-//            $shopifyCustomer['password_confirmation'] = $request->get('password');
-//            $shopifyCustomer['send_email_welcome'] = ($request->get('password_confirmation') != '' && $request->get('password_confirmation') == '1') ? true : false;
-//        }
-
-        /**
-         * Set Customer's Address
-         */
-//        $shopifyCustomer['addresses'][0] = array(
-//            'first_name' => $request->get('first_name'),
-//            'last_name' => $request->get('last_name'),
-//            'address1' => $request->get('address1'),
-//            'city' => $request->get('city'),
-//            'province' => $request->get('province'),
-//            'phone' => $request->get('phone'),
-//            'zip' => $request->get('zip'),
-//            'country' => $request->get('country'),
-//        );
-
-
-        /**
-         * Create Customer in Shopify
-         */
-        $shop = ShopifyShops::where([
-            'account_id' => Auth::User()->account_id
-        ])->first();
-
-        $customer = [];
-
-        if($shop) {
-            try {
-                $shopifyClient = new ShopifyClient([
-                    'private_app' => false,
-                    'api_key' => env('SHOPIFY_APP_API_KEY'), // In public app, this is the app ID
-                    'version' => env('SHOPIFY_API_VERSION'), // Put API Version
-                    'access_token' => $shop->access_token,
-                    'shop' => $shop->myshopify_domain
-                ]);
-
-                $customer = $shopifyClient->updateCustomer($shopifyCustomer);
-            } catch (\Exception $e) {
-                return response()->json(array(
-                    'status' => 0,
-//                    'message' => ['Email/ Phone is already in use or Country/ Province is wrong entered.'],
-                    'message' => [$e->getMessage()],
-                ));
-            }
+        $leopards_cities = LeopardsCities::where([
+            'account_id' => Auth::User()->account_id,
+        ])->whereIn('city_id', [$booked_packet->origin_city, $booked_packet->destination_city])
+            ->select('city_id', 'name')
+            ->get();
+        if($leopards_cities) {
+            $leopards_cities = $leopards_cities->keyBy('city_id');
         } else {
-            return response()->json(array(
-                'status' => 0,
-                'message' => ['Shop is not connected, Please contact App Administrator.'],
-            ));
+            $leopards_cities = [];
         }
 
-        if(count($customer)) {
-            $customer['customer_id'] = $customer['id'];
-            unset($customer['id']);
-
-            if(isset($customer['default_address']) && count($customer['default_address'])) {
-                $default_address = $customer['default_address'];
-                unset($default_address['id']);
-                unset($default_address['customer_id']);
-                $customer = array_merge($customer, $default_address);
-                $customer['default_address'] = json_encode($customer['default_address']);
-            }
-
-            /**
-             * Set Address based on array provided
-             */
-            if(count($customer['addresses'])) {
-                $customer['addresses'] = json_encode($customer['addresses']);
-            }
-
-            $customer_processed = BookedPackets::prepareRecord($customer);
-            $customer_processed['account_id'] = $shop['account_id'];
-
-            $customer_record = BookedPackets::where([
-                'customer_id' => $customer_processed['customer_id'],
-                'account_id' => $customer_processed['account_id'],
-            ])->select('id')->first();
-
-            if($customer_record) {
-                BookedPackets::where([
-                    'customer_id' => $customer_processed['customer_id'],
-                    'account_id' => $customer_processed['account_id'],
-                ])->update($customer_processed);
-            } else {
-                //echo 'Product Created: ' . $customer_processed['title'] . "\n";
-                BookedPackets::create($customer_processed);
-            }
-
-            flash('Record has been updated successfully.')->success()->important();
-
-            return response()->json(array(
-                'status' => 1,
-                'message' => 'Record has been updated successfully.',
-            ));
-        } else {
-            return response()->json(array(
-                'status' => 0,
-                'message' => 'Something went wrong, please try again later.',
-            ));
-        }
+        return view('admin.booked_packets.detail', compact('booked_packet', 'shipment_type', 'leopards_cities'));
     }
 
 
@@ -537,55 +499,22 @@ class BookedPacketsController extends Controller
 
         BookedPackets::deleteRecord($id);
 
-        return redirect()->route('admin.booked_packets.index');
+        return redirect()->back();
     }
 
     /**
-     * Inactive Record from storage.
+     * Cancel Record from LCS.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function inactive($id)
+    public function cancel($id)
     {
-        if (! Gate::allows('booked_packets_inactive')) {
-            return abort(401);
-        }
-        BookedPackets::inactiveRecord($id);
-
-        return redirect()->route('admin.booked_packets.index');
-    }
-
-    /**
-     * Inactive Record from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function active($id)
-    {
-        if (! Gate::allows('booked_packets_active')) {
-            return abort(401);
-        }
-        BookedPackets::activeRecord($id);
-
-        return redirect()->route('admin.booked_packets.index');
-    }
-
-    /**
-     * Dispatch event for sync customers.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function syncCustomers()
-    {
-        if (! Gate::allows('booked_packets_manage')) {
+        if (! Gate::allows('booked_packets_create')) {
             return abort(401);
         }
 
-        event(new SyncCustomersFire(Accounts::find(Auth::User()->account_id)));
-
-        flash('Customers Sync Event is dispatched successfully.')->success()->important();
+        BookedPackets::cancelPacket($id);
 
         return redirect()->route('admin.booked_packets.index');
     }

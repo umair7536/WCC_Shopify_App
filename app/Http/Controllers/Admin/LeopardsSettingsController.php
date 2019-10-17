@@ -43,7 +43,7 @@ class LeopardsSettingsController extends Controller
      */
     public function create()
     {
-        if (! Gate::allows('leopards_settings_create')) {
+        if (! Gate::allows('leopards_settings_edit')) {
             return abort(401);
         }
 

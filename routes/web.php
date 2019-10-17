@@ -203,10 +203,11 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     // Consignees Routes end
 
     // Booked Packets start
+    Route::get('booked_packets/api', ['uses' => 'Admin\BookedPacketsController@api', 'as' => 'booked_packets.api']);
+    Route::post('booked_packets/apidatatable', ['uses' => 'Admin\BookedPacketsController@apidatatable', 'as' => 'booked_packets.apidatatable']);
+    Route::patch('booked_packets/cancel/{id}', ['uses' => 'Admin\BookedPacketsController@cancel', 'as' => 'booked_packets.cancel']);
+    Route::get('booked_packets/detail/{id}', ['uses' => 'Admin\BookedPacketsController@detail', 'as' => 'booked_packets.detail']);
     Route::post('booked_packets/datatable', ['uses' => 'Admin\BookedPacketsController@datatable', 'as' => 'booked_packets.datatable']);
-    Route::patch('booked_packets/active/{id}', ['uses' => 'Admin\BookedPacketsController@active', 'as' => 'booked_packets.active']);
-    Route::patch('booked_packets/inactive/{id}', ['uses' => 'Admin\BookedPacketsController@inactive', 'as' => 'booked_packets.inactive']);
-    Route::get('booked_packets/sync-custom-collections', ['uses' => 'Admin\BookedPacketsController@syncCustomCollections', 'as' => 'booked_packets.custom_collections']);
     Route::resource('booked_packets', 'Admin\BookedPacketsController');
     // Booked Packets end
 });

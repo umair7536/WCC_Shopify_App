@@ -17,7 +17,7 @@ class CreateBookedPacketsTable extends Migration
             $table->increments('id');
 
             $table->unsignedInteger('booked_packet_id')->nullable();
-            $table->unsignedInteger('cn_number')->nullable();
+            $table->text('cn_number')->nullable();
             $table->string('shipment_type_id')->nullable();
             $table->date('booking_date')->nullable();
             $table->unsignedInteger('packet_pieces')->nullable();
@@ -34,7 +34,7 @@ class CreateBookedPacketsTable extends Migration
              */
             $table->unsignedInteger('shipper_id')->nullable();
             $table->string('shipper_name');
-            $table->string('shipper_email', 255);
+            $table->string('shipper_email', 255)->nullable();
             $table->string('shipper_phone', 255);
             $table->text('shipper_address');
             $table->unsignedInteger('origin_city')->nullable();
@@ -44,15 +44,22 @@ class CreateBookedPacketsTable extends Migration
              */
             $table->unsignedInteger('consignee_id')->nullable();
             $table->string('consignee_name');
-            $table->string('consignee_email', 255);
+            $table->string('consignee_email', 255)->nullable();
             $table->string('consignee_phone', 255);
-            $table->string('consignee_phone_2', 255);
-            $table->string('consignee_phone_3', 255);
+            $table->string('consignee_phone_2', 255)->nullable();
+            $table->string('consignee_phone_3', 255)->nullable();
             $table->text('consignee_address');
 
             $table->unsignedInteger('destination_city')->nullable();
 
             $table->text('comments')->nullable();
+
+            /**
+             * Handle Packet as Production or Test
+             * '1' as Test Mode
+             * '2' as Production Mode
+             */
+            $table->tinyInteger('booking_type')->default(1);
 
             /**
              * Tracking Information
@@ -63,7 +70,7 @@ class CreateBookedPacketsTable extends Migration
             /**
              * Status Information
              */
-            $table->string('status')->nullable();
+            $table->string('status')->default(0);
             $table->text('history')->nullable();
 
             $table->unsignedInteger('created_by')->nullable();

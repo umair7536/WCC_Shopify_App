@@ -30,33 +30,12 @@
                 <i class="icon-list font-dark"></i>
                 <span class="caption-subject font-dark sbold uppercase">@lang('global.app_list')</span>
             </div>
-            <div class="actions">
-                @if(Gate::allows('booked_packets_create'))
-                    <a class="btn btn-success" href="{{ route('admin.booked_packets.create') }}">@lang('global.app_add_new')</a>
-                @endif
-            </div>
         </div>
         <div class="portlet-body">
             <div class="table-container">
-                {{--<div class="table-actions-wrapper">--}}
-                    {{--<span> </span>--}}
-                    {{--<select class="table-group-action-input form-control input-inline input-small input-sm">--}}
-                        {{--<option value="">Select</option>--}}
-                        {{--<option value="Delete">Delete</option>--}}
-                    {{--</select>--}}
-                    {{--<button class="btn btn-sm red table-group-action-submit">--}}
-                        {{--<i class="fa fa-check"></i> Submit--}}
-                    {{--</button>--}}
-                {{--</div>--}}
                 <table class="table table-striped table-bordered table-hover table-checkable" id="datatable_ajax">
                     <thead>
                     <tr role="row" class="heading">
-                        <th width="3%">
-                            <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
-                                <input type="checkbox" class="group-checkable" data-set="#sample_2 .checkboxes"/>
-                                <span></span>
-                            </label>
-                        </th>
                         <th>@lang('global.booked_packets.fields.status')</th>
                         <th>@lang('global.booked_packets.fields.order_id')</th>
                         <th>@lang('global.booked_packets.fields.shipment_type_id')</th>
@@ -69,10 +48,8 @@
                         <th>@lang('global.booked_packets.fields.consignee_email')</th>
                         <th>@lang('global.booked_packets.fields.booking_date')</th>
                         <th>@lang('global.booked_packets.fields.collect_amount')</th>
-                        <th width="17%">@lang('global.booked_packets.fields.actions')</th>
                     </tr>
                     <tr role="row" class="filter">
-                        <td></td>
                         <td>
                             {!! Form::select('status', $status, null, ['class' => 'form-control form-filter input-sm', 'placeholder' => 'Select a Status']) !!}
                         </td>
@@ -165,7 +142,7 @@
     <!-- END PAGE LEVEL PLUGINS -->
     <!-- BEGIN PAGE LEVEL SCRIPTS -->
     <script src="{{ url('metronic/assets/global/scripts/datatable.js') }}" type="text/javascript"></script>
-    <script src="{{ url('js/admin/booked_packets/datatable.js') }}" type="text/javascript"></script>
+    <script src="{{ url('js/admin/booked_packets/apidatatable.js') }}" type="text/javascript"></script>
     <!-- END PAGE LEVEL SCRIPTS -->
     <script src="{{ url('metronic/assets/global/plugins/jquery-validation/js/jquery.validate.min.js') }}" type="text/javascript"></script>
     <script src="{{ url('metronic/assets/global/plugins/jquery-validation/js/additional-methods.min.js') }}" type="text/javascript"></script>

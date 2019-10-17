@@ -75,5 +75,6 @@ return [
         14 => 'Dispatched',
         16 => 'Refused',
         17 => 'Being Return',
-    )
+    ),
+    'status_cancel' => 3
 ];

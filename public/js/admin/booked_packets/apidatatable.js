@@ -29,7 +29,6 @@ var TableDatatablesAjax = function () {
                 lengthMenu: [[25, 50, 100], [25, 50, 100]],
                 pageLength: 25,
                 "columns": [
-                    { "data": "id","bSortable": false },
                     { "data": "status","bSortable": true },
                     { "data": "order_id","bSortable": true },
                     { "data": "shipment_type_id","bSortable": true },
@@ -46,13 +45,13 @@ var TableDatatablesAjax = function () {
                 ],
                 ajax: {
                     // url: "../demo/table_ajax.php",
-                    url: route('admin.booked_packets.datatable'),
+                    url: route('admin.booked_packets.apidatatable'),
                     'beforeSend': function (request) {
                         request.setRequestHeader("X-CSRF-TOKEN", $('meta[name="csrf-token"]').attr('content'));
                     }
                 },
                 ordering: !0,
-                order: [[11, "desc"]]
+                order: [[10, "desc"]]
             }
         }), a.getTableWrapper().on("click", ".table-group-action-submit", function (e) {
             e.preventDefault();

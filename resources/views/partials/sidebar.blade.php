@@ -224,9 +224,16 @@
                             </li>
                         @endif
                         @if(Gate::allows('booked_packets_manage'))
-                            <li class="nav-item start {{ $request->segment(2) == 'booked_packets' ? 'active active-sub' : '' }}">
+                            <li class="nav-item start {{ ($request->segment(2) == 'booked_packets' && $request->segment(3) != 'api') ? 'active active-sub' : '' }}">
                                 <a href="{{ route('admin.booked_packets.index') }}">
                                     <span class="title">@lang('global.booked_packets.title')</span>
+                                </a>
+                            </li>
+                        @endif
+                        @if(Gate::allows('booked_packets_manage'))
+                            <li class="nav-item start {{ ($request->segment(2) == 'booked_packets' && $request->segment(3) == 'api') ? 'active active-sub' : '' }}">
+                                <a href="{{ route('admin.booked_packets.api') }}">
+                                    <span class="title">@lang('global.booked_packets.api_title')</span>
                                 </a>
                             </li>
                         @endif

@@ -374,7 +374,8 @@ class UsersController extends Controller
         $roles = Role::where('id', '!=', '1')->get()->pluck('name', 'id');
         $roles_commissions = Role::all();
 
-        $user = User::getData($id);
+//        $user = User::getData($id);
+        $user = User::find($id);
 
         return view('admin.users.edit', compact('user', 'roles'));
     }

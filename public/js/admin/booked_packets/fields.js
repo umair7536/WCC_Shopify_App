@@ -1,6 +1,6 @@
-var FormValidation = function () {
+var BookedPacketValidation = function () {
     var e = function () {
-        var e = $("#form-validation"), r = $(".alert-danger", e), i = $(".alert-success", e);
+        var e = $("#booked-packet-validation"), r = $(".alert-danger", e), i = $(".alert-success", e);
         e.validate({
             errorElement: "span",
             errorClass: "help-block help-block-error",
@@ -38,7 +38,11 @@ var FormValidation = function () {
                     if (response.status == '1') {
                         r.hide();
                         i.html(response.message);
-                        window.location = route('admin.booked_packets.index');
+                        if(response.test_mode == '1') {
+                            window.location = route('admin.booked_packets.api');
+                        } else {
+                            window.location = route('admin.booked_packets.index');
+                        }
                     } else {
                         $("input[type=submit]", e).removeAttr('disabled');
                         i.hide();
@@ -51,10 +55,10 @@ var FormValidation = function () {
         });
         $('.form-control.inpt-focus').focus();
 
-        $('.date-picker').datepicker({
-            autoclose: true,
-            format: "yyyy-mm-dd"
-        });
+        // $('.date-picker').datepicker({
+        //     autoclose: true,
+        //     format: "yyyy-mm-dd"
+        // });
     }
 
     var x = function (action, method, data, callback) {
@@ -68,10 +72,7 @@ var FormValidation = function () {
             cache: false,
             success: function (response) {
                 if (response.status == '1') {
-                    callback({
-                        'status': response.status,
-                        'message': response.message,
-                    });
+                    callback(response);
                 } else {
                     callback({
                         'status': response.status,
@@ -94,14 +95,62 @@ var FormValidation = function () {
             }
         });
     }
+    
+    var calculateVol = function () {
+        if (
+            $('#vol_weight_w').val() != '' && $('#vol_weight_w').val() != 0 &&
+            $('#vol_weight_h').val() != '' && $('#vol_weight_h').val() != 0 &&
+            $('#vol_weight_l').val() != '' && $('#vol_weight_l').val() != 0
+        )
+        {
+            var volume = (
+                parseInt($('#vol_weight_w').val()) *
+                parseInt($('#vol_weight_h').val()) *
+                parseInt($('#vol_weight_l').val())
+            ) / 5000;
+            $('#volumetric_dimensions_calculated').val(volume + ' (grams)');
+        } else {
+            console.log('N?A is added');
+            $('#volumetric_dimensions_calculated').val('N/A');
+        }
+    }
+
+    var changeShipper = function (shipper_value) {
+        if(shipper_value == 'self') {
+            $('#shipper_name').val($('#company_name_eng').val());
+            $('#shipper_address').html($('#company_address1_eng').val());
+            $('#shipper_phone').val($('#company_phone').val());
+            $('#shipper_email').val($('#company_email').val());
+            $('#origin_city').val($('#company_origin_city').val());
+            $('#origin_city').trigger('change');
+        } else if(shipper_value == 'other') {
+            $('#shipper_name').val('');
+            $('#shipper_address').html('');
+            $('#shipper_phone').val('');
+            $('#shipper_email').val('');
+            $('#origin_city').val('');
+            $('#origin_city').trigger('change');
+        } else {
+            $('#shipper_name').val('');
+            $('#shipper_address').html('');
+            $('#shipper_phone').val('');
+            $('#shipper_email').val('');
+            $('#origin_city').val('');
+            $('#origin_city').trigger('change');
+        }
+    }
 
     return {
         init: function () {
-            e()
-        }
+            e(), calculateVol(), changeShipper($('#shipper_id').val());
+        },
+        calculateVol: calculateVol,
+        changeShipper: changeShipper,
     }
 }();
 jQuery(document).ready(function () {
-    FormValidation.init();
-    $('.select2').select2({ width: '100%' });
+    BookedPacketValidation.init();
+    // $('.select2').select2({ width: '100%' });
+    $('#origin_city').select2({ width: '100%' });
+    $('#destination_city').select2({ width: '100%' });
 });

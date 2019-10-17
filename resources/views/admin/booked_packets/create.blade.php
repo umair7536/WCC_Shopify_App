@@ -40,7 +40,7 @@
         </div>
         <div class="portlet-body form">
             <div class="form-group">
-                {!! Form::open(['method' => 'POST', 'id' => 'form-validation', 'route' => ['admin.booked_packets.store']]) !!}
+                {!! Form::open(['method' => 'POST', 'id' => 'booked-packet-validation', 'route' => ['admin.booked_packets.store']]) !!}
                     <div class="form-body">
                         <!-- Starts Form Validation Messages -->
                         @include('partials.messages')
@@ -52,6 +52,7 @@
                         {!! Form::submit(trans('global.app_save'), ['class' => 'btn btn-success']) !!}
                     </div>
                 {!! Form::close() !!}
+                @include('admin.booked_packets.company_fields')
             </div>
         </div>
     </div>
