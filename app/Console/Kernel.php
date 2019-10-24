@@ -17,13 +17,13 @@ class Kernel extends ConsoleKernel
         /*
          * Shopify Commands
          */
-        '\App\Console\Commands\Shopify\SyncProducts',
+//        '\App\Console\Commands\Shopify\SyncProducts',
         '\App\Console\Commands\Shopify\SyncCustomers',
-        '\App\Console\Commands\Shopify\SyncProductsWeekly',
-        '\App\Console\Commands\Shopify\UploadVariants',
+//        '\App\Console\Commands\Shopify\SyncProductsWeekly',
+//        '\App\Console\Commands\Shopify\UploadVariants',
         '\App\Console\Commands\Shopify\HandleHeavyLifting',
-        '\App\Console\Commands\Shopify\SyncCustomCollections',
-        '\App\Console\Commands\Shopify\SyncCollects',
+//        '\App\Console\Commands\Shopify\SyncCustomCollections',
+//        '\App\Console\Commands\Shopify\SyncCollects',
         '\App\Console\Commands\Shopify\SyncOrders',
     ];
 
@@ -45,9 +45,9 @@ class Kernel extends ConsoleKernel
         /*
          * Sync Products from Shopify
          */
-        $schedule->command('shopify:sync-products')
-            ->withoutOverlapping()
-            ->everyMinute();
+//        $schedule->command('shopify:sync-products')
+//            ->withoutOverlapping()
+//            ->everyMinute();
 
         /*
          * Sync Customers from Shopify
@@ -59,16 +59,16 @@ class Kernel extends ConsoleKernel
         /*
          * Sync Customers from Shopify
          */
-        $schedule->command('shopify:sync-custom-collections')
-            ->withoutOverlapping()
-            ->everyMinute();
+//        $schedule->command('shopify:sync-custom-collections')
+//            ->withoutOverlapping()
+//            ->everyMinute();
 
         /*
          * Sync Customers from Shopify
          */
-        $schedule->command('shopify:sync-collects')
-            ->withoutOverlapping()
-            ->everyMinute();
+//        $schedule->command('shopify:sync-collects')
+//            ->withoutOverlapping()
+//            ->everyMinute();
 
         /*
          * Sync Customers from Shopify

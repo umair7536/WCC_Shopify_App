@@ -150,6 +150,15 @@ class ShopifyOrders extends BaseModal
     {
         $where = array();
 
+        $orderBy = 'name';
+        $order = 'desc';
+
+        if ($request->get('order')[0]['dir']) {
+            $orderColumn = $request->get('order')[0]['column'];
+            $orderBy = $request->get('columns')[$orderColumn]['data'];
+            $order = $request->get('order')[0]['dir'];
+        }
+
         if($account_id) {
             $where[] = array(
                 'shopify_orders.account_id',
@@ -197,6 +206,7 @@ class ShopifyOrders extends BaseModal
             return self::join('shopify_customers','shopify_customers.customer_id', '=', 'shopify_orders.customer_id')
                 ->where($where)
                 ->limit($iDisplayLength)->offset($iDisplayStart)
+                ->orderBy($orderBy,$order)
                 ->select(
                     'shopify_customers.name as customer_name',
                     'shopify_customers.email as customer_email',
@@ -205,7 +215,10 @@ class ShopifyOrders extends BaseModal
                 )
                 ->get();
         } else {
-            return self::limit($iDisplayLength)->offset($iDisplayStart)->get();
+            return self::limit($iDisplayLength)
+                ->offset($iDisplayStart)
+                ->orderBy($orderBy,$order)
+                ->get();
         }
     }
 

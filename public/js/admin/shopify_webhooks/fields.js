@@ -52,6 +52,15 @@ var FormValidation = function () {
         
     }
 
+    var j = function (value) {
+        if(value != '' && typeof value != 'undefined') {
+            let topics = value.split('/');
+            $('#address').val($('#prepare_url').val() + topics[0]);
+        } else {
+            $('#address').val($('#prepare_url').val());
+        }
+    }
+
     var x = function (action, method, data, callback) {
         $.ajax({
             headers: {
@@ -92,8 +101,9 @@ var FormValidation = function () {
 
     return {
         init: function () {
-            e()
-        }
+            e(), j();
+        },
+        j: j,
     }
 }();
 jQuery(document).ready(function () {

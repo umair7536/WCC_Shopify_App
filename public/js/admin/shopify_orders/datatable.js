@@ -43,8 +43,8 @@ var TableDatatablesAjax = function () {
                         request.setRequestHeader("X-CSRF-TOKEN", $('meta[name="csrf-token"]').attr('content'));
                     }
                 },
-                ordering: !1,
-                order: [[1, "asc"]]
+                ordering: !0,
+                order: [[1, "desc"]]
             }
         }), a.getTableWrapper().on("click", ".table-group-action-submit", function (e) {
             e.preventDefault();

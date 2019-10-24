@@ -238,6 +238,7 @@ class ShopifyWebhooks extends BaseModal
             }
 
         } catch(\Exception $exception) {
+            echo $exception->getMessage(); exit;
             return null;
         }
     }
@@ -435,12 +436,12 @@ class ShopifyWebhooks extends BaseModal
                         $single_data
                     );
                 }
-
-                return true;
             }
         } catch (\Exception $exception) {
+
+            return false;
         }
 
-        return false;
+        return true;
     }
 }

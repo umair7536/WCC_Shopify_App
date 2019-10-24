@@ -27,6 +27,14 @@ Route::get('shopify-login', 'Admin\ShopifyController@login')->name('shopify.logi
 Route::get('verify', 'Admin\ShopifyController@verifyShopify')->name('shopify.verify');
 
 
+// Shopify Webhooks Area
+Route::post('webhooks/orders', 'Admin\WebhooksController@orders')->name('webhooks.orders');
+
+// GDPR related Webhooks
+Route::post('customers/data_request', 'Admin\WebhooksController@customersDataRequest')->name('webhooks.customers_data_request');
+Route::post('customers/redact', 'Admin\WebhooksController@customersRedact')->name('webhooks.customers_redact');
+Route::post('shop/redact', 'Admin\WebhooksController@shopRedact')->name('webhooks.customers_redact');
+
 // Change Password Routes...
 $this->get('change_password', 'Auth\ChangePasswordController@showChangePasswordForm')->name('auth.change_password');
 $this->patch('change_password', 'Auth\ChangePasswordController@changePassword')->name('auth.change_password');

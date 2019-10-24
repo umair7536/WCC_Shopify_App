@@ -192,8 +192,8 @@ class BookedPackets extends BaseModal
     {
         $where = array();
 
-        $orderBy = 'id';
-        $order = 'booking_date';
+        $orderBy = 'booking_date';
+        $order = 'desc';
 
         if ($request->get('order')[0]['dir']) {
             $orderColumn = $request->get('order')[0]['column'];
@@ -363,6 +363,49 @@ class BookedPackets extends BaseModal
         // Set Account ID
         $data['account_id'] = $account_id;
         $data = self::prepareRecord($data);
+
+//        echo '<pre>';
+//        print_r($data);
+//        exit;
+
+        /**
+         * If Consigneee is 'other' then create this consignee into system
+         */
+        if($data['consignee_id'] == 'other') {
+
+            $destination_city = LeopardsCities::where([
+                'city_id' => $data['destination_city']
+            ])->first();
+
+            if(!$destination_city) {
+                return [
+                    'status' => false,
+                    'record_id' => 0,
+                    'error_msg' => 'Unable to find destination city'
+                ];
+            }
+
+            $consignee = new Request();
+            $consignee->replace([
+                'name' => $data['consignee_name'],
+                'email' => $data['consignee_email'],
+                'phone' => $data['consignee_phone'],
+                'phone_2' => $data['consignee_phone_2'],
+                'phone_3' => $data['consignee_phone_3'],
+                'address' => $data['consignee_address'],
+                'city_id' => $destination_city->id,
+            ]);
+
+            if($consignee_created = Consignees::createRecord($consignee, $data['account_id'])) {
+                $data['consignee_id'] = $consignee_created->id;
+            } else {
+                return [
+                    'status' => false,
+                    'record_id' => 0,
+                    'error_msg' => 'Unable to create consignee'
+                ];
+            }
+        }
 
         /**
          * Handle Packet as Production or Test

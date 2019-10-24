@@ -189,8 +189,6 @@ class ShopifyWebhooksController extends Controller
             return abort(401);
         }
 
-        $shopify_webhook = ShopifyWebhooks::syncData(Auth::User()->account_id);
-
         if (ShopifyWebhooks::syncData(Auth::User()->account_id)) {
             flash('Records has been synced successfully.')->success()->important();
         } else {

@@ -20,8 +20,8 @@ class CreateConsigneesTable extends Migration
             $table->string('name');
             $table->string('email', 255);
             $table->string('phone', 255);
-            $table->string('phone_2', 255);
-            $table->string('phone_3', 255);
+            $table->string('phone_2', 255)->nullable();
+            $table->string('phone_3', 255)->nullable();
             $table->text('address');
             $table->unsignedTinyInteger('active')->default(1);
             $table->unsignedInteger('account_id')->nullable();

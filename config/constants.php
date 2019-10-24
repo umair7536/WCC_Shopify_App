@@ -34,9 +34,15 @@ return [
     ),
 
     'webhooks' => array(
-        'products/create' => 'Product Creation',
-        'products/delete' => 'Product Deletion',
-        'products/update' => 'Product Update',
+//        'products/create' => 'Product Creation',
+//        'products/delete' => 'Product Deletion',
+//        'products/update' => 'Product Update',
+        'orders/cancelled' => 'Order Cancellation',
+        'orders/create' => 'Order Creation',
+        'orders/delete' => 'Order Deletion',
+        'orders/fulfilled' => 'Order Fulfillment',
+        'orders/paid' => 'Order Payment',
+        'orders/updated' => 'Order Update',
     ),
 
     'shopify_payment_status' => array(
