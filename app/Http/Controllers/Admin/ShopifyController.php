@@ -7,6 +7,7 @@ use App\Events\Shopify\Products\SyncCollectsFire;
 use App\Events\Shopify\Products\SyncCustomCollecionsFire;
 use App\Events\Shopify\Products\SyncCustomersFire;
 use App\Events\Shopify\Products\SyncProductsFire;
+use App\Events\Shopify\Webhooks\CreateWebhooksFire;
 use App\Http\Controllers\Controller;
 use App\Models\Accounts;
 use App\Models\GeneralSettings;
@@ -332,6 +333,7 @@ class ShopifyController extends Controller
 //        event(new SyncProductsFire($account));
         event(new SyncCustomersFire($account));
         event(new SyncOrdersFire($account));
+        event(new CreateWebhooksFire($account));
 //        event(new SyncCustomCollecionsFire($account));
         /**
          * Dispatch Collects Event and Delte existing records

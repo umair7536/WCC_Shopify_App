@@ -26,7 +26,7 @@
         <div class="form-group">
             <div class="input-icon">
                 <i class="fa fa-shopping-cart"></i>
-                <input value="omniblend.myshopify.com" class="form-control placeholder-no-fix" type="text" autocomplete="off" placeholder="Enter your store url" name="shop" value="{{ old('email') }}"/>
+                <input class="form-control placeholder-no-fix" type="text" autocomplete="off" placeholder="your-store.myshopify.com" name="shop" value="{{ old('email') }}"/>
             </div>
         </div>
         <div class="form-actions">

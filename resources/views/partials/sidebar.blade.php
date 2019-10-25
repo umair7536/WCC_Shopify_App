@@ -260,7 +260,7 @@
             ) active open @endif">
                     <a href="javascript:;" class="nav-link nav-toggle">
                         <i class="icon-settings"></i>
-                        <span class="title">Admin Settings</span>
+                        <span class="title">Shopify Settings</span>
                         <span class="arrow"></span>
                     </a>
                     <ul class="sub-menu">

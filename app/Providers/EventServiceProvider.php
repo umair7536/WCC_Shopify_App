@@ -37,6 +37,9 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\Shopify\Orders\SingleOrderFire' => [
             'App\Listeners\Shopify\Orders\SingleOrderListener',
         ],
+        'App\Events\Shopify\Webhooks\CreateWebhooksFire' => [
+            'App\Listeners\Shopify\Webhooks\CreateWebhooksListener',
+        ],
     ];
 
     /**

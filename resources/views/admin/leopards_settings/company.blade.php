@@ -31,7 +31,7 @@
                 <span class="caption-subject font-dark sbold uppercase">@lang('global.app_list')</span>
             </div>
             <div class="actions">
-                @if(Gate::allows('general_settings_edit'))
+                @if(Gate::allows('leopards_settings_edit'))
                     <a class="btn btn-success" href="{{ route('admin.leopards_settings.create') }}"
                        data-target="#ajax_leopards_settings" data-toggle="modal">@lang('global.app_edit')</a>
                 @endif
@@ -67,6 +67,8 @@
                                     <td>{{ $leopards_setting->name }}</td>
                                     @if($leopards_setting->slug == 'password' && $leopards_setting->data)
                                         <td>{{ '****************' }}</td>
+                                    @elseif($leopards_setting->slug == 'api-password' && $leopards_setting->data)
+                                            <td>{{ '****************' }}</td>
                                     @else
                                         <td>{{ ($leopards_setting->slug == 'mode') ? ($leopards_setting->data ? 'Test Mode' : 'Production') : $leopards_setting->data }}</td>
                                     @endif

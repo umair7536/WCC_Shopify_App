@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Events\Shopify\Orders;
+namespace App\Events\Shopify\Webhooks;
 
+use App\Models\Accounts;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -10,31 +11,24 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
-class SingleOrderFire
+class CreateWebhooksFire
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
-     * Holds Order data
+     * Holds App\Models\Accounts $account object
      *
      */
-    public $order;
-
-    /**
-     * Holds Shop data
-     *
-     */
-    public $shop;
+    public $account;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(array $order, array $shop)
+    public function __construct(Accounts $account)
     {
-        $this->order = $order;
-        $this->shop = $shop;
+        $this->account = $account;
     }
 
     /**

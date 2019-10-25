@@ -107,7 +107,7 @@ class ShopifyBillingsController extends Controller
 
             $recurringApplicationCharge = ShopifyBillings::where(array(
                 'account_id' => Auth::User()->account_id,
-                'status' => 'accepted',
+                'status' => 'active',
             ))->latest('id')->first();
 
             $shopifyClient = new ShopifyClient([
@@ -119,9 +119,42 @@ class ShopifyBillingsController extends Controller
             ]);
 
             try {
-//                $deletedRecurringApplicationCharge = $shopifyClient->deleteRecurringApplicationCharge(array(
-//                    'id' => (int) $recurringApplicationCharge->charge_id
-//                ));
+
+                /**
+                 * Any charge is present there in system before?
+                 * If yes, then let the system change the package
+                 */
+                if($recurringApplicationCharge) {
+                    $recurringApplicationCharge = $shopifyClient->getRecurringApplicationCharge(array(
+                        'id' => (int) $recurringApplicationCharge->charge_id
+                    ));
+
+                    if(isset($recurringApplicationCharge['id']) && $recurringApplicationCharge['id']) {
+                        // Delete Old recurring plan if exists
+                        $shopifyClient->deleteRecurringApplicationCharge(array(
+                            'id' => (int) $recurringApplicationCharge['id']
+                        ));
+
+                        ShopifyBillings::where(array(
+                            'account_id' => Auth::User()->account_id,
+                            'charge_id' => $recurringApplicationCharge['id'],
+                        ))->update(['status' => 'cancelled']);
+
+//                        if($recurringApplicationCharge['test'] || $recurringApplicationCharge['test'] == 'true') {
+//                            // Do nothing as this is test charge
+//                        } else {
+//                            if($recurringApplicationCharge['status'] == 'accepted') {
+//                                // Do nothing as this is accepted but not active yet
+//                            } else {
+//                                // Delete Old recurring plan if exists
+//                                $shopifyClient->deleteRecurringApplicationCharge(array(
+//                                    'id' => (int) $recurringApplicationCharge->charge_id
+//                                ));
+//                            }
+//                        }
+                    }
+                }
+
                 ShopifyShops::where(array(
                     'account_id' => Auth::User()->account_id,
                     'id' => $shop['id'],
@@ -201,8 +234,6 @@ class ShopifyBillingsController extends Controller
             return redirect()->route('admin.shopify_billings.index');
         }
 
-//        dd($request->all());
-
         $shop = ShopifyShops::where([
             'account_id' => Auth::User()->account_id
         ])->first();
@@ -234,7 +265,7 @@ class ShopifyBillingsController extends Controller
                     $recurringCharge = ShopifyBillings::where(array(
                         'account_id' => Auth::User()->account_id,
                         'charge_id' => $recurringApplicationCharge['id'],
-                    ))->first();
+                    ))->latest('id')->first();
 
                     if(!$recurringCharge) {
                         flash('Provided charge does not exists in our system.')->error()->important();
@@ -242,14 +273,27 @@ class ShopifyBillingsController extends Controller
                     }
 
                     /**
+                     * Approve this charge into shopify apps
+                     */
+
+                    $activateApplicationCharge = $shopifyClient->activateRecurringApplicationCharge(array(
+                        'id' => (int) $recurringApplicationCharge['id']
+                    ));
+
+                    /**
                      * Update Billing record
                      */
+                    $activateApplicationCharge['charge_id'] = $activateApplicationCharge['id'];
+                    unset($activateApplicationCharge['id']);
+                    // Set Account ID
+                    $activateApplicationCharge['account_id'] = Auth::User()->account_id;
+                    // Set Plan ID
+                    $activateApplicationCharge['plan_id'] = $recurringCharge->plan_id;
+
                     ShopifyBillings::where(array(
                         'account_id' => Auth::User()->account_id,
                         'charge_id' => $recurringApplicationCharge['id'],
-                    ))->update(array(
-                        'status' => $recurringApplicationCharge['status']
-                    ));
+                    ))->update($activateApplicationCharge);
 
                     /**
                      * Change Store Plan ID
