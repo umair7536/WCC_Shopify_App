@@ -281,7 +281,7 @@ class SyncProducts extends Command
                             $options[$option['option_id']] = $option_processed;
                         }
 
-                        if(count($images)) {
+                        if(count($options)) {
                             ShopifyProductOptions::insert($options);
                         }
 
@@ -340,7 +340,7 @@ class SyncProducts extends Command
                             $variants[$variant['variant_id']] = $variant_processed;
                         }
 
-                        if(count($images)) {
+                        if(count($variants)) {
                             ShopifyProductVariants::insert($variants);
                         }
 
