@@ -22,6 +22,7 @@ Route::get('check-session', 'Auth\LoginController@checkSession')->name('check_se
 Route::get('shop', 'Admin\ShopifyController@index')->name('shopify.shop');
 
 Route::post('install', 'Admin\ShopifyController@install')->name('shopify.install');
+Route::get('install', 'Admin\ShopifyController@install')->name('shopify.install');
 Route::get('redirect', 'Admin\ShopifyController@redirect')->name('shopify.redirect');
 Route::get('shopify-login', 'Admin\ShopifyController@login')->name('shopify.login');
 Route::get('verify', 'Admin\ShopifyController@verifyShopify')->name('shopify.verify');
