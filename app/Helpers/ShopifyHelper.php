@@ -32,7 +32,7 @@ class ShopifyHelper
         unset($order['id']);
         $order_processed = ShopifyOrders::prepareRecord($order);
         $order_processed['account_id'] = $shop['account_id'];
-        if(count($order['customer'])) {
+        if(isset($order['customer']) && count($order['customer'])) {
             $order_processed['customer_id'] = $order['customer']['id'];
         }
 
@@ -54,7 +54,7 @@ class ShopifyHelper
         /**
          * Sync Order Customer
          */
-        if(count($order['customer'])) {
+        if(isset($order['customer']) && count($order['customer'])) {
 
             $customer = $order['customer'];
 
