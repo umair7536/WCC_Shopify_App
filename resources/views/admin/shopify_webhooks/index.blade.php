@@ -40,6 +40,14 @@
                         'route' => ['admin.shopify_webhooks.sync'])) !!}
                     {!! Form::submit('Sync Webhooks', array('class' => 'btn btn-sm btn-success')) !!}
                     {!! Form::close() !!}
+
+                    {!! Form::open(array(
+                        'style' => 'display: inline-block;',
+                        'method' => 'POST',
+                        'onsubmit' => "return confirm('".trans("global.app_are_you_sure")."');",
+                        'route' => ['admin.shopify_webhooks.refresh'])) !!}
+                    {!! Form::submit('Refresh Webhooks', array('class' => 'btn btn-sm btn-success')) !!}
+                    {!! Form::close() !!}
                 @endif
                 @if(Gate::allows('shopify_webhooks_sort'))
                     <a href="{{ route('admin.shopify_webhooks.sort') }}"

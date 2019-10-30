@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\Shopify\Webhooks\CreateWebhooksFire;
+use App\Models\Accounts;
 use App\Models\ShopifyWebhooks;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -194,6 +196,28 @@ class ShopifyWebhooksController extends Controller
         } else {
             flash('Something went wrong, please try again later.')->success()->important();
         }
+        return redirect()->route('admin.shopify_webhooks.index');
+    }
+
+    /**
+     * Sync data from
+     *
+     * @param  \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function refresh(Request $request)
+    {
+        if (!Gate::allows('shopify_webhooks_create')) {
+            return abort(401);
+        }
+
+        /**
+         * Dispatch Events
+         */
+        $account = Accounts::find(Auth::User()->account_id);
+        event(new CreateWebhooksFire($account));
+
+        flash('Refresh Webhooks event is fired successfully.')->success()->important();
         return redirect()->route('admin.shopify_webhooks.index');
     }
 

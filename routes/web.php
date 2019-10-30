@@ -96,6 +96,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     // ShopifyWebhooks Routes start
     Route::post('shopify_webhooks/datatable', ['uses' => 'Admin\ShopifyWebhooksController@datatable', 'as' => 'shopify_webhooks.datatable']);
     Route::post('shopify_webhooks/sync', ['uses' => 'Admin\ShopifyWebhooksController@sync', 'as' => 'shopify_webhooks.sync']);
+    Route::post('shopify_webhooks/refresh', ['uses' => 'Admin\ShopifyWebhooksController@refresh', 'as' => 'shopify_webhooks.refresh']);
     Route::resource('shopify_webhooks', 'Admin\ShopifyWebhooksController');
     // ShopifyWebhooks Routes end
 
