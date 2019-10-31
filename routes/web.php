@@ -126,6 +126,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
 
     // Tickets Routes start
     Route::get('tickets/showticketstatus', ['uses' => 'Admin\TicketsController@showTicketStatuses', 'as' => 'tickets.showticketstatus']);
+    Route::get('tickets/showserialnumberhistory', ['uses' => 'Admin\TicketsController@showSerialNumberHistory', 'as' => 'tickets.showserialnumberhistory']);
     Route::put('tickets/storeticketstatus', ['uses' => 'Admin\TicketsController@storeTicketStatuses', 'as' => 'tickets.storeticketstatus']);
     Route::get('tickets/get-customer', ['uses' => 'Admin\TicketsController@getCustomer', 'as' => 'tickets.get_customer']);
     Route::get('tickets/get-product', ['uses' => 'Admin\TicketsController@getProduct', 'as' => 'tickets.get_product']);

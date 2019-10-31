@@ -110,7 +110,8 @@ class TicketsController extends Controller
                     'number' => '<a href="' .  route('admin.tickets.edit',[$ticket->id]) . '">' . $ticket->number . '</a>',
                     'customer_name' => $ticket->first_name . ' ' . $ticket->last_name . '<br/>' . $ticket->email . (($ticket->phone) ? '<br/>' . $ticket->phone : ''),
                     'total_products' => $ticket->total_products,
-                    'serial_number' => isset($ticket_products_mapping[$ticket->id]) ? implode('<br/>', $ticket_products_mapping[$ticket->id]) : '',
+//                    'serial_number' => isset($ticket_products_mapping[$ticket->id]) ? implode('<br/>', $ticket_products_mapping[$ticket->id]) : '',
+                    'serial_number' => view('admin.tickets.serial_numbers.actions', compact('ticket', 'ticket_products_mapping'))->render(),
                     'ticket_status_id' => view('admin.tickets.ticket_status', compact('ticket'))->render(),
                     'status_id' => $ticket->ticket_status_id,
                     'created_at' => Carbon::parse($ticket->created_at)->format('F j,Y h:i A'),
@@ -342,7 +343,10 @@ class TicketsController extends Controller
             return abort(401);
         }
 
-        $ticket = Tickets::findOrFail($id);
+        $ticket = Tickets::where([
+            'id' => $id,
+            'account_id' => Auth::User()->account_id
+        ])->first();
 
         if (!$ticket) {
             return view('error', compact('lead_statuse'));
@@ -734,6 +738,66 @@ class TicketsController extends Controller
         $ticket_status = TicketStatuses::where('id', '=', $ticket->ticket_status_id)->first();
 
         return view('admin.tickets.ticket_status_popup', compact('ticket', 'ticket_statuses', 'ticket_status'));
+    }
+
+
+    /**
+     * Load Serial Number History.
+     *
+     * @param mixed Request $request
+     * @return mixed
+     */
+    public function showSerialNumberHistory(Request $request)
+    {
+        if (!Gate::allows('tickets_manage')) {
+            return abort(401);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'id' => 'sometimes|nullable',
+            'serial_number' => 'required|numeric',
+        ]);
+
+        if ($validator->fails()) {
+            return view('error');
+        }
+
+        $ticket = Tickets::where([
+            'id' => $request->get('id'),
+            'account_id' => Auth::User()->account_id
+        ])->first();
+
+        if (!$ticket) {
+            return view('error');
+        }
+
+        /**
+         * Fetch Ticket History
+         */
+        $tickets = Tickets::join('ticket_products','ticket_products.ticket_id', '=', 'tickets.id')
+            ->where('tickets.id', '!=', $ticket->id)
+            ->where('tickets.account_id', '=', Auth::User()->account_id)
+            ->where('ticket_products.serial_number', '=', $request->get('serial_number'))
+            ->select('tickets.id', 'tickets.number', 'tickets.technician_remarks', 'tickets.created_at')
+            ->get();
+
+        $ticket_ids = array();
+
+        if($tickets->count()) {
+            foreach($tickets as $loop_ticket) {
+                $ticket_ids[$ticket->id] = $loop_ticket->id;
+            }
+
+
+        }
+
+        dd($ticket_ids);
+
+        dd($tickets->toArray());
+
+
+
+        return view('admin.tickets.ticket_status_popup', compact('ticket', 'tickets', 'ticket_status'));
     }
 
     /**
