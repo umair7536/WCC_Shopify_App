@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\ShopifyHelper;
 use App\Models\ShopifyBillings;
 use App\Models\ShopifyPlans;
 use App\Models\ShopifyShops;
 use App\Models\Tickets;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
@@ -108,7 +110,8 @@ class ShopifyBillingsController extends Controller
             $recurringApplicationCharge = ShopifyBillings::where(array(
                 'account_id' => Auth::User()->account_id,
                 'status' => 'active',
-            ))->latest('id')->first();
+            ))->where('price', '!=', 0.00)
+                ->latest('id')->first();
 
             $shopifyClient = new ShopifyClient([
                 'private_app' => false,
@@ -155,12 +158,20 @@ class ShopifyBillingsController extends Controller
                     }
                 }
 
-                ShopifyShops::where(array(
-                    'account_id' => Auth::User()->account_id,
-                    'id' => $shop['id'],
-                ))->update(array(
-                    'plan_id' => $plan['id']
-                ));
+                /**
+                 * Grab Free Plan and assign this to User
+                 */
+                $plan_data = ShopifyHelper::getFreePlan(Auth::User()->account_id);
+                if($plan_data['status']) {
+                    ShopifyShops::where(array(
+                        'account_id' => Auth::User()->account_id,
+                        'id' => $shop['id'],
+                    ))->update(array(
+                        'plan_id' => $plan_data['plan_id'],
+                        'activated_on' => $plan_data['activated_on'],
+                        'shopify_billing_id' => $plan_data['shopify_billing_id']
+                    ));
+                }
 
                 flash('Your plan has been changed successfully.')->success()->important();
                 return redirect()->route('admin.shopify_billings.index');
@@ -302,7 +313,9 @@ class ShopifyBillingsController extends Controller
                         'account_id' => Auth::User()->account_id,
                         'id' => $shop['id'],
                     ))->update(array(
-                        'plan_id' => $recurringCharge->plan_id
+                        'plan_id' => $recurringCharge->plan_id,
+                        'activated_on' => Carbon::parse($recurringCharge->activated_on)->format('Y-m-d'),
+                        'shopify_billing_id' => $recurringCharge->id
                     ));
 
                     flash('Your plan has been changed successfully.')->success()->important();

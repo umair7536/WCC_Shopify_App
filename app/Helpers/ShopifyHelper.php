@@ -207,6 +207,7 @@ class ShopifyHelper
                 'test' => env('SHOPIFY_BILLING_TEST_MODE'),
                 'activated_on' => $date,
                 'cancelled_on' => null,
+                'status' => 'active',
                 'trial_days' => 0,
                 'trial_ends_on' => $date,
                 'decoded_return_url' => env('APP_URL'),
