@@ -17,7 +17,7 @@
                 {!! Form::open(['method' => 'PATCH', 'id' => 'form-validation', 'route' => ['auth.change_password']]) !!}
                     <div class="form-body">
                         <div class="alert alert-danger display-hide"><button class="close" data-close="alert"></button> You have some form errors. Please check below. </div>
-                        <div class="alert alert-success display-hide"><button class="close" data-close="alert"></button> Your validation is complete, fomm! </div>
+                        <div class="alert alert-success display-hide"><button class="close" data-close="alert"></button> Your validation is complete, Please waite while we are processing your request! </div>
                         <div class="form-group @if($errors->has('current_password')) has-error @endif">
                             {!! Form::label('current_password', 'Current password*', ['class' => 'control-label']) !!}
                             {!! Form::password('current_password', ['class' => 'form-control', 'placeholder' => '']) !!}

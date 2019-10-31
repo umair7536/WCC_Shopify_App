@@ -14,7 +14,7 @@
                     </div>
                     <div class="alert alert-success display-hide">
                         <button class="close" data-close="alert"></button>
-                        Your validation is complete, fomm!
+                        Your validation is complete, Please waite while we are processing your request!
                     </div>
 
                     {!! Form::hidden('id', encrypt((old('id')) ? old('id') : $user->id)) !!}
