@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\ShopifyHelper;
 use App\Models\BookedPackets;
 use App\Models\LeopardsCities;
 use App\Models\LeopardsSettings;
@@ -305,6 +306,24 @@ class BookedPacketsController extends Controller
     {
         if (! Gate::allows('booked_packets_create')) {
             return abort(401);
+        }
+
+        /**
+         * Check Current Billing Cycle Quota and take action as per response
+         */
+        $checkQuota = ShopifyHelper::getQuota(Auth::User()->account_id);
+
+        if($checkQuota['status']) {
+            if($checkQuota['info']) {
+                flash($checkQuota['info'])->info()->important();
+            }
+        } else {
+            flash($checkQuota['error'])->error()->important();
+            if (Gate::allows('shopify_billings_manage')) {
+                return redirect()->route('admin.shopify_billings.index');
+            } else {
+                return redirect()->route('admin.booked_packets.index');
+            }
         }
 
         /**

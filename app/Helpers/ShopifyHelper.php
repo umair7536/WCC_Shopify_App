@@ -10,11 +10,13 @@
 namespace App\Helpers;
 
 
+use App\Models\BookedPackets;
 use App\Models\ShopifyBillings;
 use App\Models\ShopifyCustomers;
 use App\Models\ShopifyOrderItems;
 use App\Models\ShopifyOrders;
 use App\Models\ShopifyPlans;
+use App\Models\ShopifyShops;
 use Carbon\Carbon;
 
 class ShopifyHelper
@@ -228,6 +230,83 @@ class ShopifyHelper
         } catch (\Exception $exception) {
             return $result;
         }
+    }
+
+
+    /**
+     * Get Free Plan
+     *
+     * @param $account_id
+     * @return array
+     */
+    static public function getQuota($account_id) {
+
+        $result = array(
+            'status' => true,
+            'info' => null,
+            'error' => null,
+        );
+
+        try {
+
+            /**
+             * Fetch Shop Information
+             */
+            $shop = ShopifyShops::where([
+                'account_id' => $account_id
+            ])->first();
+
+            if(!$shop || !$shop->activated_on) {
+                $result['status'] = false;
+                $result['error'] = 'Your shop have issues, please contact with support';
+            }
+
+            /**
+             * Fetch Plan based on Shop
+             */
+            $plan = ShopifyPlans::where([
+                'id' => $shop->plan_id
+            ])->first();
+
+            if(!$plan) {
+                $result['status'] = false;
+                $result['error'] = 'Your billing plan have issues, please contact with support';
+            }
+
+
+            /**
+             * Fetch Booked Packets Quota usage in current billing cycle
+             */
+            $billing_start = date('Y-m') . '-' . explode('-', $shop->activated_on)[2];
+            $billing_end = Carbon::parse($billing_start)->addDays(30)->format('Y-m-d');
+
+            $packets_count = BookedPackets::where([
+                'account_id' => $account_id,
+                'booking_type' => 2 /** 2 for Live and 1 for Test Packets */
+            ])
+                ->whereBetween('created_at', [$billing_start." 00:00:00", $billing_end." 23:59:59"])
+                ->count();
+
+            if($plan->quota <= $packets_count) {
+                $result['status'] = false;
+                $result['error'] = 'Your monthly quota of ' . $plan->quota . ' Orders has been consumed. Please upgrade your currrent plan to next plan';
+            } else {
+                if($plan->quota && $packets_count) {
+                    /**
+                     * Find quota usage percentage for current billing cycle.
+                     */
+                    $percent = ($packets_count / $plan->quota) * 100;
+                    if($percent >= 90) {
+                        $result['info'] = 'Your monthly quota  more than ' . $percent . '% has been used. Upgrade your current plan to continue your services smoothly.';
+                    }
+                }
+            }
+        } catch (\Exception $exception) {
+            $result['status'] = false;
+            $result['error'] = 'Something went wrong, please contact support of this app.';
+        }
+
+        return $result;
     }
 
 }
