@@ -10,9 +10,12 @@
 namespace App\Helpers;
 
 
+use App\Models\ShopifyBillings;
 use App\Models\ShopifyCustomers;
 use App\Models\ShopifyOrderItems;
 use App\Models\ShopifyOrders;
+use App\Models\ShopifyPlans;
+use Carbon\Carbon;
 
 class ShopifyHelper
 {
@@ -156,6 +159,73 @@ class ShopifyHelper
 //                                }
 //                            }
             return true;
+        }
+    }
+
+
+    /**
+     * Get Free Plan
+     *
+     * @param $account_id
+     * @return array
+     */
+    static public function getFreePlan($account_id) {
+
+        $result = array(
+            'status' => false,
+            'plan_id' => null,
+            'activated_on' => null,
+            'shopify_billing_id' => null,
+        );
+
+        try {
+            /**
+             * Grab Free Plan and assign this to User
+             */
+            $plan = ShopifyPlans::where([
+                'slug' => 'free'
+            ])->first();
+            if($plan) {
+                $result['plan_id'] = $plan->id;
+            } else {
+                return $result;
+            }
+
+            $date = Carbon::now()->format('Y-m-d');
+            $created_at = Carbon::now()->toDateTimeString();
+
+            /**
+             * Create Free Plan entry into Shopify Billings
+             */
+            $billing_data = array(
+                'charge_id' => $account_id,
+                'name' => 'Free',
+                'api_client_id' => $account_id,
+                'price' => 0.00,
+                'return_url' => env('APP_URL'),
+                'billing_on' => $date,
+                'test' => env('SHOPIFY_BILLING_TEST_MODE'),
+                'activated_on' => $date,
+                'cancelled_on' => null,
+                'trial_days' => 0,
+                'trial_ends_on' => $date,
+                'decoded_return_url' => env('APP_URL'),
+                'confirmation_url' => env('APP_URL'),
+                'plan_id' => $plan->id,
+                'account_id' => $account_id,
+                'created_at' => $created_at,
+                'updated_at' => $created_at,
+            );
+
+            $billing = ShopifyBillings::create($billing_data, $account_id);
+
+            $result['status'] = true;
+            $result['activated_on'] = $date;
+            $result['shopify_billing_id'] = $billing->id;
+
+            return $result;
+        } catch (\Exception $exception) {
+            return $result;
         }
     }
 

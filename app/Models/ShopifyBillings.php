@@ -13,13 +13,13 @@ class ShopifyBillings extends BaseModal
     use SoftDeletes;
 
     protected $fillable = [
-        'account_id', 'charge_id', 'name', 'api_client_id', 'price', 'status', 'return_url',
+        'account_id', 'charge_id', 'name', 'api_client_id', 'price', 'status', 'return_url', 'plan_id', 'account_id',
         'billing_on', 'test', 'activated_on', 'cancelled_on', 'trial_days', 'trial_ends_on', 'decorated_return_url'.
         'confirmation_url', 'created_at', 'updated_at'
     ];
 
     protected static $_fillable = [
-        'charge_id', 'name', 'api_client_id', 'price', 'status', 'return_url',
+        'charge_id', 'name', 'api_client_id', 'price', 'status', 'return_url', 'plan_id',
         'billing_on', 'test', 'activated_on', 'cancelled_on', 'trial_days', 'trial_ends_on', 'decorated_return_url'.
         'confirmation_url', 'created_at', 'updated_at'
     ];

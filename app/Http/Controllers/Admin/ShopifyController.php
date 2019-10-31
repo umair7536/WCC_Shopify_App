@@ -8,11 +8,13 @@ use App\Events\Shopify\Products\SyncCustomCollecionsFire;
 use App\Events\Shopify\Products\SyncCustomersFire;
 use App\Events\Shopify\Products\SyncProductsFire;
 use App\Events\Shopify\Webhooks\CreateWebhooksFire;
+use App\Helpers\ShopifyHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Accounts;
 use App\Models\GeneralSettings;
 use App\Models\LeopardsSettings;
 use App\Models\ShopifyCollects;
+use App\Models\ShopifyPlans;
 use App\Models\ShopifyShops;
 use App\Models\TicketStatuses;
 use App\User;
@@ -214,7 +216,7 @@ class ShopifyController extends Controller
                             'updated_at' => Carbon::parse(Carbon::now())->toDateTimeString(),
                         ));
 
-                        $shop = ShopifyShops::create(array(
+                        $shop_data = array(
                             'access_token' => session('access_token'),
                             'store_id' => $shopDomain['id'],
                             'domain' => $shopDomain['domain'],
@@ -227,7 +229,19 @@ class ShopifyController extends Controller
                             'timezone' => $shopDomain['timezone'],
                             'iana_timezone' => $shopDomain['iana_timezone'],
                             'account_id' => $account->id,
-                        ));
+                        );
+
+                        /**
+                         * Grab Free Plan and assign this to User
+                         */
+                        $plan_data = ShopifyHelper::getFreePlan($account->id);
+                        if($plan_data['status']) {
+                            $shop_data['plan_id'] = $plan_data['plan_id'];
+                            $shop_data['activated_on'] = $plan_data['activated_on'];
+                            $shop_data['shopify_billing_id'] = $plan_data['shopify_billing_id'];
+                        }
+
+                        $shop = ShopifyShops::create($shop_data);
 
                         $user = User::create(array(
                             'name' => $shopDomain['shop_owner'],
