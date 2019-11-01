@@ -163,6 +163,15 @@ class ShopifyCustomersController extends Controller
             'country' => $request->get('country'),
         );
 
+        /**
+         * Set Optional Fields
+         */
+        if($request->get('company') != '') {
+            $shopifyCustomer['addresses'][0]['company'] = $request->get('company');
+        }
+        if($request->get('address2') != '') {
+            $shopifyCustomer['addresses'][0]['address2'] = $request->get('address2');
+        }
 
         /**
          * Create Customer in Shopify
