@@ -98,9 +98,6 @@ class TicketsController extends Controller
                     $ticket_products_mapping[$ticket_product->ticket_id][] = $ticket_product->serial_number;
                 }
             }
-//            echo '<pre>';
-//            print_r($ticket_products_mapping);
-//            exit;
 
             foreach ($Tickets as $ticket) {
 
@@ -114,7 +111,7 @@ class TicketsController extends Controller
                     'serial_number' => view('admin.tickets.serial_numbers.actions', compact('ticket', 'ticket_products_mapping'))->render(),
                     'ticket_status_id' => view('admin.tickets.ticket_status', compact('ticket'))->render(),
                     'status_id' => $ticket->ticket_status_id,
-                    'created_at' => Carbon::parse($ticket->created_at)->format('F j,Y h:i A'),
+                    'created_at' => Carbon::parse($ticket->created_at)->format('F j, Y h:i A'),
                     'actions' => view('admin.tickets.actions', compact('ticket'))->render(),
                 );
             }
@@ -137,10 +134,6 @@ class TicketsController extends Controller
         if (!Gate::allows('tickets_create')) {
             return abort(401);
         }
-
-//        $products = ShopifyProducts::where([
-//            'account_id' => Auth::User()->account_id
-//        ])->get()->toArray();
 
         $products = array();
 
@@ -762,6 +755,8 @@ class TicketsController extends Controller
             return view('error');
         }
 
+        $serial_number = $request->get('serial_number');
+
         $ticket = Tickets::where([
             'id' => $request->get('id'),
             'account_id' => Auth::User()->account_id
@@ -782,22 +777,29 @@ class TicketsController extends Controller
             ->get();
 
         $ticket_ids = array();
+        $ticket_repairs = null;
 
         if($tickets->count()) {
             foreach($tickets as $loop_ticket) {
                 $ticket_ids[$ticket->id] = $loop_ticket->id;
             }
 
+            $ticket_repairs = TicketRepairs::join('shopify_products','shopify_products.product_id', '=', 'ticket_repairs.product_id')
+                ->where([
+                    'account_id' => Auth::User()->account_id,
+                ])
+                ->whereIn('ticket_id', $ticket_ids)
+                ->select('ticket_repairs.id as repair_id', 'shopify_products.title', 'ticket_repairs.ticket_id', 'ticket_repairs.serial_number', 'ticket_repairs.customer_feedback')
+                ->get()
+                ->keyBy('repair_id');
 
+//            echo '<pre>';
+//            print_r($tickets->toArray());
+//            print_r($ticket_repairs->toArray());
+//            exit;
         }
 
-        dd($ticket_ids);
-
-        dd($tickets->toArray());
-
-
-
-        return view('admin.tickets.ticket_status_popup', compact('ticket', 'tickets', 'ticket_status'));
+        return view('admin.tickets.serial_numbers.popup', compact('ticket', 'serial_number', 'tickets', 'ticket_repairs'));
     }
 
     /**
