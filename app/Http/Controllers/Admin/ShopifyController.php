@@ -117,6 +117,7 @@ class ShopifyController extends Controller
 
             return redirect($location);
         } else {
+            return redirect('/login')->withErrors(['No Shopify Store url provided.']);
             return Redirect::back()->withErrors(['No Shopify Store url provided.']);
         }
     }
