@@ -292,43 +292,63 @@ class ShopifyController extends Controller
      */
     public function verifyShopify(ServerRequestInterface $request) {
 
-        try {
-            $validator = new RequestValidator();
-            $validator->validateRequest($request, self::$APP_SHARED_SECRET);
+        $shopRequest = $request->getQueryParams();
 
-            $shopRequest = $request->getQueryParams();
+        if(
+                (isset($shopRequest['shop']) && $shopRequest['shop'])
+            &&  (isset($shopRequest['hmac']) && $shopRequest['hmac'])
+        ) {
 
-            if($shopRequest['shop'] && $shopRequest['hmac']) {
-                $shop = ShopifyShops::where(['myshopify_domain' => $shopRequest['shop']])->first();
-                if($shop) {
-                    $user = User::where(array(
-                        'account_id' => $shop->account_id,
-                        'main_account' => 1,
-                    ))->first();
+            try {
+                $validator = new RequestValidator();
+                $validator->validateRequest($request, self::$APP_SHARED_SECRET);
 
-                    if ($user) {
-                        Auth::login($user);
+                if($shopRequest['shop'] && $shopRequest['hmac']) {
+                    $shop = ShopifyShops::where(['myshopify_domain' => $shopRequest['shop']])->first();
+                    if($shop) {
+                        $user = User::where(array(
+                            'account_id' => $shop->account_id,
+                            'main_account' => 1,
+                        ))->first();
 
-                        /*
-                         * Set Session for this user
-                         */
-                        $account_id=Auth::User()->account_id;
-                        session(['account_id' => $account_id]);
-                        $account= DB::table('accounts')->find($account_id);
-                        session(['account' => $account]);
+                        if ($user) {
+                            Auth::login($user);
 
-                        return Redirect::to(route('auth.login'));
+                            /*
+                             * Set Session for this user
+                             */
+                            $account_id=Auth::User()->account_id;
+                            session(['account_id' => $account_id]);
+                            $account= DB::table('accounts')->find($account_id);
+                            session(['account' => $account]);
+
+                            return Redirect::to(route('auth.login'));
+                        } else {
+                            return Redirect::to(route('auth.register'))->withErrors(['Something went wrong, Please try again.']);
+                        }
                     } else {
-                        return Redirect::to(route('auth.register'))->withErrors(['Something went wrong, Please try again.']);
+                        return Redirect::to(route('auth.register'))->withErrors(['Provided Shop not found.']);
                     }
                 } else {
-                    return Redirect::to(route('auth.register'))->withErrors(['Provided Shop not found.']);
+                    return Redirect::to(route('auth.login'))->withErrors(['Invalid request received, Please try again.']);
                 }
-            } else {
-                return Redirect::to(route('auth.login'))->withErrors(['Invalid request received, Please try again.']);
+            } catch (InvalidRequestException $exception) {
+                return Redirect::to(route('auth.login'))->withErrors([$exception->getMessage()]);
             }
-        } catch (InvalidRequestException $exception) {
-            return Redirect::to(route('auth.login'))->withErrors([$exception->getMessage()]);
+
+        } else {
+            if(isset($shopRequest['shop']) && $shopRequest['shop']) {
+
+                $redirectionUri = env('APP_URL') . '/redirect';
+
+                $response = new AuthorizationRedirectResponse(self::$APP_API_KEY, $shopRequest['shop'], explode(',', self::$APP_SCOPES), $redirectionUri, self::$APP_NONCE);
+                $location = $response->getHeader('location')[0];
+
+                return redirect($location);
+            } else {
+                return redirect('/login')->withErrors(['No Shopify Store url provided.']);
+//                return Redirect::back()->withErrors(['No Shopify Store url provided.']);
+            }
         }
     }
 
