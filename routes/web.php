@@ -1,7 +1,7 @@
 <?php
 
 //Route::get('/', function () { return redirect('/admin/home'); });
-Route::get('/', 'Admin\ShopifyController@verify')->name('shopify.verify_install');
+Route::get('/', 'Admin\ShopifyController@verifyShopify')->name('shopify.verify_install');
 
 //use Route for register:R
 Auth::routes();
