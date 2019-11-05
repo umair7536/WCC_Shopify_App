@@ -66,10 +66,50 @@ var FormValidation = function () {
 
 
         $('.customer_confirmation').hide();
+
+        $('#customer_id').on('select2:select', function (e) {
+            var data = e.params.data;
+            if(data.selected) {
+                $('.customer_information').show();
+
+                App.blockUI({
+                    target: '#customer_information',
+                    boxed: true,
+                    textOnly: true
+                });
+
+                $.ajax({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    url: route('admin.tickets.get_customer_detail'),
+                    type: 'GET',
+                    data: {
+                        customer_id: data.id
+                    },
+                    cache: false,
+                    success: function (response) {
+                        if(response.status == '1') {
+                            var ref = '<a href="' + response.shop_url + '" target="_blank">' + response.customer.full_name + ' <i class="fa fa-external-link"></i></a>';
+                            $('#customer_full_name').html(ref);
+                            $('#customer_email').html(response.customer.email);
+                            $('#customer_phone').html(response.customer.phone);
+                            $('#customer_company').html(response.customer.company);
+                        }
+                        App.unblockUI('#customer_information');
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        App.unblockUI('#customer_information');
+                    }
+                });
+            }
+        });
+
         $('#customer_confirmation').change(function () {
             addUsers();
             if($('#customer_confirmation:checked').length) {
                 $('.customer_confirmation').show();
+                $('.customer_information').hide();
             }  else {
                 $('.customer_confirmation').hide();
             }

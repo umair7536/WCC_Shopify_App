@@ -131,6 +131,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::get('tickets/get-customer', ['uses' => 'Admin\TicketsController@getCustomer', 'as' => 'tickets.get_customer']);
     Route::get('tickets/get-product', ['uses' => 'Admin\TicketsController@getProduct', 'as' => 'tickets.get_product']);
     Route::get('tickets/get-product-detail', ['uses' => 'Admin\TicketsController@getProductDetail', 'as' => 'tickets.get_product_detail']);
+    Route::get('tickets/get-customer-detail', ['uses' => 'Admin\TicketsController@getCustomerDetail', 'as' => 'tickets.get_customer_detail']);
     Route::post('tickets/datatable', ['uses' => 'Admin\TicketsController@datatable', 'as' => 'tickets.datatable']);
     Route::patch('tickets/active/{id}', ['uses' => 'Admin\TicketsController@active', 'as' => 'tickets.active']);
     Route::patch('tickets/inactive/{id}', ['uses' => 'Admin\TicketsController@inactive', 'as' => 'tickets.inactive']);

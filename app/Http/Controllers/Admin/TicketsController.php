@@ -345,6 +345,10 @@ class TicketsController extends Controller
             return view('error', compact('lead_statuse'));
         }
 
+        $shop = ShopifyShops::where([
+            'account_id' => Auth::User()->account_id
+        ])->first();
+
         $shopify_customer = ShopifyCustomers::where([
             'customer_id' => $ticket->customer_id,
             'account_id' => Auth::User()->account_id
@@ -422,7 +426,7 @@ class TicketsController extends Controller
                 ->get()->getDictionary();
         }
 
-        return view('admin.tickets.edit', compact('ticket', 'ticket_products', 'ticket_repairs', 'relationships', 'repair_relationships', 'products', 'ticket_statuses', 'shopify_customer'));
+        return view('admin.tickets.edit', compact('ticket', 'ticket_products', 'ticket_repairs', 'relationships', 'repair_relationships', 'products', 'ticket_statuses', 'shopify_customer', 'shop'));
     }
 
     /**
@@ -1165,6 +1169,52 @@ class TicketsController extends Controller
                     'status' => 1,
                     'product' => $variant->toArray()
                 );
+            }
+        }
+
+        return response()->json($data);
+    }
+
+
+    /**
+     * Get Customer Detail with Variant ID
+     *
+     * @param  \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function getCustomerDetail(Request $request) {
+        $data = array(
+            'status' => 0,
+            'customer' => array(),
+            'shop_url' => array()
+        );
+
+        if($request->get('customer_id') != '') {
+
+            $account_id = Auth::User()->account_id;
+
+            $shop = ShopifyShops::where([
+                'account_id' => $account_id
+            ])->first();
+
+            if($shop) {
+                $customer = ShopifyCustomers::where([
+                    'account_id' => $account_id,
+                    'customer_id' => $request->get('customer_id'),
+                ])->first();
+
+                if($customer) {
+                    $data = array(
+                        'status' => 1,
+                        'customer' => array(
+                            'full_name' => $customer->first_name . (($customer->last_name) ? ' ' . $customer->last_name : ''),
+                            'email' => ($customer->email) ? ' ' . $customer->email : 'N/A',
+                            'phone' => ($customer->phone) ? ' ' . $customer->phone : 'N/A',
+                            'company' => ($customer->company) ? ' ' . $customer->company : 'N/A',
+                        ),
+                        'shop_url' => 'https://' . $shop->myshopify_domain . '/admin/customers/' . $customer->customer_id
+                    );
+                }
             }
         }
 
