@@ -98,9 +98,6 @@ class TicketsController extends Controller
                     $ticket_products_mapping[$ticket_product->ticket_id][] = $ticket_product->serial_number;
                 }
             }
-//            echo '<pre>';
-//            print_r($ticket_products_mapping);
-//            exit;
 
             foreach ($Tickets as $ticket) {
 
@@ -110,10 +107,11 @@ class TicketsController extends Controller
                     'number' => '<a href="' .  route('admin.tickets.edit',[$ticket->id]) . '">' . $ticket->number . '</a>',
                     'customer_name' => $ticket->first_name . ' ' . $ticket->last_name . '<br/>' . $ticket->email . (($ticket->phone) ? '<br/>' . $ticket->phone : ''),
                     'total_products' => $ticket->total_products,
-                    'serial_number' => isset($ticket_products_mapping[$ticket->id]) ? implode('<br/>', $ticket_products_mapping[$ticket->id]) : '',
+//                    'serial_number' => isset($ticket_products_mapping[$ticket->id]) ? implode('<br/>', $ticket_products_mapping[$ticket->id]) : '',
+                    'serial_number' => view('admin.tickets.serial_numbers.actions', compact('ticket', 'ticket_products_mapping'))->render(),
                     'ticket_status_id' => view('admin.tickets.ticket_status', compact('ticket'))->render(),
                     'status_id' => $ticket->ticket_status_id,
-                    'created_at' => Carbon::parse($ticket->created_at)->format('F j,Y h:i A'),
+                    'created_at' => Carbon::parse($ticket->created_at)->format('F j, Y h:i A'),
                     'actions' => view('admin.tickets.actions', compact('ticket'))->render(),
                 );
             }
@@ -136,10 +134,6 @@ class TicketsController extends Controller
         if (!Gate::allows('tickets_create')) {
             return abort(401);
         }
-
-//        $products = ShopifyProducts::where([
-//            'account_id' => Auth::User()->account_id
-//        ])->get()->toArray();
 
         $products = array();
 
@@ -342,11 +336,18 @@ class TicketsController extends Controller
             return abort(401);
         }
 
-        $ticket = Tickets::findOrFail($id);
+        $ticket = Tickets::where([
+            'id' => $id,
+            'account_id' => Auth::User()->account_id
+        ])->first();
 
         if (!$ticket) {
             return view('error', compact('lead_statuse'));
         }
+
+        $shop = ShopifyShops::where([
+            'account_id' => Auth::User()->account_id
+        ])->first();
 
         $shopify_customer = ShopifyCustomers::where([
             'customer_id' => $ticket->customer_id,
@@ -425,7 +426,7 @@ class TicketsController extends Controller
                 ->get()->getDictionary();
         }
 
-        return view('admin.tickets.edit', compact('ticket', 'ticket_products', 'ticket_repairs', 'relationships', 'repair_relationships', 'products', 'ticket_statuses', 'shopify_customer'));
+        return view('admin.tickets.edit', compact('ticket', 'ticket_products', 'ticket_repairs', 'relationships', 'repair_relationships', 'products', 'ticket_statuses', 'shopify_customer', 'shop'));
     }
 
     /**
@@ -734,6 +735,75 @@ class TicketsController extends Controller
         $ticket_status = TicketStatuses::where('id', '=', $ticket->ticket_status_id)->first();
 
         return view('admin.tickets.ticket_status_popup', compact('ticket', 'ticket_statuses', 'ticket_status'));
+    }
+
+
+    /**
+     * Load Serial Number History.
+     *
+     * @param mixed Request $request
+     * @return mixed
+     */
+    public function showSerialNumberHistory(Request $request)
+    {
+        if (!Gate::allows('tickets_manage')) {
+            return abort(401);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'id' => 'sometimes|nullable',
+            'serial_number' => 'required|numeric',
+        ]);
+
+        if ($validator->fails()) {
+            return view('error');
+        }
+
+        $serial_number = $request->get('serial_number');
+
+        $ticket = Tickets::where([
+            'id' => $request->get('id'),
+            'account_id' => Auth::User()->account_id
+        ])->first();
+
+        if (!$ticket) {
+            return view('error');
+        }
+
+        /**
+         * Fetch Ticket History
+         */
+        $tickets = Tickets::join('ticket_products','ticket_products.ticket_id', '=', 'tickets.id')
+            ->where('tickets.id', '!=', $ticket->id)
+            ->where('tickets.account_id', '=', Auth::User()->account_id)
+            ->where('ticket_products.serial_number', '=', $request->get('serial_number'))
+            ->select('tickets.id', 'tickets.number', 'tickets.technician_remarks', 'tickets.created_at')
+            ->get();
+
+        $ticket_ids = array();
+        $ticket_repairs = null;
+
+        if($tickets->count()) {
+            foreach($tickets as $loop_ticket) {
+                $ticket_ids[$ticket->id] = $loop_ticket->id;
+            }
+
+            $ticket_repairs = TicketRepairs::join('shopify_products','shopify_products.product_id', '=', 'ticket_repairs.product_id')
+                ->where([
+                    'account_id' => Auth::User()->account_id,
+                ])
+                ->whereIn('ticket_id', $ticket_ids)
+                ->select('ticket_repairs.id as repair_id', 'shopify_products.title', 'ticket_repairs.ticket_id', 'ticket_repairs.serial_number', 'ticket_repairs.customer_feedback')
+                ->get()
+                ->keyBy('repair_id');
+
+//            echo '<pre>';
+//            print_r($tickets->toArray());
+//            print_r($ticket_repairs->toArray());
+//            exit;
+        }
+
+        return view('admin.tickets.serial_numbers.popup', compact('ticket', 'serial_number', 'tickets', 'ticket_repairs'));
     }
 
     /**
@@ -1099,6 +1169,52 @@ class TicketsController extends Controller
                     'status' => 1,
                     'product' => $variant->toArray()
                 );
+            }
+        }
+
+        return response()->json($data);
+    }
+
+
+    /**
+     * Get Customer Detail with Variant ID
+     *
+     * @param  \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function getCustomerDetail(Request $request) {
+        $data = array(
+            'status' => 0,
+            'customer' => array(),
+            'shop_url' => array()
+        );
+
+        if($request->get('customer_id') != '') {
+
+            $account_id = Auth::User()->account_id;
+
+            $shop = ShopifyShops::where([
+                'account_id' => $account_id
+            ])->first();
+
+            if($shop) {
+                $customer = ShopifyCustomers::where([
+                    'account_id' => $account_id,
+                    'customer_id' => $request->get('customer_id'),
+                ])->first();
+
+                if($customer) {
+                    $data = array(
+                        'status' => 1,
+                        'customer' => array(
+                            'full_name' => $customer->first_name . (($customer->last_name) ? ' ' . $customer->last_name : ''),
+                            'email' => ($customer->email) ? ' ' . $customer->email : 'N/A',
+                            'phone' => ($customer->phone) ? ' ' . $customer->phone : 'N/A',
+                            'company' => ($customer->company) ? ' ' . $customer->company : 'N/A',
+                        ),
+                        'shop_url' => 'https://' . $shop->myshopify_domain . '/admin/customers/' . $customer->customer_id
+                    );
+                }
             }
         }
 

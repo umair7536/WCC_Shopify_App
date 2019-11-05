@@ -52,6 +52,8 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::get('/home', ['uses' => 'HomeController@index', 'as' => 'home']);
     Route::get('/run', ['uses' => 'HomeController@runQueue', 'as' => 'run_queue']);
     Route::get('/variant', ['uses' => 'HomeController@runVariantsQueue', 'as' => 'run_variant']);
+    Route::post('/clear-processes', ['uses' => 'HomeController@clearProcesses', 'as' => 'clear_processes']);
+
     // Permissions Routes
     Route::post('permissions/datatable', ['uses' => 'Admin\PermissionsController@datatable', 'as' => 'permissions.datatable']);
     Route::resource('permissions', 'Admin\PermissionsController');
@@ -135,10 +137,12 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
 
     // Tickets Routes start
     Route::get('tickets/showticketstatus', ['uses' => 'Admin\TicketsController@showTicketStatuses', 'as' => 'tickets.showticketstatus']);
+    Route::get('tickets/showserialnumberhistory', ['uses' => 'Admin\TicketsController@showSerialNumberHistory', 'as' => 'tickets.showserialnumberhistory']);
     Route::put('tickets/storeticketstatus', ['uses' => 'Admin\TicketsController@storeTicketStatuses', 'as' => 'tickets.storeticketstatus']);
     Route::get('tickets/get-customer', ['uses' => 'Admin\TicketsController@getCustomer', 'as' => 'tickets.get_customer']);
     Route::get('tickets/get-product', ['uses' => 'Admin\TicketsController@getProduct', 'as' => 'tickets.get_product']);
     Route::get('tickets/get-product-detail', ['uses' => 'Admin\TicketsController@getProductDetail', 'as' => 'tickets.get_product_detail']);
+    Route::get('tickets/get-customer-detail', ['uses' => 'Admin\TicketsController@getCustomerDetail', 'as' => 'tickets.get_customer_detail']);
     Route::post('tickets/datatable', ['uses' => 'Admin\TicketsController@datatable', 'as' => 'tickets.datatable']);
     Route::patch('tickets/active/{id}', ['uses' => 'Admin\TicketsController@active', 'as' => 'tickets.active']);
     Route::patch('tickets/inactive/{id}', ['uses' => 'Admin\TicketsController@inactive', 'as' => 'tickets.inactive']);

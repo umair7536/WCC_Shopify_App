@@ -1,3 +1,4 @@
+<span class="caption-subject bold font-dark uppercase margin-bottom-10">Customer Overview</span>
 <div class="row">
     <div class="form-group col-md-6">
         {!! Form::label('first_name', 'First Name*', ['class' => 'control-label']) !!}
@@ -39,12 +40,71 @@
     </div>
 </div>
 <div class="row">
+    <div class="form-group col-md-6">
+        <div class="mt-checkbox-inline">
+            <label class="mt-checkbox">
+                <input name="email_verified" checked="checked" type="checkbox" id="email_verified" value="1"> Verified Email
+                <span></span>
+            </label>
+        </div>
+    </div>
+    <div class="form-group col-md-6">
+        <div class="mt-checkbox-inline">
+            <label class="mt-checkbox">
+                <input name="password_confirmation" type="checkbox" id="password_confirmation" value="1"> Set Password
+                <span></span>
+            </label>
+        </div>
+    </div>
+</div>
+<div class="row password_confirmation">
+    <div class="form-group col-md-6">
+        {!! Form::label('password', 'Password', ['class' => 'control-label']) !!}
+        <input type="password" id="password" name="password" value="{{ old('password') }}" class="form-control" />
+        @if($errors->has('password'))
+            <p class="help-block">
+                {{ $errors->first('password') }}
+            </p>
+        @endif
+    </div>
+    <div class="form-group col-md-6">
+        {!! Form::label('send_email_welcome', 'Welcome Email', ['class' => 'control-label']) !!}
+        <div class="mt-checkbox-inline">
+            <label class="mt-checkbox">
+                <input name="send_email_welcome" type="checkbox" id="send_email_welcome" value="1"> Send Welcome Email to Customer
+                <span></span>
+            </label>
+        </div>
+    </div>
+</div>
+<span class="caption-subject bold font-dark uppercase margin-bottom-10">Customer Address</span>
+<div class="row">
     <div class="form-group col-md-12">
+        {!! Form::label('company', 'Company', ['class' => 'control-label']) !!}
+        {!! Form::text('company', old('company'), ['class' => 'form-control', 'placeholder' => '']) !!}
+        @if($errors->has('company'))
+            <p class="help-block">
+                {{ $errors->first('company') }}
+            </p>
+        @endif
+    </div>
+</div>
+<div class="row">
+    <div class="form-group col-md-6">
         {!! Form::label('address1', 'Address', ['class' => 'control-label']) !!}
         {!! Form::text('address1', old('address1'), ['class' => 'form-control', 'placeholder' => '']) !!}
         @if($errors->has('address1'))
             <p class="help-block">
                 {{ $errors->first('address1') }}
+            </p>
+        @endif
+    </div>
+    <div class="form-group col-md-6">
+        {!! Form::label('address2', 'Apartment, suite, etc.', ['class' => 'control-label']) !!}
+        {!! Form::text('address2', old('address2'), ['class' => 'form-control', 'placeholder' => '']) !!}
+        @if($errors->has('address2'))
+            <p class="help-block">
+                {{ $errors->first('address2') }}
             </p>
         @endif
     </div>
@@ -87,44 +147,6 @@
                 {{ $errors->first('country') }}
             </p>
         @endif
-    </div>
-</div>
-<div class="row">
-    <div class="form-group col-md-6">
-        <div class="mt-checkbox-inline">
-            <label class="mt-checkbox">
-                <input name="email_verified" checked="checked" type="checkbox" id="email_verified" value="1"> Verified Email
-                <span></span>
-            </label>
-        </div>
-    </div>
-    <div class="form-group col-md-6">
-        <div class="mt-checkbox-inline">
-            <label class="mt-checkbox">
-                <input name="password_confirmation" type="checkbox" id="password_confirmation" value="1"> Set Password
-                <span></span>
-            </label>
-        </div>
-    </div>
-</div>
-<div class="row password_confirmation">
-    <div class="form-group col-md-6">
-        {!! Form::label('password', 'Password', ['class' => 'control-label']) !!}
-        <input type="password" id="password" name="password" value="{{ old('password') }}" class="form-control" />
-        @if($errors->has('password'))
-            <p class="help-block">
-                {{ $errors->first('password') }}
-            </p>
-        @endif
-    </div>
-    <div class="form-group col-md-6">
-        {!! Form::label('send_email_welcome', 'Welcome Email', ['class' => 'control-label']) !!}
-        <div class="mt-checkbox-inline">
-            <label class="mt-checkbox">
-                <input name="send_email_welcome" type="checkbox" id="send_email_welcome" value="1"> Send Welcome Email to Customer
-                <span></span>
-            </label>
-        </div>
     </div>
 </div>
 <div class="clearfix"></div>

@@ -64,7 +64,13 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li class="external">
-                                <h3><span class="bold">{{ (($syncProducts + $syncCustomers + $uploadVariants + $syncCustomCollections + $syncCollects + $syncOrders) > 1000) ? number_format(($syncProducts + $syncCustomers + $uploadVariants + $syncCustomCollections + $syncCollects + $syncOrders) / 1000, 2) . 'K' : ($syncProducts  + $syncCustomers + $uploadVariants + $syncCustomCollections + $syncCollects + $syncOrders) }} pending</span> processes</h3>
+                                <h3><span class="bold">{{ (($syncProducts + $syncCustomers + $uploadVariants + $syncCustomCollections + $syncCollects) > 1000) ? number_format(($syncProducts + $syncCustomers + $uploadVariants + $syncCustomCollections + $syncCollects) / 1000, 2) . 'K' : ($syncProducts  + $syncCustomers + $uploadVariants + $syncCustomCollections + $syncCollects) }} pending</span> processes</h3>
+                                {!! Form::open(array(
+                                    'method' => 'POST',
+                                    'onsubmit' => "return confirm('".trans("global.app_are_you_sure")."');",
+                                    'route' => ['admin.clear_processes'])) !!}
+                                {!! Form::submit('Clear All', array('class' => 'btn btn-link btn-sm pull-right')) !!}
+                                {!! Form::close() !!}
                             </li>
                             <li>
                                 <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 150px;">
