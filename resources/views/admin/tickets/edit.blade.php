@@ -121,13 +121,45 @@
                                 </div>
 
                                 <div class="clearfix"></div>
+                            </div>
 
+                            <div class="form-body col-md-12 customer_information" id="customer_information">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered table-advance">
+                                        <thead>
+                                        <tr>
+                                            <th colspan="4" class="bold">Customer Information</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <th style="text-align: left">Full Name</th>
+                                            <td id="customer_full_name">
+                                                <a target="_blank" href="https://{{ $shop->myshopify_domain }}/admin/customers/{{ $shopify_customer->customer_id }}">
+                                                    {{ $shopify_customer->first_name . (($shopify_customer->last_name) ? ' ' . $shopify_customer->last_name : '') }} <i class="fa fa-external-link"></i>
+                                                </a>
+                                            </td>
+                                            <th style="text-align: left">Email</th>
+                                            <td id="customer_email">{{ ($shopify_customer->email) ? $shopify_customer->email : 'N/A' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th style="text-align: left">Phone</th>
+                                            <td id="customer_phone">{{ ($shopify_customer->phone) ? $shopify_customer->phone : 'N/A' }}</td>
+                                            <th style="text-align: left">Company</th>
+                                            <td id="customer_company">{{ ($shopify_customer->company) ? $shopify_customer->company : 'N/A' }}</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="row">
                                 <div class="form-group col-md-12">
                                     {!! Form::label('technician_remarks', 'Notes for Technician', ['class' => 'control-label']) !!}
                                     {!! Form::textarea('technician_remarks', old('technician_remarks'), ['rows' => '2', 'id' => 'technician_remarks', 'class' => 'form-control', 'placeholder' => '']) !!}
                                 </div>
-
                             </div>
+
                         </div>
                     </div>
 
@@ -367,5 +399,6 @@
     <script src="{{ url('metronic/assets/global/plugins/jquery-validation/js/additional-methods.min.js') }}" type="text/javascript"></script>
     <script src="{{ url('metronic/assets/global/plugins/select2/js/select2.full.min.js') }}" type="text/javascript"></script>
     <script src="{{'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js'}}" type="text/javascript"></script>
+    <script src="{{ url('metronic/assets/pages/scripts/ui-blockui.min.js') }}" type="text/javascript"></script>
     <script src="{{ url('js/admin/tickets/fields.js') }}" type="text/javascript"></script>
 @endsection

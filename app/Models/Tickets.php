@@ -2,12 +2,11 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
 use App\Models\AuditTrails;
 use Auth;
+use DB;
 
 
 class Tickets extends BaseModal
@@ -66,35 +65,45 @@ class Tickets extends BaseModal
             );
         }
 
+        $query = self
+            ::join('shopify_customers','shopify_customers.customer_id', '=', 'tickets.customer_id')
+            ->join('ticket_products','ticket_products.ticket_id', '=', 'tickets.id');
+
+        if ($account_id) {
+            $query->where('tickets.account_id', '=', $account_id);
+        }
+
         if ($request->get('number')) {
-            $where[] = array(
-                'number',
-                'like',
-                '%' . $request->get('number') . '%'
-            );
+            $query->where('tickets.number', 'like', '%' . $request->get('number') . '%');
+        }
+
+        if ($request->get('customer_name')) {
+            $customer_name = $request->get('customer_name');
+            $query->where(function ($sub_query) use($customer_name) {
+                $sub_query->orWhere('shopify_customers.first_name', 'like', '%' . $customer_name . '%');
+                $sub_query->orWhere('shopify_customers.last_name', 'like', '%' . $customer_name . '%');
+                $sub_query->orWhere('shopify_customers.email', 'like', '%' . $customer_name . '%');
+                $sub_query->orWhere('shopify_customers.phone', 'like', '%' . $customer_name . '%');
+            });
+        }
+
+        if ($request->get('serial_number')) {
+            $query->where('ticket_products.serial_number', 'like', '%' . $request->get('serial_number') . '%');
         }
 
         if ($request->get('total_products')) {
-            $where[] = array(
-                'total_products',
-                'like',
-                '%' . $request->get('total_products') . '%'
-            );
+            $query->where('tickets.total_products', '=', $request->get('total_products'));
         }
 
         if ($request->get('ticket_status_id')) {
-            $where[] = array(
-                'ticket_status_id',
-                '=',
-                $request->get('ticket_status_id')
-            );
+            $query->where('tickets.ticket_status_id', '=', $request->get('ticket_status_id'));
         }
 
-        if (count($where)) {
-            return self::where($where)->count();
-        } else {
-            return self::count();
-        }
+        return $query
+            ->select('tickets.id')
+            ->groupBy('tickets.id')
+            ->get()
+            ->count();
     }
 
     /**
@@ -154,23 +163,11 @@ class Tickets extends BaseModal
 
         return $query
             ->select('tickets.*', 'shopify_customers.first_name', 'shopify_customers.last_name', 'shopify_customers.email', 'shopify_customers.phone')
+            ->limit($iDisplayLength)
+            ->offset($iDisplayStart)
             ->groupBy('tickets.id')
             ->orderBy($orderBy, $order)
             ->get();
-        '';
-
-        if (count($where)) {
-            return self::where($where)
-                ->limit($iDisplayLength)
-                ->offset($iDisplayStart)
-                ->orderBy($orderBy, $order)
-                ->get();
-        } else {
-            return self::limit($iDisplayLength)
-                ->offset($iDisplayStart)
-                ->orderBy($orderBy, $order)
-                ->get();
-        }
     }
 
     /**
