@@ -8,6 +8,8 @@ use App\Models\LeopardsCities;
 use App\Models\LeopardsSettings;
 use App\Models\Shippers;
 use Carbon\Carbon;
+use Developifynet\LeopardsCOD\LeopardsCOD;
+use Developifynet\LeopardsCOD\LeopardsCODClient;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -484,7 +486,7 @@ class BookedPacketsController extends Controller
         $booked_packet = BookedPackets::getData($id);
 
         if(!$booked_packet) {
-            return view('error', compact('lead_statuse'));
+            return view('error');
         }
 
         $shipment_type = Config::get('constants.shipment_type');
@@ -501,6 +503,73 @@ class BookedPacketsController extends Controller
         }
 
         return view('admin.booked_packets.detail', compact('booked_packet', 'shipment_type', 'leopards_cities'));
+    }
+
+    /**
+     * Track booked Packet.
+     *
+     * @param  int $id
+     * @return \Illuminate\Http\Response
+     */
+    public function track($id)
+    {
+        if (!Gate::allows('booked_packets_manage')) {
+            return abort(401);
+        }
+
+        $booked_packet = BookedPackets::getData($id);
+
+        if(!$booked_packet) {
+            return view('error');
+        }
+
+        $track_history = [];
+
+        /**
+         * Load Leopards Settings
+         */
+        $leopards_settings = LeopardsSettings::where([
+            'account_id' => Auth::User()->account_id
+        ])
+            ->select('slug', 'data')
+            ->orderBy('id', 'asc')
+            ->get()->keyBy('slug');
+
+
+        try {
+            $leopards = new LeopardsCODClient();
+
+            $response = $leopards->trackPacket(array(
+                'api_key' => $leopards_settings['api-key']->data,                                           // API Key provided by LCS
+                'api_password' => $leopards_settings['api-password']->data,                                 // API Password provided by LCS
+                'enable_test_mode' => ($booked_packet->booking_type == '1') ? true : false,                 // [Optional] default value is 'false', true|false to set mode test or live
+                'track_numbers' => $booked_packet->track_number
+            ));
+
+            if($response['status']) {
+                if(isset($response['packet_list']) && count($response['packet_list'])) {
+                    $track_history = array_reverse($response['packet_list'][0]['Tracking Detail']);
+                }
+            }
+
+        } catch (\Exception $exception) {
+
+        }
+
+        $shipment_type = Config::get('constants.shipment_type');
+
+        $leopards_cities = LeopardsCities::where([
+            'account_id' => Auth::User()->account_id,
+        ])->whereIn('city_id', [$booked_packet->origin_city, $booked_packet->destination_city])
+            ->select('city_id', 'name')
+            ->get();
+        if($leopards_cities) {
+            $leopards_cities = $leopards_cities->keyBy('city_id');
+        } else {
+            $leopards_cities = [];
+        }
+
+        return view('admin.booked_packets.track', compact('booked_packet', 'shipment_type', 'leopards_cities', 'track_history'));
     }
 
 

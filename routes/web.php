@@ -218,6 +218,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::post('booked_packets/apidatatable', ['uses' => 'Admin\BookedPacketsController@apidatatable', 'as' => 'booked_packets.apidatatable']);
     Route::patch('booked_packets/cancel/{id}', ['uses' => 'Admin\BookedPacketsController@cancel', 'as' => 'booked_packets.cancel']);
     Route::get('booked_packets/detail/{id}', ['uses' => 'Admin\BookedPacketsController@detail', 'as' => 'booked_packets.detail']);
+    Route::get('booked_packets/track/{id}', ['uses' => 'Admin\BookedPacketsController@track', 'as' => 'booked_packets.track']);
     Route::post('booked_packets/datatable', ['uses' => 'Admin\BookedPacketsController@datatable', 'as' => 'booked_packets.datatable']);
     Route::resource('booked_packets', 'Admin\BookedPacketsController');
     // Booked Packets end
