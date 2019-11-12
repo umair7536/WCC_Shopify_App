@@ -327,7 +327,10 @@ class ShopifyController extends Controller
                             return Redirect::to(route('auth.register'))->withErrors(['Something went wrong, Please try again.']);
                         }
                     } else {
-                        return Redirect::to(route('auth.register'))->withErrors(['Provided Shop not found.']);
+                        return Redirect::to(route('shopify.install'))->withInput(array(
+                            'shop' => $shopRequest['shop']
+                        ));
+//                        return Redirect::to(route('auth.register'))->withErrors(['Provided Shop not found.']);
                     }
                 } else {
                     return Redirect::to(route('auth.login'))->withErrors(['Invalid request received, Please try again.']);
