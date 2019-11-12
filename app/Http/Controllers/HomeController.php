@@ -6,6 +6,7 @@ use App\Events\Shopify\Products\SyncProductsFire;
 use App\Events\Shopify\Products\UploadVariantsFire;
 use App\Models\Accounts;
 use App\Models\HeavyLifter;
+use App\Models\LeopardsSettings;
 use App\Models\ShopifyJobs;
 use Auth;
 use Config;
@@ -30,6 +31,23 @@ class HomeController extends Controller
     public function index()
     {
         return view('home');
+    }
+
+    /**
+     * Show the application dashboard.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function instructions()
+    {
+        $leopards_settings = LeopardsSettings::where([
+            'account_id' => Auth::User()->account_id
+        ])
+            ->select('slug', 'data')
+            ->orderBy('id', 'asc')
+            ->get()->keyBy('slug');
+
+        return view('instructions', compact('leopards_settings'));
     }
 
     public function runQueue() {

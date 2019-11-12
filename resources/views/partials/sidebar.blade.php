@@ -12,9 +12,17 @@
             </li>
             <!-- END SIDEBAR TOGGLER BUTTON -->
             <li class="nav-item start {{ $request->segment(2) == 'home' ? 'active' : '' }}">
-                <a href="{{ url('/') }}" class="nav-link ">
+                <a href="{{ route('admin.home') }}" class="nav-link ">
                     <i class="icon-home"></i>
                     <span class="title">@lang('global.app_dashboard')</span>
+                </a>
+            </li>
+
+            <!-- END SIDEBAR TOGGLER BUTTON -->
+            <li class="nav-item start {{ $request->segment(2) == 'instructions' ? 'active' : '' }}">
+                <a href="{{ route('admin.instructions') }}" class="nav-link ">
+                    <i class="icon-bulb"></i>
+                    <span class="title">@lang('global.app_instructions')</span>
                 </a>
             </li>
 
@@ -129,49 +137,21 @@
                 </li>
             @endif
 
-            @if(
-                    Gate::allows('shopify_customers_manage')
-                )
-                <li class="nav-item start @if(
-                    $request->segment(2) == 'shopify_customers'
-                ) active open @endif">
-                    <a href="javascript:;" class="nav-link nav-toggle">
+            @if(Gate::allows('shopify_customers_manage'))
+                <li class="nav-item start {{ $request->segment(2) == 'shopify_customers' ? 'active active-sub' : '' }}">
+                    <a href="{{ route('admin.shopify_customers.index') }}">
                         <i class="icon-users"></i>
-                        <span class="title">Customers</span>
-                        <span class="arrow"></span>
+                        <span class="title">@lang('global.shopify_customers.title')</span>
                     </a>
-                    <ul class="sub-menu">
-                        @if(Gate::allows('shopify_customers_manage'))
-                            <li class="nav-item start {{ $request->segment(2) == 'shopify_customers' ? 'active active-sub' : '' }}">
-                                <a href="{{ route('admin.shopify_customers.index') }}">
-                                    <span class="title">@lang('global.shopify_customers.title')</span>
-                                </a>
-                            </li>
-                        @endif
-                    </ul>
                 </li>
             @endif
 
-            @if(
-                    Gate::allows('shopify_orders_manage')
-                )
-                <li class="nav-item start @if(
-                    $request->segment(2) == 'shopify_orders'
-                ) active open @endif">
-                    <a href="javascript:;" class="nav-link nav-toggle">
-                        <i class="icon-star"></i>
-                        <span class="title">@lang('global.shopify_orders.title') Management</span>
-                        <span class="arrow"></span>
+            @if(Gate::allows('shopify_orders_manage'))
+                <li class="nav-item start {{ $request->segment(2) == 'shopify_orders' ? 'active active-sub' : '' }}">
+                    <a href="{{ route('admin.shopify_orders.index') }}">
+                        <i class="icon-basket-loaded"></i>
+                        <span class="title">@lang('global.shopify_orders.title')</span>
                     </a>
-                    <ul class="sub-menu">
-                        @if(Gate::allows('shopify_orders_manage'))
-                            <li class="nav-item start {{ $request->segment(2) == 'shopify_orders' ? 'active active-sub' : '' }}">
-                                <a href="{{ route('admin.shopify_orders.index') }}">
-                                    <span class="title">@lang('global.shopify_orders.title')</span>
-                                </a>
-                            </li>
-                        @endif
-                    </ul>
                 </li>
             @endif
 
@@ -255,10 +235,18 @@
                 </li>
             @endif
 
+            @if(Gate::allows('shopify_billings_manage'))
+                <li class="nav-item start {{ $request->segment(2) == 'shopify_billings' ? 'active active-sub' : '' }}">
+                    <a href="{{ route('admin.shopify_billings.index') }}">
+                        <i class="icon-credit-card"></i>
+                        <span class="title">@lang('global.shopify_billings.title')</span>
+                    </a>
+                </li>
+            @endif
+
             @if(
                     Gate::allows('settings_manage') ||
                     Gate::allows('shopify_plans_manage') ||
-                    Gate::allows('shopify_billings_manage') ||
                     Gate::allows('general_settings_manage') ||
                     Gate::allows('shopify_webhooks_manage') ||
                     Gate::allows('ticket_statuses_manage')
@@ -267,7 +255,6 @@
                 <li class="nav-item start @if(
                 $request->segment(2) == 'settings' ||
                 $request->segment(2) == 'shopify_plans' ||
-                $request->segment(2) == 'shopify_billings' ||
                 $request->segment(2) == 'general_settings' ||
                 $request->segment(2) == 'shopify_webhooks' ||
                 $request->segment(2) == 'ticket_statuses'
@@ -289,13 +276,6 @@
                             <li class="nav-item start {{ $request->segment(2) == 'shopify_plans' ? 'active active-sub' : '' }}">
                                 <a href="{{ route('admin.shopify_plans.index') }}">
                                     <span class="title">@lang('global.shopify_plans.title')</span>
-                                </a>
-                            </li>
-                        @endif
-                        @if(Gate::allows('shopify_billings_manage'))
-                            <li class="nav-item start {{ $request->segment(2) == 'shopify_billings' ? 'active active-sub' : '' }}">
-                                <a href="{{ route('admin.shopify_billings.index') }}">
-                                    <span class="title">@lang('global.shopify_billings.title')</span>
                                 </a>
                             </li>
                         @endif
