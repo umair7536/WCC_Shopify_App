@@ -99,6 +99,14 @@ class Tickets extends BaseModal
             $query->where('tickets.ticket_status_id', '=', $request->get('ticket_status_id'));
         }
 
+        if ($request->get('date_from') != '') {
+            $query->where('tickets.created_at', '>=', $request->get('date_from') . ' 00:00:00');
+        }
+
+        if ($request->get('date_to') != '') {
+            $query->where('tickets.created_at', '<=', $request->get('date_to') . ' 23:59:59');
+        }
+
         return $query
             ->select('tickets.id')
             ->groupBy('tickets.id')
@@ -159,6 +167,14 @@ class Tickets extends BaseModal
 
         if ($request->get('ticket_status_id')) {
             $query->where('tickets.ticket_status_id', '=', $request->get('ticket_status_id'));
+        }
+
+        if ($request->get('date_from') != '') {
+            $query->where('tickets.created_at', '>=', $request->get('date_from') . ' 00:00:00');
+        }
+
+        if ($request->get('date_to') != '') {
+            $query->where('tickets.created_at', '<=', $request->get('date_to') . ' 23:59:59');
         }
 
         return $query
