@@ -428,65 +428,85 @@ class ShopifyController extends Controller
 //        ])->forceDelete();
 //        event(new SyncCollectsFire($account));
 
+        /**
+         * Check if Ticket Statuses exists or not
+         */
+        $statuses = TicketStatuses::where([
+            'account_id' => $account_id
+        ])->get();
 
-        $global_ticket_statuses = Config::get('setup.ticket_statuses');
+        if(!$statuses || !$statuses->count()) {
+            $global_ticket_statuses = Config::get('setup.ticket_statuses');
 
-        $ticket_statuses = [];
-        $sort_number = 0;
-        foreach($global_ticket_statuses as $ticket_statuse) {
-            $ticket_statuses[] = array(
-                'name' => $ticket_statuse['name'],
-                'slug' => $ticket_statuse['slug'],
-                'sort_number'=> $sort_number++,
-                'account_id' => $account_id,
-                'created_at' => \Carbon\Carbon::now(),
-                'updated_at' => \Carbon\Carbon::now(),
-            );
+            $ticket_statuses = [];
+            $sort_number = 0;
+            foreach($global_ticket_statuses as $ticket_statuse) {
+                $ticket_statuses[] = array(
+                    'name' => $ticket_statuse['name'],
+                    'slug' => $ticket_statuse['slug'],
+                    'sort_number'=> $sort_number++,
+                    'account_id' => $account_id,
+                    'created_at' => \Carbon\Carbon::now(),
+                    'updated_at' => \Carbon\Carbon::now(),
+                );
+            }
+
+            TicketStatuses::insert($ticket_statuses);
         }
-
-        TicketStatuses::insert($ticket_statuses);
 
         /**
          * General Settings
          */
         $global_general_settings = Config::get('setup.general_settings');
 
-        $general_settings = [];
-        $sort_number = 0;
-        foreach($global_general_settings as $general_setting) {
-            $general_settings[] = array(
-                'name' => $general_setting['name'],
-                'slug' => $general_setting['slug'],
-                'data' => null,
-                'sort_number'=> $sort_number++,
-                'account_id' => $account_id,
-                'created_at' => \Carbon\Carbon::now(),
-                'updated_at' => \Carbon\Carbon::now(),
-            );
-        }
+        $settings = GeneralSettings::where([
+            'account_id' => $account_id,
+        ])->get();
 
-        GeneralSettings::insert($general_settings);
+        if(!$settings || !$settings->count()) {
+            $general_settings = [];
+            $sort_number = 0;
+            foreach($global_general_settings as $general_setting) {
+                $general_settings[] = array(
+                    'name' => $general_setting['name'],
+                    'slug' => $general_setting['slug'],
+                    'data' => null,
+                    'sort_number'=> $sort_number++,
+                    'account_id' => $account_id,
+                    'created_at' => \Carbon\Carbon::now(),
+                    'updated_at' => \Carbon\Carbon::now(),
+                );
+            }
+
+            GeneralSettings::insert($general_settings);
+        }
 
         /**
          * LCS Settings
          */
         $global_leopards_settings = Config::get('setup.leopards_settings');
 
-        $leopards_settings = [];
-        $sort_number = 0;
-        foreach($global_leopards_settings as $leopards_setting) {
-            $leopards_settings[] = array(
-                'name' => $leopards_setting['name'],
-                'slug' => $leopards_setting['slug'],
-                'data' => null,
-                'sort_number'=> $sort_number++,
-                'account_id' => $account_id,
-                'created_at' => \Carbon\Carbon::now(),
-                'updated_at' => \Carbon\Carbon::now(),
-            );
-        }
+        $leopards = LeopardsSettings::where([
+            'account_id' => $account_id,
+        ])->get();
 
-        LeopardsSettings::insert($leopards_settings);
+        if(!$leopards || !$leopards->count()) {
+            $leopards_settings = [];
+            $sort_number = 0;
+            foreach($global_leopards_settings as $leopards_setting) {
+                $leopards_settings[] = array(
+                    'name' => $leopards_setting['name'],
+                    'slug' => $leopards_setting['slug'],
+                    'data' => null,
+                    'sort_number'=> $sort_number++,
+                    'account_id' => $account_id,
+                    'created_at' => \Carbon\Carbon::now(),
+                    'updated_at' => \Carbon\Carbon::now(),
+                );
+            }
+
+            LeopardsSettings::insert($leopards_settings);
+        }
 
         return $account_id;
     }
