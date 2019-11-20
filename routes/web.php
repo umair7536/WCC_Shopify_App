@@ -30,6 +30,7 @@ Route::get('verify', 'Admin\ShopifyController@verifyShopify')->name('shopify.ver
 
 
 // Shopify Webhooks Area
+Route::post('webhooks/app', 'Admin\WebhooksController@app')->name('webhooks.app');
 Route::post('webhooks/orders', 'Admin\WebhooksController@orders')->name('webhooks.orders');
 
 // GDPR related Webhooks

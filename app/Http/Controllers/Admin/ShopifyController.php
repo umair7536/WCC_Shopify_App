@@ -12,8 +12,10 @@ use App\Helpers\ShopifyHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Accounts;
 use App\Models\GeneralSettings;
+use App\Models\HeavyLifter;
 use App\Models\LeopardsSettings;
 use App\Models\ShopifyCollects;
+use App\Models\ShopifyJobs;
 use App\Models\ShopifyPlans;
 use App\Models\ShopifyShops;
 use App\Models\TicketStatuses;
@@ -187,8 +189,11 @@ class ShopifyController extends Controller
                     if($shop) {
                         // Shop found just redirect at login page for login
                         $shop->update(array(
-                            'access_token' => session('access_token')
+                            'access_token' => session('access_token'),
+                            'installed' => 1
                         ));
+
+                        $this->setupAccount($shop->account_id);
 
                         $user = User::where(array(
                             'account_id' => $shop->account_id,
@@ -306,6 +311,38 @@ class ShopifyController extends Controller
                 if($shopRequest['shop'] && $shopRequest['hmac']) {
                     $shop = ShopifyShops::where(['myshopify_domain' => $shopRequest['shop']])->first();
                     if($shop) {
+
+                        /**
+                         * Check if App Installed is '0' then reinstall this app
+                         */
+                        if(!$shop->installed) {
+                            return redirect()->route('shopify.install', [
+                                'shop' => $shopRequest['shop']
+                            ]);
+                        } else {
+                            /**
+                             * If Shop data is not provided then again reinstall this app
+                             */
+                            $shopifyClient = new ShopifyClient([
+                                'private_app' => false,
+                                'api_key' => env('SHOPIFY_APP_API_KEY'), // In public app, this is the app ID
+                                'version' => env('SHOPIFY_API_VERSION'), // Put API Version
+                                'access_token' => $shop->access_token,
+                                'shop' => $shop->myshopify_domain
+                            ]);
+
+                            try {
+                                $shop = $total_records = $shopifyClient->getShop();
+                            } catch (\Exception $exception) {
+                                $message = $exception->getMessage();
+                                if(is_string($message) && strpos($message, '401 Unauthorized') !== false) {
+                                    return redirect()->route('shopify.install', [
+                                        'shop' => $shopRequest['shop']
+                                    ]);
+                                }
+                            }
+                        }
+
                         $user = User::where(array(
                             'account_id' => $shop->account_id,
                             'main_account' => 1,
@@ -362,6 +399,17 @@ class ShopifyController extends Controller
      * @return: boolean true|false
      */
     private function setupAccount($account_id) {
+
+        /**
+         * Flush any Queue process
+         */
+        HeavyLifter::where(array(
+            'account_id' => $account_id
+        ))->forceDelete();
+
+        ShopifyJobs::where(array(
+            'account_id' => $account_id
+        ))->forceDelete();
 
         /**
          * Dispatch Events

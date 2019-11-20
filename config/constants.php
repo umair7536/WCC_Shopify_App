@@ -43,6 +43,7 @@ return [
         'orders/fulfilled' => 'Order Fulfillment',
         'orders/paid' => 'Order Payment',
         'orders/updated' => 'Order Update',
+        'app/uninstalled' => 'App Uninstalled',
     ),
 
     'shopify_payment_status' => array(

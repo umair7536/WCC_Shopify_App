@@ -14,6 +14,52 @@ use ZfrShopify\Exception\InvalidRequestException;
 class WebhooksController extends Controller
 {
     /**
+     * Webhook for App Uninstall.
+     *
+     * @param \Psr\Http\Message\ServerRequestInterface
+     * @return \Illuminate\Http\Response
+     */
+    public function app(ServerRequestInterface $request)
+    {
+
+        $shopify_topic = $request->getHeaderLine('X-Shopify-Topic');
+        $shopify_test_mode = $request->getHeaderLine('X-Shopify-Test');
+        $shopify_hmac_sha256 = $request->getHeaderLine('X-Shopify-Hmac-Sha256');
+        $shopify_shop_domain = $request->getHeaderLine('X-Shopify-Shop-Domain');
+
+        /**
+         * Check if packet is coming from test mode
+         */
+        if(!$shopify_test_mode || $shopify_test_mode == 'false') {
+            try {
+
+                $validator = new WebhookValidator();
+                $validator->validateWebhook($request, env('SHOPIFY_APP_SHARED_SECRET'));
+
+                switch ($shopify_topic) {
+                    case 'app/uninstalled':
+
+                        ShopifyShops::where([
+                            'myshopify_domain' => $shopify_shop_domain
+                        ])->update(array(
+                            'access_token' => null,
+                            'installed' => 0,
+                        ));
+
+                        break;
+                    default:
+                        break;
+                }
+
+            } catch (InvalidRequestException $exception) {
+                // Handle your error heres
+            }
+        }
+
+        return response()->json(['status' => true]);
+    }
+
+    /**
      * Show the form for creating new Permission.
      *
      * @param \Psr\Http\Message\ServerRequestInterface

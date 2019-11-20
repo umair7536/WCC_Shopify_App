@@ -10,7 +10,7 @@ class ShopifyShops extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'access_token', 'store_id', 'name', 'store_owner', 'domain', 'myshopify_domain',
+        'access_token', 'installed', 'store_id', 'name', 'store_owner', 'domain', 'myshopify_domain',
         'phone', 'email', 'customer_email', 'timezone', 'plan_id', 'activated_on', 'shopify_billing_id',
         'iana_timezone', 'account_id', 'created_at', 'updated_at'
     ];

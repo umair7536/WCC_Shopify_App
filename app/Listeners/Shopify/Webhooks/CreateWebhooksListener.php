@@ -70,7 +70,7 @@ class CreateWebhooksListener implements ShouldQueue
                     if(count($webhooks)) {
                         foreach ($webhooks as $topic => $desc) {
                             $single_data = $shopifyClient->createWebhook(array(
-                                'address' => env('APP_URL_TUNNEL') . '/webhooks/orders',
+                                'address' => env('APP_URL_TUNNEL') . '/webhooks/' . explode('/', $topic)[0],
                                 'format' => 'json',
                                 'topic' => $topic,
                             ));
