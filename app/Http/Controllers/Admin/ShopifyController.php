@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\Shopify\Locations\SyncLocationsFire;
 use App\Events\Shopify\Orders\SyncOrdersFire;
 use App\Events\Shopify\Products\SyncCollectsFire;
 use App\Events\Shopify\Products\SyncCustomCollecionsFire;
@@ -416,6 +417,7 @@ class ShopifyController extends Controller
          */
         $account = Accounts::find($account_id);
 //        event(new SyncProductsFire($account));
+        event(new SyncLocationsFire($account));
         event(new SyncCustomersFire($account));
         event(new SyncOrdersFire($account));
         event(new CreateWebhooksFire($account));
