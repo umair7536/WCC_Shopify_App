@@ -19,6 +19,8 @@ class Kernel extends ConsoleKernel
          */
 //        '\App\Console\Commands\Shopify\SyncProducts',
         '\App\Console\Commands\Shopify\SyncCustomers',
+        '\App\Console\Commands\Leopards\SyncPacketStatus',
+        '\App\Console\Commands\Leopards\SyncAllAccountPackets',
 //        '\App\Console\Commands\Shopify\SyncProductsWeekly',
 //        '\App\Console\Commands\Shopify\UploadVariants',
         '\App\Console\Commands\Shopify\HandleHeavyLifting',
@@ -55,6 +57,13 @@ class Kernel extends ConsoleKernel
         $schedule->command('shopify:sync-customers')
             ->withoutOverlapping()
             ->everyMinute();
+
+        /*
+         * Launch Packet Statuses Update
+         */
+        $schedule->command('lcs:sync-all-accounts-packets')
+            ->withoutOverlapping()
+            ->cron('0 */6 * * *');
 
         /*
          * Sync Customers from Shopify

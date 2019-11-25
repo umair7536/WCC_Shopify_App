@@ -83,5 +83,9 @@ return [
         16 => 'Refused',
         17 => 'Being Return',
     ),
-    'status_cancel' => 3
+    'status_sync' => array(
+        0, 2, 4, 5, 6, 7, 8, 9, 14, 16, 17
+    ),
+    'status_cancel' => 3,
+    'request_sent' => 0,
 ];

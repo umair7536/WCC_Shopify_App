@@ -1,7 +1,7 @@
 <div class="modal-body" style="max-height: calc(100vh - 50px); overflow-y: auto;">
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
-        <h4 class="modal-title">Tracking Information</h4>
+        <h4 class="modal-title">Tracking Information {!! ($booked_packet->track_number) ? ' for <b>' . $booked_packet->track_number . '</b>' : '' !!}</h4>
     </div>
     <table class="table table-striped">
         <tbody>

@@ -1,4 +1,6 @@
-@if(Config::get('constants.status_cancel') != $booked_packet->status)
+@if(
+    Config::get('constants.request_sent') == $booked_packet->status
+)
     @if(Gate::allows('booked_packets_create'))
         {!! Form::open(array(
             'style' => 'display: inline-block;',

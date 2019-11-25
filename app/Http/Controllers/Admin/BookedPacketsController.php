@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\Leopards\BookedPackets\FullSyncPacketStatusFire;
 use App\Helpers\ShopifyHelper;
+use App\Models\Accounts;
 use App\Models\BookedPackets;
 use App\Models\LeopardsCities;
 use App\Models\LeopardsSettings;
@@ -548,7 +550,27 @@ class BookedPacketsController extends Controller
 
             if($response['status']) {
                 if(isset($response['packet_list']) && count($response['packet_list'])) {
-                    $track_history = array_reverse($response['packet_list'][0]['Tracking Detail']);
+
+                    $packet = $response['packet_list'][0];
+                    $track_history = array_reverse($packet['Tracking Detail']);
+
+                    /**
+                     * Update Packet Status
+                     */
+                    $status = Config::get('constants.status');
+                    $status_id = 0;
+
+                    foreach ($status as $key => $value) {
+                        if(strtolower($packet['booked_packet_status']) == strtolower($value)) {
+                            $status_id = $key;
+                        }
+                    }
+
+                    BookedPackets::where([
+                        'track_number' => $packet['track_number']
+                    ])->update(array(
+                        'status' => $status_id
+                    ));
                 }
             }
 
@@ -603,6 +625,24 @@ class BookedPacketsController extends Controller
         }
 
         BookedPackets::cancelPacket($id);
+
+        return redirect()->route('admin.booked_packets.index');
+    }
+
+    /**
+     * Dispatch event for sync products.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function syncStatus()
+    {
+        if (! Gate::allows('booked_packets_manage')) {
+            return abort(401);
+        }
+
+        event(new FullSyncPacketStatusFire(Accounts::find(Auth::User()->account_id)));
+
+        flash('Booked Packet Statuses Sync Event is dispatched successfully.')->success()->important();
 
         return redirect()->route('admin.booked_packets.index');
     }

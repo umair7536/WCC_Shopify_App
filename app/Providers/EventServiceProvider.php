@@ -43,6 +43,9 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\Shopify\Webhooks\CreateWebhooksFire' => [
             'App\Listeners\Shopify\Webhooks\CreateWebhooksListener',
         ],
+        'App\Events\Leopards\BookedPackets\FullSyncPacketStatusFire' => [
+            'App\Listeners\Leopards\BookedPackets\FullSyncPacketStatusListener',
+        ],
     ];
 
     /**

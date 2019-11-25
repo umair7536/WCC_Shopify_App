@@ -220,6 +220,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     // Consignees Routes end
 
     // Booked Packets start
+    Route::get('booked_packets/sync-status', ['uses' => 'Admin\BookedPacketsController@syncStatus', 'as' => 'booked_packets.sync_status']);
     Route::get('booked_packets/api', ['uses' => 'Admin\BookedPacketsController@api', 'as' => 'booked_packets.api']);
     Route::post('booked_packets/apidatatable', ['uses' => 'Admin\BookedPacketsController@apidatatable', 'as' => 'booked_packets.apidatatable']);
     Route::patch('booked_packets/cancel/{id}', ['uses' => 'Admin\BookedPacketsController@cancel', 'as' => 'booked_packets.cancel']);

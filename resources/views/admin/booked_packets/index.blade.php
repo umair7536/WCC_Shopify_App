@@ -33,6 +33,7 @@
             <div class="actions">
                 @if(Gate::allows('booked_packets_create'))
                     <a class="btn btn-success" href="{{ route('admin.booked_packets.create') }}">@lang('global.app_add_new')</a>
+                    <a class="btn btn-success" href="{{ route('admin.booked_packets.sync_status') }}" data-toggle="modal">Sync Packet Statuses</a>
                 @endif
             </div>
         </div>
