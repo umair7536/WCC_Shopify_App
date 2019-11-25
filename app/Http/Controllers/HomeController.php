@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\Leopards\BookedPackets\FullSyncPacketStatusFire;
 use App\Events\Shopify\Products\SyncProductsFire;
 use App\Events\Shopify\Products\UploadVariantsFire;
 use App\Models\Accounts;
@@ -10,7 +9,6 @@ use App\Models\HeavyLifter;
 use App\Models\LeopardsSettings;
 use App\Models\ShopifyJobs;
 use Auth;
-use Config;
 
 class HomeController extends Controller
 {
@@ -31,17 +29,6 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $accounts = Accounts::where([
-            'suspended' => 0
-        ])->get();
-
-        if($accounts) {
-            foreach ($accounts as $account) {
-                event(new FullSyncPacketStatusFire($account));
-            }
-            echo 'Records found'; exit;
-        }
-
         return view('home');
     }
 
