@@ -248,7 +248,6 @@
                     Gate::allows('settings_manage') ||
                     Gate::allows('shopify_plans_manage') ||
                     Gate::allows('general_settings_manage') ||
-                    Gate::allows('shopify_webhooks_manage') ||
                     Gate::allows('ticket_statuses_manage')
 
                 )
@@ -256,7 +255,6 @@
                 $request->segment(2) == 'settings' ||
                 $request->segment(2) == 'shopify_plans' ||
                 $request->segment(2) == 'general_settings' ||
-                $request->segment(2) == 'shopify_webhooks' ||
                 $request->segment(2) == 'ticket_statuses'
             ) active open @endif">
                     <a href="javascript:;" class="nav-link nav-toggle">
@@ -283,13 +281,6 @@
                             <li class="nav-item start {{ $request->segment(2) == 'general_settings' ? 'active active-sub' : '' }}">
                                 <a href="{{ route('admin.general_settings.index') }}">
                                     <span class="title">@lang('global.general_settings.title')</span>
-                                </a>
-                            </li>
-                        @endif
-                        @if(Gate::allows('shopify_webhooks_manage'))
-                            <li class="nav-item start {{ $request->segment(2) == 'shopify_webhooks' ? 'active active-sub' : '' }}">
-                                <a href="{{ route('admin.shopify_webhooks.index') }}">
-                                    <span class="title">@lang('global.shopify_webhooks.title')</span>
                                 </a>
                             </li>
                         @endif

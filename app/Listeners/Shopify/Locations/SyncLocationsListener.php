@@ -2,11 +2,9 @@
 
 namespace App\Listeners\Shopify\Locations;
 
-use App\Events\Shopify\Products\SyncCustomersFire;
-use App\Models\ShopifyJobs;
+use App\Events\Shopify\Locations\SyncLocationsFire;
 use App\Models\ShopifyLocations;
 use App\Models\ShopifyShops;
-use Carbon\Carbon;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use ZfrShopify\ShopifyClient;
@@ -27,10 +25,10 @@ class SyncLocationsListener implements ShouldQueue
     /**
      * Handle the event.
      *
-     * @param  SyncCustomersFire  $event
+     * @param  SyncLocationsFire  $event
      * @return void
      */
-    public function handle(SyncCustomersFire $event)
+    public function handle(SyncLocationsFire $event)
     {
 
         try {

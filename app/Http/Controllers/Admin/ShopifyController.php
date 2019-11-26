@@ -333,7 +333,7 @@ class ShopifyController extends Controller
                             ]);
 
                             try {
-                                $shop = $total_records = $shopifyClient->getShop();
+                                $shop_live = $total_records = $shopifyClient->getShop();
                             } catch (\Exception $exception) {
                                 $message = $exception->getMessage();
                                 if(is_string($message) && strpos($message, '401 Unauthorized') !== false) {
