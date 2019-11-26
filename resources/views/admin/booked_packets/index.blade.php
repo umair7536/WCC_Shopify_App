@@ -138,8 +138,7 @@
     </div>
     <!-- End: Demo Datatable 1 -->
     <!--Add New View model Start-->
-    <div class="modal fade" id="ajax_booked_packets" role="basic" aria-hidden="true"
-         style=" left:10%; width: 80%; top:2%;">
+    <div class="modal fade" id="ajax_booked_packets" role="basic" aria-hidden="true" style=" left:10%; width: 80%; top:2%;">
         <div class="modal-content">
             <div class="modal-body">
                 <span> &nbsp;&nbsp;Loading... </span>
@@ -149,6 +148,15 @@
     <!--Add new View model End-->
     <!--Detail View model Start-->
     <div class="modal fade" id="ajax_booked_packets_detail" role="basic" aria-hidden="true"  style=" left:10%; width: 80%; top:2%;">
+        <div class="modal-content">
+            <div class="modal-body">
+                <span> &nbsp;&nbsp;Loading... </span>
+            </div>
+        </div>
+    </div>
+    <!--Detail View model End-->
+    <!--Detail View model Start-->
+    <div class="modal fade" id="ajax_booked_packets_fulfill" role="basic" aria-hidden="true"  style=" left:10%; width: 80%; top:2%;">
         <div class="modal-content">
             <div class="modal-body">
                 <span> &nbsp;&nbsp;Loading... </span>

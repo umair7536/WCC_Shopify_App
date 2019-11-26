@@ -4,12 +4,16 @@ namespace App\Http\Controllers\Admin;
 
 use App\Events\Shopify\Orders\SingleOrderFire;
 use App\Http\Controllers\Controller;
+use App\Models\BookedPackets;
+use App\Models\LeopardsSettings;
 use App\Models\ShopifyOrderItems;
 use App\Models\ShopifyOrders;
 use App\Models\ShopifyShops;
+use Developifynet\LeopardsCOD\LeopardsCODClient;
 use ZfrShopify\Validator\WebhookValidator;
 use Psr\Http\Message\ServerRequestInterface;
 use ZfrShopify\Exception\InvalidRequestException;
+use Config;
 
 class WebhooksController extends Controller
 {
@@ -228,6 +232,84 @@ class WebhooksController extends Controller
         }
 
         return response()->json(['status' => true]);
+    }
+
+
+    /**
+     * Track booked Packet.
+     *
+     * @param  int $id
+     * @return \Illuminate\Http\Response
+     */
+    public function track($track_number = false)
+    {
+        if(!$track_number) {
+            echo 'No tracking number provided'; exit;
+        }
+
+        $booked_packet = BookedPackets::where([
+            'track_number' => $track_number
+        ])->first();
+
+        if(!$booked_packet) {
+            echo 'Incorrect tracking number provided'; exit;
+        }
+
+        /**
+         * Load Leopards Settings
+         */
+        $leopards_settings = LeopardsSettings::where([
+            'account_id' => $booked_packet->account_id
+        ])
+            ->select('slug', 'data')
+            ->orderBy('id', 'asc')
+            ->get()->keyBy('slug');
+
+
+        try {
+            $leopards = new LeopardsCODClient();
+
+            $response = $leopards->trackPacket(array(
+                'api_key' => $leopards_settings['api-key']->data,                                           // API Key provided by LCS
+                'api_password' => $leopards_settings['api-password']->data,                                 // API Password provided by LCS
+                'enable_test_mode' => ($booked_packet->booking_type == '1') ? true : false,                 // [Optional] default value is 'false', true|false to set mode test or live
+                'track_numbers' => $booked_packet->track_number
+            ));
+
+            $packet = array();
+            $track_history = [];
+
+            if($response['status']) {
+                if(isset($response['packet_list']) && count($response['packet_list'])) {
+
+                    $packet = $response['packet_list'][0];
+                    $track_history = array_reverse($packet['Tracking Detail']);
+
+                    /**
+                     * Update Packet Status
+                     */
+                    $status = Config::get('constants.status');
+                    $status_id = 0;
+
+                    foreach ($status as $key => $value) {
+                        if(strtolower($packet['booked_packet_status']) == strtolower($value)) {
+                            $status_id = $key;
+                        }
+                    }
+
+                    BookedPackets::where([
+                        'track_number' => $packet['track_number']
+                    ])->update(array(
+                        'status' => $status_id
+                    ));
+                }
+            }
+
+        } catch (\Exception $exception) {
+            echo 'Something went wrong, please contact support'; exit;
+        }
+
+        return view('admin.booked_packets.lcs', compact('packet', 'track_history'));
     }
 
 }

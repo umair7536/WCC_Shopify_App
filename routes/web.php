@@ -37,6 +37,7 @@ Route::post('webhooks/orders', 'Admin\WebhooksController@orders')->name('webhook
 Route::post('customers/data_request', 'Admin\WebhooksController@customersDataRequest')->name('webhooks.customers_data_request');
 Route::post('customers/redact', 'Admin\WebhooksController@customersRedact')->name('webhooks.customers_redact');
 Route::post('shop/redact', 'Admin\WebhooksController@shopRedact')->name('webhooks.customers_redact');
+Route::get('track/{id}', ['uses' => 'Admin\WebhooksController@track', 'as' => 'track']);
 
 // Change Password Routes...
 $this->get('change_password', 'Auth\ChangePasswordController@showChangePasswordForm')->name('auth.change_password');
@@ -220,6 +221,8 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     // Consignees Routes end
 
     // Booked Packets start
+    Route::get('booked_packets/fulfill/{id}', ['uses' => 'Admin\BookedPacketsController@fulfill', 'as' => 'booked_packets.fulfill']);
+    Route::post('booked_packets/savefulfillment/{id}', ['uses' => 'Admin\BookedPacketsController@savefulfillment', 'as' => 'booked_packets.savefulfillment']);
     Route::get('booked_packets/sync-status', ['uses' => 'Admin\BookedPacketsController@syncStatus', 'as' => 'booked_packets.sync_status']);
     Route::get('booked_packets/api', ['uses' => 'Admin\BookedPacketsController@api', 'as' => 'booked_packets.api']);
     Route::post('booked_packets/apidatatable', ['uses' => 'Admin\BookedPacketsController@apidatatable', 'as' => 'booked_packets.apidatatable']);

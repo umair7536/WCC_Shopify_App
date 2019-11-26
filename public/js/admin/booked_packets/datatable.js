@@ -73,10 +73,19 @@ var TableDatatablesAjax = function () {
         })
     };
 
+    var setLoader = function (targetId) {
+        $('#' + targetId).html('<div class="modal-content">\n' +
+            '            <div class="modal-body">\n' +
+            '                <span> &nbsp;&nbsp;Loading... </span>\n' +
+            '            </div>\n' +
+            '        </div>');
+    };
+
     return {
         init: function () {
             a(), e();
-        }
+        },
+        setLoader: setLoader
     }
 }();
 jQuery(document).ready(function () {

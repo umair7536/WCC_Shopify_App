@@ -9,6 +9,9 @@ use App\Models\BookedPackets;
 use App\Models\LeopardsCities;
 use App\Models\LeopardsSettings;
 use App\Models\Shippers;
+use App\Models\ShopifyLocations;
+use App\Models\ShopifyOrders;
+use App\Models\ShopifyShops;
 use Carbon\Carbon;
 use Developifynet\LeopardsCOD\LeopardsCOD;
 use Developifynet\LeopardsCOD\LeopardsCODClient;
@@ -19,6 +22,7 @@ use App\Http\Controllers\Controller;
 use Auth;
 use Config;
 use Validator;
+use ZfrShopify\ShopifyClient;
 
 class BookedPacketsController extends Controller
 {
@@ -506,6 +510,181 @@ class BookedPacketsController extends Controller
 
         return view('admin.booked_packets.detail', compact('booked_packet', 'shipment_type', 'leopards_cities'));
     }
+
+    /**
+     * Show Lead detail.
+     *
+     * @param  int $id
+     * @return \Illuminate\Http\Response
+     */
+    public function fulfill($id)
+    {
+        if (!Gate::allows('booked_packets_manage')) {
+            return abort(401);
+        }
+
+        $booked_packet = BookedPackets::where([
+            ['id','=',$id],
+            ['account_id','=', Auth::User()->account_id]
+        ])->first();
+
+        if(!$booked_packet) {
+            return view('error');
+        }
+
+        $shopify_order = ShopifyOrders::where([
+            ['order_number','=',$booked_packet->order_id],
+            ['account_id','=', Auth::User()->account_id]
+        ])
+            ->select('order_id')
+            ->first();
+
+        /**
+         * Fulfill this order
+         */
+        $shop = ShopifyShops::where([
+            'account_id' => Auth::User()->account_id
+        ])->first();
+
+        $fullfilments = array();
+
+        if($shop) {
+
+            try {
+                $shopifyClient = new ShopifyClient([
+                    'private_app' => false,
+                    'api_key' => env('SHOPIFY_APP_API_KEY'), // In public app, this is the app ID
+                    'version' => env('SHOPIFY_API_VERSION'), // Put API Version
+                    'access_token' => $shop->access_token,
+                    'shop' => $shop->myshopify_domain
+                ]);
+
+                $fullfilments = $shopifyClient->getFulfillments([
+                    'order_id' => (int) $shopify_order->order_id
+                ]);
+            } catch (\Exception $exception) {
+
+            }
+        }
+
+        if(count($fullfilments)) {
+            return view('admin.booked_packets.already_fulfilled', compact('booked_packet', 'shopify_locations', 'fullfilments', 'shopify_order'));
+        } else {
+            $shopify_locations = ShopifyLocations::where([
+                'account_id' => Auth::User()->account_id
+            ])->get()->pluck('name', 'location_id');
+
+            return view('admin.booked_packets.fulfill', compact('booked_packet', 'shopify_locations', 'fullfilments', 'shopify_order'));
+        }
+    }
+
+    /**
+     * Store Fulfillment.
+     *
+     * @param  \Illuminate\Http\Request $request
+     * @param int $id
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function savefulfillment(Request $request, $id)
+    {
+        if (! Gate::allows('booked_packets_manage')) {
+            return abort(401);
+        }
+
+        $validator = $this->verifyFulfillment($request);
+
+        if ($validator->fails()) {
+            return response()->json(array(
+                'status' => 0,
+                'message' => $validator->messages()->all(),
+            ));
+        }
+
+        $booked_packet = BookedPackets::where([
+            'track_number' => $request->get('track_number')
+        ])->first();
+
+        if(!$booked_packet) {
+            return response()->json(array(
+                'status' => 0,
+                'message' => ['Invalid packet provided'],
+            ));
+        }
+
+        /**
+         * Fulfill this order
+         */
+        $shop = ShopifyShops::where([
+            'account_id' => Auth::User()->account_id
+        ])->first();
+
+        $fulfillment = array();
+
+        if($shop) {
+            try {
+                $shopifyClient = new ShopifyClient([
+                    'private_app' => false,
+                    'api_key' => env('SHOPIFY_APP_API_KEY'), // In public app, this is the app ID
+                    'version' => env('SHOPIFY_API_VERSION'), // Put API Version
+                    'access_token' => $shop->access_token,
+                    'shop' => $shop->myshopify_domain
+                ]);
+
+                $fulfillment = $shopifyClient->createFulfillment(array(
+                    'order_id' => (int) $request->get('order_id'),
+                    'location_id' => $request->get('location_id'),
+                    'tracking_number' => $request->get('track_number'),
+                    'tracking_company' => 'Leopards Courier Services',
+                    'notify_customer' => ($request->get('notify_customer') == '1') ? true : false,
+                    'tracking_urls' => array(
+                        $request->get('tracking_url')
+                    ),
+                ));
+
+                flash('Order is fulfilled successfully.')->success()->important();
+
+                return response()->json(array(
+                    'status' => 1,
+                    'message' => 'Order is fulfilled successfully.',
+                ));
+            } catch (\Exception $exception) {
+                $error = ['Error in fulfilment, Please select proper location where this inventory exists'];
+                $message = $exception->getMessage();
+                $message = json_decode(substr($message, strpos($message, '{')), true);
+                if(is_array($message)) {
+                    if(isset($message['errors']) && isset($message['errors']['base'])) {
+                        $error = $message['errors']['base'];
+                    }
+                }
+
+                flash('Order is fulfilled successfully.')->success()->important();
+
+                return response()->json(array(
+                    'status' => 0,
+                    'message' => $error,
+                ));
+
+            }
+        }
+    }
+
+    /**
+     * Validate fulfillment fields
+     *
+     * @param  \Illuminate\Http\Request $request
+     * @return Validator $validator;
+     */
+    protected function verifyFulfillment(Request $request)
+    {
+        return $validator = Validator::make($request->all(), [
+            'order_id' => 'required|numeric',
+            'location_id' => 'required',
+            'track_number' => 'required',
+            'tracking_url' => 'required',
+        ]);
+    }
+
 
     /**
      * Track booked Packet.
