@@ -68,7 +68,8 @@ class HomeController extends Controller
         ))->forceDelete();
 
         ShopifyJobs::where(array(
-            'account_id' => Auth::User()->account_id
+            'account_id' => Auth::User()->account_id,
+            'is_processing' => 0,
         ))->forceDelete();
 
         flash('Quese is flushed successfully.')->success()->important();
