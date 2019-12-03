@@ -44,19 +44,31 @@ class SyncCustomCollections extends Command
 
             $jobs = ShopifyJobs
                 ::where([
-                    'attempts' => 0,
+                    'is_processing' => 0,
                     'type' => 'sync-custom-collections'
                 ])
                 ->offset(0)
-                ->limit(4)
+                ->limit(1)
                 ->orderBy('id', 'asc')
                 ->get();
 
             if($jobs) {
                 foreach ($jobs as $job) {
+
+                    /**
+                     * Put current job in processing state
+                     */
+                    ShopifyJobs::where([
+                        'id' => $job->id
+                    ])->update([
+                        'is_processing' => 1,
+                    ]);
+
                     $payload = json_decode($job->payload, true);
-                    $result = $this->syncCustomCollections($payload['offset'], $payload['records_per_page'], $payload['shop']);
+                    $result = $this->syncCustomCollections($payload['shop']);
+
                     echo 'Result is: ' . ($result) ? 'true' : 'false';
+
                     if($result) {
                         ShopifyJobs::where([
                             'id' => $job->id
@@ -85,7 +97,7 @@ class SyncCustomCollections extends Command
      *
      * @return: true|false
      */
-    private function syncCustomCollections($offset, $records_per_page, $shop) {
+    private function syncCustomCollections($shop) {
         if($shop['access_token']) {
             $shopifyClient = new ShopifyClient([
                 'private_app' => false,
@@ -95,41 +107,36 @@ class SyncCustomCollections extends Command
                 'shop' => $shop['myshopify_domain']
             ]);
 
-            $custom_collections = $shopifyClient->getCustomCollections([
-                'limit' => $records_per_page,
-                'page' => $offset
+            $custom_collections = $shopifyClient->getCustomCollectionsIterator([
+                'since_id' => 0
             ]);
 
-            echo 'Limit: ' . $records_per_page . "\n";
-            echo 'Offset: ' . $offset . "\n";
+            foreach ($custom_collections as $custom_collection) {
+                if(!isset($custom_collection['id'])) {
+                    break;
+                }
 
-            if(count($custom_collections)) {
+                /*
+                 * Prepare record before insert
+                 */
+                $custom_collection['collection_id'] = $custom_collection['id'];
+                unset($custom_collection['id']);
+                $custom_collection_processed = ShopifyCustomCollections::prepareRecord($custom_collection);
+                $custom_collection_processed['account_id'] = $shop['account_id'];
 
-                foreach ($custom_collections as $custom_collection) {
-                    /*
-                     * Prepare record before insert
-                     */
-                    $custom_collection['collection_id'] = $custom_collection['id'];
-                    unset($custom_collection['id']);
-                    $custom_collection_processed = ShopifyCustomCollections::prepareRecord($custom_collection);
-                    $custom_collection_processed['account_id'] = $shop['account_id'];
+                $custom_collection_record = ShopifyCustomCollections::where([
+                    'collection_id' => $custom_collection_processed['collection_id'],
+                    'account_id' => $custom_collection_processed['account_id'],
+                ])->select('id')->first();
 
-                    $custom_collection_record = ShopifyCustomCollections::where([
+                if($custom_collection_record) {
+                    ShopifyCustomCollections::where([
                         'collection_id' => $custom_collection_processed['collection_id'],
                         'account_id' => $custom_collection_processed['account_id'],
-                    ])->select('id')->first();
-
-                    if($custom_collection_record) {
-                        ShopifyCustomCollections::where([
-                            'collection_id' => $custom_collection_processed['collection_id'],
-                            'account_id' => $custom_collection_processed['account_id'],
-                        ])->update($custom_collection_processed);
-                    } else {
-                        ShopifyCustomCollections::create($custom_collection_processed);
-                    }
+                    ])->update($custom_collection_processed);
+                } else {
+                    ShopifyCustomCollections::create($custom_collection_processed);
                 }
-            } else {
-                echo 'No Custom Collection fetched' . "\n";
             }
         }
 

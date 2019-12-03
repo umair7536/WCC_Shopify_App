@@ -45,19 +45,31 @@ class SyncCollects extends Command
 
             $jobs = ShopifyJobs
                 ::where([
-                    'attempts' => 0,
+                    'is_processing' => 0,
                     'type' => 'sync-collects'
                 ])
                 ->offset(0)
-                ->limit(4)
+                ->limit(1)
                 ->orderBy('id', 'asc')
                 ->get();
 
             if($jobs) {
                 foreach ($jobs as $job) {
+
+                    /**
+                     * Put current job in processing state
+                     */
+                    ShopifyJobs::where([
+                        'id' => $job->id
+                    ])->update([
+                        'is_processing' => 1,
+                    ]);
+
                     $payload = json_decode($job->payload, true);
-                    $result = $this->syncCollects($payload['offset'], $payload['records_per_page'], $payload['shop']);
+                    $result = $this->syncCollects($payload['shop']);
+
                     echo 'Result is: ' . ($result) ? 'true' : 'false';
+
                     if($result) {
                         ShopifyJobs::where([
                             'id' => $job->id
@@ -86,7 +98,7 @@ class SyncCollects extends Command
      *
      * @return: true|false
      */
-    private function syncCollects($offset, $records_per_page, $shop) {
+    private function syncCollects($shop) {
         if($shop['access_token']) {
             $shopifyClient = new ShopifyClient([
                 'private_app' => false,
@@ -96,41 +108,36 @@ class SyncCollects extends Command
                 'shop' => $shop['myshopify_domain']
             ]);
 
-            $collects = $shopifyClient->getCollects([
-                'limit' => $records_per_page,
-                'page' => $offset
+            $collects = $shopifyClient->getCollectsIterator([
+                'since_id' => 0
             ]);
 
-            echo 'Limit: ' . $records_per_page . "\n";
-            echo 'Offset: ' . $offset . "\n";
+            foreach ($collects as $collect) {
+                if(!isset($collect['id'])) {
+                    break;
+                }
 
-            if(count($collects)) {
+                /*
+                 * Prepare record before insert
+                 */
+                $collect['collect_id'] = $collect['id'];
+                unset($collect['id']);
+                $collect_processed = ShopifyCollects::prepareRecord($collect);
+                $collect_processed['account_id'] = $shop['account_id'];
 
-                foreach ($collects as $collect) {
-                    /*
-                     * Prepare record before insert
-                     */
-                    $collect['collect_id'] = $collect['id'];
-                    unset($collect['id']);
-                    $collect_processed = ShopifyCollects::prepareRecord($collect);
-                    $collect_processed['account_id'] = $shop['account_id'];
+                $collect_record = ShopifyCollects::where([
+                    'collect_id' => $collect_processed['collect_id'],
+                    'account_id' => $collect_processed['account_id'],
+                ])->select('id')->first();
 
-                    $collect_record = ShopifyCollects::where([
+                if($collect_record) {
+                    ShopifyCollects::where([
                         'collect_id' => $collect_processed['collect_id'],
                         'account_id' => $collect_processed['account_id'],
-                    ])->select('id')->first();
-
-                    if($collect_record) {
-                        ShopifyCollects::where([
-                            'collect_id' => $collect_processed['collect_id'],
-                            'account_id' => $collect_processed['account_id'],
-                        ])->update($collect_processed);
-                    } else {
-                        ShopifyCollects::create($collect_processed);
-                    }
+                    ])->update($collect_processed);
+                } else {
+                    ShopifyCollects::create($collect_processed);
                 }
-            } else {
-                echo 'No Custom Collection fetched' . "\n";
             }
         }
 

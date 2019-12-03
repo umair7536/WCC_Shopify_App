@@ -51,37 +51,23 @@ class SyncCollectsListener implements ShouldQueue
                 echo 'total records: ' . $total_records;
 
                 if($total_records) {
-                    $records_per_page = 250;
 
-                    $total_calls = ceil($total_records / $records_per_page);
+                    /**
+                     * Payload
+                     */
+                    $payload = array(
+                        'shop' => $shop->toArray(),
+                    );
 
-                    if($total_calls) {
+                    $shopify_jobs[] = array(
+                        'payload' => json_encode($payload),
+                        'type' => 'sync-collects',
+                        'created_at' => Carbon::now()->toDateTimeString(),
+                        'available_at' => Carbon::now()->toDateTimeString(),
+                        'account_id' => $shop->account_id,
+                    );
 
-                        $shopify_jobs = [];
-
-                        for($i = 1; $i <= $total_calls; $i++) {
-                            $offset = $i;
-
-                            /**
-                             * Payload
-                             */
-                            $payload = array(
-                                'offset' => $offset,
-                                'records_per_page' => $records_per_page,
-                                'shop' => $shop->toArray(),
-                            );
-
-                            $shopify_jobs[$i] = array(
-                                'payload' => json_encode($payload),
-                                'type' => 'sync-collects',
-                                'created_at' => Carbon::now()->toDateTimeString(),
-                                'available_at' => Carbon::now()->toDateTimeString(),
-                                'account_id' => $shop->account_id,
-                            );
-                        }
-
-                        ShopifyJobs::insert($shopify_jobs);
-                    }
+                    ShopifyJobs::insert($shopify_jobs);
                 }
 
                 echo 'Queue dispatched for sync products';

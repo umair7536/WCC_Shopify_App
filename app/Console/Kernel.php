@@ -55,7 +55,6 @@ class Kernel extends ConsoleKernel
          * Sync Customers from Shopify
          */
         $schedule->command('shopify:sync-customers')
-            ->withoutOverlapping()
             ->everyMinute();
 
         /*
@@ -83,7 +82,6 @@ class Kernel extends ConsoleKernel
          * Sync Customers from Shopify
          */
         $schedule->command('shopify:sync-orders')
-            ->withoutOverlapping()
             ->everyMinute();
 
         /*

@@ -51,19 +51,31 @@ class SyncProducts extends Command
 
             $jobs = ShopifyJobs
                 ::where([
-                    'attempts' => 0,
+                    'is_processing' => 0,
                     'type' => 'sync-products'
                 ])
                 ->offset(0)
-                ->limit(4)
+                ->limit(1)
                 ->orderBy('id', 'asc')
                 ->get();
 
             if($jobs) {
                 foreach ($jobs as $job) {
+
+                    /**
+                     * Put current job in processing state
+                     */
+                    ShopifyJobs::where([
+                        'id' => $job->id
+                    ])->update([
+                        'is_processing' => 1,
+                    ]);
+
                     $payload = json_decode($job->payload, true);
-                    $result = $this->syncProducts($payload['offset'], $payload['records_per_page'], $payload['shop']);
+                    $result = $this->syncProducts($payload['shop']);
+
                     echo 'Result is: ' . ($result) ? 'true' : 'false';
+
                     if($result) {
                         ShopifyJobs::where([
                             'id' => $job->id
@@ -78,8 +90,6 @@ class SyncProducts extends Command
             echo "\n";
             echo "\n";
         }
-
-        return true;
     }
 
 
@@ -90,7 +100,7 @@ class SyncProducts extends Command
      *
      * @return: true|false
      */
-    private function syncProducts($offset, $records_per_page, $shop) {
+    private function syncProducts($shop) {
         if($shop['access_token']) {
             $shopifyClient = new ShopifyClient([
                 'private_app' => false,
@@ -100,285 +110,188 @@ class SyncProducts extends Command
                 'shop' => $shop['myshopify_domain']
             ]);
 
-            $products = $shopifyClient->getProducts([
-                'limit' => $records_per_page,
-                'page' => $offset
+            $products = $shopifyClient->getProductsIterator([
+                'since_id' => 0
             ]);
 
-            echo 'Limit: ' . $records_per_page . "\n";
-            echo 'Offset: ' . $offset . "\n";
+            foreach ($products as $product) {
+                if(!isset($product['id'])) {
+                    break;
+                }
 
-            if(count($products)) {
+                /*
+                 * Prepare record before insert
+                 */
+                $product['product_id'] = $product['id'];
+                unset($product['id']);
+                $product_processed = ShopifyProducts::prepareRecord($product);
+                $product_processed['account_id'] = $shop['account_id'];
 
-                //echo 'Total Products: ' . count($products) . "\n";
+                $product_record = ShopifyProducts::where([
+                    'product_id' => $product_processed['product_id'],
+                    'account_id' => $product_processed['account_id'],
+                ])->select('id')->first();
 
-                foreach ($products as $product) {
-
-                    //echo '---- Product Start ----' . "\n";
-
-                    /*
-                     * Prepare record before insert
-                     */
-                    $product['product_id'] = $product['id'];
-                    unset($product['id']);
-                    $product_processed = ShopifyProducts::prepareRecord($product);
-                    $product_processed['account_id'] = $shop['account_id'];
-
-                    $product_record = ShopifyProducts::where([
+                if($product_record) {
+                    //echo 'Product Updated: ' . $product_processed['title'] . "\n";
+                    ShopifyProducts::where([
                         'product_id' => $product_processed['product_id'],
                         'account_id' => $product_processed['account_id'],
-                    ])->select('id')->first();
+                    ])->update($product_processed);
+                } else {
+                    //echo 'Product Created: ' . $product_processed['title'] . "\n";
+                    ShopifyProducts::create($product_processed);
+                }
 
-                    if($product_record) {
-                        //echo 'Product Updated: ' . $product_processed['title'] . "\n";
-                        ShopifyProducts::where([
-                            'product_id' => $product_processed['product_id'],
+                /*
+                 * Create Tag based on Product Tags
+                 */
+                $tags = explode(', ', $product['tags']);
+
+                if(count($tags)) {
+
+                    $tags_for_relationshop = [];
+
+                    foreach ($tags as $tag) {
+
+                        $tag_processed = array(
                             'account_id' => $product_processed['account_id'],
-                        ])->update($product_processed);
-                    } else {
-                        //echo 'Product Created: ' . $product_processed['title'] . "\n";
-                        ShopifyProducts::create($product_processed);
-                    }
+                            'name' => $tag,
+                            'active' => 1,
+                            'updated_at' => Carbon::now()->toDateTimeString(),
+                        );
 
-                    /*
-                     * Create Tag based on Product Tags
-                     */
-                    $tags = explode(', ', $product['tags']);
+                        $tag_record = ShopifyTags::where([
+                            'name' => $tag,
+                            'account_id' => $product_processed['account_id'],
+                        ])->select('id')->first();
 
-                    if(count($tags)) {
-
-                        $tags_for_relationshop = [];
-
-                        foreach ($tags as $tag) {
-
-                            $tag_processed = array(
-                                'account_id' => $product_processed['account_id'],
-                                'name' => $tag,
-                                'active' => 1,
-                                'updated_at' => Carbon::now()->toDateTimeString(),
-                            );
-
-                            $tag_record = ShopifyTags::where([
+                        if($tag_record) {
+                            //echo 'Tag Updated: ' . $tag . "\n";
+                            ShopifyTags::where([
                                 'name' => $tag,
                                 'account_id' => $product_processed['account_id'],
-                            ])->select('id')->first();
-
-                            if($tag_record) {
-                                //echo 'Tag Updated: ' . $tag . "\n";
-                                ShopifyTags::where([
-                                    'name' => $tag,
-                                    'account_id' => $product_processed['account_id'],
-                                ])->update($tag_processed);
-                            } else {
-                                //echo 'Tag Created: ' . $tag . "\n";
-                                $tag_processed['created_at'] = Carbon::now()->toDateTimeString();
-                                $tag_record = ShopifyTags::create($tag_processed);
-                            }
-
-                            /*
-                             * Prepare Product Tag Relationshops
-                             */
-                            $tags_for_relationshop[] = array(
-                                'product_id' => $product_processed['product_id'],
-                                'account_id' => $product_processed['account_id'],
-                                'tag_id' => $tag_record->id,
-                            );
+                            ])->update($tag_processed);
+                        } else {
+                            //echo 'Tag Created: ' . $tag . "\n";
+                            $tag_processed['created_at'] = Carbon::now()->toDateTimeString();
+                            $tag_record = ShopifyTags::create($tag_processed);
                         }
 
                         /*
-                         * Delete previous added product tags
+                         * Prepare Product Tag Relationshops
                          */
-                        ShopifyProductTags::where([
+                        $tags_for_relationshop[] = array(
                             'product_id' => $product_processed['product_id'],
-                            'account_id' => $shop['account_id'],
-                        ])->delete();
-
-                        if(count($tags_for_relationshop)) {
-                            ShopifyProductTags::insert($tags_for_relationshop);
-                        }
-                    }
-
-
-                    /*
-                     * Sync Product Images
-                     */
-                    if(count($product['images'])) {
-
-                        $images = [];
-
-                        /**
-                         * Delete records
-                         */
-                        ShopifyProductImages::where(array(
-                            'product_id' => $product['product_id'],
-                            'account_id' => $shop['account_id'],
-                        ))->forceDelete();
-
-                        foreach($product['images'] as $image) {
-
-                            $image['image_id'] = $image['id'];
-                            unset($image['id']);
-                            $image_processed = ShopifyProductImages::prepareRecord($image);
-                            $image_processed['account_id'] = $shop['account_id'];
-
-                            $images[$image['image_id']] = $image_processed;
-                        }
-
-                        if(count($images)) {
-                            ShopifyProductImages::insert($images);
-                        }
-
-//                        foreach($product['images'] as $image) {
-//                            dd($image);
-//                            /*
-//                             * Prepare record before insert
-//                             */
-//                            $image['image_id'] = $image['id'];
-//                            unset($image['id']);
-//                            $image_processed = ShopifyProductImages::prepareRecord($image);
-//                            $image_processed['account_id'] = $shop['account_id'];
-//
-//                            $image_record = ShopifyProductImages::where([
-//                                'image_id' => $image_processed['image_id'],
-//                                'account_id' => $image_processed['account_id'],
-//                            ])->first();
-//
-//                            if($image_record) {
-//                                ////echo 'Image Updated: ' . $image_processed['image_id'] . "\n";
-//                                ShopifyProductImages::where([
-//                                    'image_id' => $image_processed['image_id'],
-//                                    'account_id' => $image_processed['account_id'],
-//                                ])->update($image_processed);
-//                            } else {
-//                                //echo 'Image Created: ' . $image_processed['image_id'] . "\n";
-//                                ShopifyProductImages::create($image_processed);
-//                            }
-//                        }
+                            'account_id' => $product_processed['account_id'],
+                            'tag_id' => $tag_record->id,
+                        );
                     }
 
                     /*
-                     * Sync Product Options
+                     * Delete previous added product tags
                      */
-                    if(count($product['options'])) {
+                    ShopifyProductTags::where([
+                        'product_id' => $product_processed['product_id'],
+                        'account_id' => $shop['account_id'],
+                    ])->delete();
 
-                        $options = [];
-
-                        /**
-                         * Delete records
-                         */
-                        ShopifyProductOptions::where(array(
-                            'product_id' => $product['product_id'],
-                            'account_id' => $shop['account_id'],
-                        ))->forceDelete();
-
-                        foreach($product['options'] as $option) {
-
-                            $option['option_id'] = $option['id'];
-                            unset($option['id']);
-                            $option_processed = ShopifyProductOptions::prepareRecord($option);
-                            $option_processed['account_id'] = $shop['account_id'];
-
-                            $options[$option['option_id']] = $option_processed;
-                        }
-
-                        if(count($options)) {
-                            ShopifyProductOptions::insert($options);
-                        }
-
-//                        foreach($product['options'] as $option) {
-//                            /*
-//                             * Prepare record before insert
-//                             */
-//                            $option['option_id'] = $option['id'];
-//                            unset($option['id']);
-//                            $option_processed = ShopifyProductOptions::prepareRecord($option);
-//                            $option_processed['account_id'] = $shop['account_id'];
-//
-//                            $option_record = ShopifyProductOptions::where([
-//                                'option_id' => $option_processed['option_id'],
-//                                'account_id' => $option_processed['account_id'],
-//                            ])->first();
-//
-//                            if($option_record) {
-//
-//                                //echo 'Option Updated: ' . $option_processed['option_id'] . "\n";
-//
-//                                ShopifyProductOptions::where([
-//                                    'option_id' => $option_processed['option_id'],
-//                                    'account_id' => $option_processed['account_id'],
-//                                ])->update($option_processed);
-//                            } else {
-//
-//                                //echo 'Option Created: ' . $option_processed['option_id'] . "\n";
-//
-//                                ShopifyProductOptions::create($option_processed);
-//                            }
-//                        }
+                    if(count($tags_for_relationshop)) {
+                        ShopifyProductTags::insert($tags_for_relationshop);
                     }
-
-                    /*
-                     * Sync Product Variants
-                     */
-                    if(count($product['variants'])) {
-
-                        $variants = [];
-
-                        /**
-                         * Delete records
-                         */
-                        ShopifyProductVariants::where(array(
-                            'product_id' => $product['product_id'],
-                            'account_id' => $shop['account_id'],
-                        ))->forceDelete();
-
-                        foreach($product['variants'] as $variant) {
-                            $variant['variant_id'] = $variant['id'];
-                            unset($variant['id']);
-                            $variant_processed = ShopifyProductVariants::prepareRecord($variant);
-                            $variant_processed['account_id'] = $shop['account_id'];
-
-                            $variants[$variant['variant_id']] = $variant_processed;
-                        }
-
-                        if(count($variants)) {
-                            ShopifyProductVariants::insert($variants);
-                        }
-
-//                        foreach($product['variants'] as $variant) {
-//                            /*
-//                             * Prepare record before insert
-//                             */
-//                            $variant['variant_id'] = $variant['id'];
-//                            unset($variant['id']);
-//                            $variant_processed = ShopifyProductVariants::prepareRecord($variant);
-//                            $variant_processed['account_id'] = $shop['account_id'];
-//
-//                            $variant_record = ShopifyProductVariants::where([
-//                                'variant_id' => $variant_processed['variant_id'],
-//                                'account_id' => $variant_processed['account_id'],
-//                            ])->first();
-//
-//                            if($variant_record) {
-//
-//                                //echo 'Variant Updated: ' . $variant_processed['variant_id'] . "\n";
-//
-//                                ShopifyProductVariants::where([
-//                                    'variant_id' => $variant_processed['variant_id'],
-//                                    'account_id' => $variant_processed['account_id'],
-//                                ])->update($variant_processed);
-//                            } else {
-//
-//                                //echo 'Variant Created: ' . $variant_processed['variant_id'] . "\n";
-//
-//                                ShopifyProductVariants::create($variant_processed);
-//                            }
-//                        }
-                    }
-
-                    //echo '---- Product End ----' . "\n\n\n";
                 }
-            } else {
-                echo 'No Products fetched' . "\n";
+
+
+                /*
+                 * Sync Product Images
+                 */
+                if(count($product['images'])) {
+
+                    $images = [];
+
+                    /**
+                     * Delete records
+                     */
+                    ShopifyProductImages::where(array(
+                        'product_id' => $product['product_id'],
+                        'account_id' => $shop['account_id'],
+                    ))->forceDelete();
+
+                    foreach($product['images'] as $image) {
+
+                        $image['image_id'] = $image['id'];
+                        unset($image['id']);
+                        $image_processed = ShopifyProductImages::prepareRecord($image);
+                        $image_processed['account_id'] = $shop['account_id'];
+
+                        $images[$image['image_id']] = $image_processed;
+                    }
+
+                    if(count($images)) {
+                        ShopifyProductImages::insert($images);
+                    }
+                }
+
+                /*
+                 * Sync Product Options
+                 */
+                if(count($product['options'])) {
+
+                    $options = [];
+
+                    /**
+                     * Delete records
+                     */
+                    ShopifyProductOptions::where(array(
+                        'product_id' => $product['product_id'],
+                        'account_id' => $shop['account_id'],
+                    ))->forceDelete();
+
+                    foreach($product['options'] as $option) {
+
+                        $option['option_id'] = $option['id'];
+                        unset($option['id']);
+                        $option_processed = ShopifyProductOptions::prepareRecord($option);
+                        $option_processed['account_id'] = $shop['account_id'];
+
+                        $options[$option['option_id']] = $option_processed;
+                    }
+
+                    if(count($options)) {
+                        ShopifyProductOptions::insert($options);
+                    }
+                }
+
+                /*
+                 * Sync Product Variants
+                 */
+                if(count($product['variants'])) {
+
+                    $variants = [];
+
+                    /**
+                     * Delete records
+                     */
+                    ShopifyProductVariants::where(array(
+                        'product_id' => $product['product_id'],
+                        'account_id' => $shop['account_id'],
+                    ))->forceDelete();
+
+                    foreach($product['variants'] as $variant) {
+                        $variant['variant_id'] = $variant['id'];
+                        unset($variant['id']);
+                        $variant_processed = ShopifyProductVariants::prepareRecord($variant);
+                        $variant_processed['account_id'] = $shop['account_id'];
+
+                        $variants[$variant['variant_id']] = $variant_processed;
+                    }
+
+                    if(count($variants)) {
+                        ShopifyProductVariants::insert($variants);
+                    }
+                }
+
+                //echo '---- Product End ----' . "\n\n\n";
             }
         }
 

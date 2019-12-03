@@ -44,19 +44,31 @@ class SyncOrders extends Command
 
             $jobs = ShopifyJobs
                 ::where([
-                    'attempts' => 0,
+                    'is_processing' => 0,
                     'type' => 'sync-orders'
                 ])
                 ->offset(0)
-                ->limit(4)
+                ->limit(1)
                 ->orderBy('id', 'asc')
                 ->get();
 
             if($jobs) {
                 foreach ($jobs as $job) {
+
+                    /**
+                     * Put current job in processing state
+                     */
+                    ShopifyJobs::where([
+                        'id' => $job->id
+                    ])->update([
+                        'is_processing' => 1,
+                    ]);
+
                     $payload = json_decode($job->payload, true);
-                    $result = $this->syncOrders($payload['offset'], $payload['records_per_page'], $payload['shop']);
+                    $result = $this->syncOrders($payload['shop']);
+
                     echo 'Result is: ' . ($result) ? 'true' : 'false';
+
                     if($result) {
                         ShopifyJobs::where([
                             'id' => $job->id
@@ -73,8 +85,6 @@ class SyncOrders extends Command
             echo "\n";
             echo "\n";
         }
-
-        return true;
     }
 
 
@@ -85,7 +95,7 @@ class SyncOrders extends Command
      *
      * @return: true|false
      */
-    private function syncOrders($offset, $records_per_page, $shop) {
+    private function syncOrders($shop) {
         if($shop['access_token']) {
             $shopifyClient = new ShopifyClient([
                 'private_app' => false,
@@ -95,22 +105,16 @@ class SyncOrders extends Command
                 'shop' => $shop['myshopify_domain']
             ]);
 
-            $orders = $shopifyClient->getOrders([
-                'limit' => $records_per_page,
-                'page' => $offset
+            $orders = $shopifyClient->getOrdersIterator([
+                'since_id' => 0
             ]);
 
-            echo 'Limit: ' . $records_per_page . "\n";
-            echo 'Offset: ' . $offset . "\n";
-
-            if(count($orders)) {
-
-                foreach ($orders as $order) {
-
-                    ShopifyHelper::syncSingleOrder($order, $shop);
+            foreach ($orders as $order) {
+                if(!isset($order['id'])) {
+                    break;
                 }
-            } else {
-                echo 'No Orders fetched' . "\n";
+
+                ShopifyHelper::syncSingleOrder($order, $shop);
             }
         }
 
