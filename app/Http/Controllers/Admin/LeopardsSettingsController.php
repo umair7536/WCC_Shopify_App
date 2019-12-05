@@ -6,6 +6,7 @@ use App\Events\Leopards\SyncLeopardsCitiesFire;
 use App\Helpers\Leopards;
 use App\Models\Accounts;
 use App\Models\LeopardsSettings;
+use Developifynet\LeopardsCOD\LeopardsCODClient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
@@ -85,7 +86,7 @@ class LeopardsSettingsController extends Controller
         if (!$response['status']) {
             return response()->json(array(
                 'status' => 0,
-                'message' => ['Credentials are invalid, Please check your credentials.'],
+                'message' => ( isset($response['message']) && $response['message']) ? [$response['message']] : ['User ID and Password are incorrect, Please enter correct credentials.'],
             ));
         } else {
             $data = $request->all();
@@ -138,6 +139,22 @@ class LeopardsSettingsController extends Controller
             'status' => false,
             'company_id' => false,
         );
+
+        /**
+         * Grab Cities List
+         */
+        $leopard_client = new LeopardsCODClient();
+        $cities = $leopard_client->getAllCities(array(
+            'api_key' => $request->get('api-key'),
+            'api_password' => $request->get('api-password'),
+            'enable_test_mode' => false
+        ));
+        if(!$cities['status']) {
+            $data['status'] = false;
+            $data['message'] = 'Your API Key and API Passwords are incorrect.';
+
+            return $data;
+        }
 
         /**
          * Grab Company ID
