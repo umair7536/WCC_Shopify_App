@@ -30,9 +30,8 @@ var TableDatatablesAjax = function () {
                     { "data": "id","bSortable": false },
                     { "data": "name" },
                     { "data": "closed_at" },
-                    { "data": "customer_name" },
                     { "data": "customer_email" },
-                    { "data": "customer_phone" },
+                    { "data": "financial_status" },
                     { "data": "fulfillment_status" },
                     { "data": "actions","bSortable": false }
                 ],

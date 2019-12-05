@@ -103,37 +103,35 @@ class ShopifyOrders extends BaseModal
      */
     static public function getTotalRecords(Request $request, $account_id = false)
     {
-        $where = array();
+        $query = self::where('account_id', '=', $account_id);
 
-        if($account_id) {
-            $where[] = array(
-                'account_id',
-                '=',
-                $account_id
-            );
+        if($request->get('name')) {
+            $query->where('name', 'like', '%' . $request->get('name') . '%');
         }
 
-        if($request->get('title')) {
-            $where[] = array(
-                'title',
-                'like',
-                '%' . $request->get('title') . '%'
-            );
+        if($request->get('customer_email')) {
+
+            $like = $request->get('customer_email');
+            $customer_query = ShopifyCustomers::where('account_id', '=', Auth::User()->account_id);
+            $customer_query->where(function ($sub_query) use ($like) {
+                $sub_query->where('name', 'LIKE', '%' . $like . '%');
+                $sub_query->orWhere('email', 'LIKE', '%' . $like . '%');
+                $sub_query->orWhere('phone', 'LIKE', '%' . $like . '%');
+            });
+
+            $query_customers = $customer_query
+                ->select('customer_id')
+                ->limit(800)
+                ->get()->pluck('customer_id');
+
+            if(count($query_customers)) {
+                $query->whereIn('customer_id', $query_customers);
+            } else {
+                $query->where('email', 'like', '%' . $request->get('customer_email') . '%');
+            }
         }
 
-        if($request->get('payment_type') != '') {
-            $where[] = array(
-                'payment_type',
-                '=',
-                $request->get('payment_type')
-            );
-        }
-
-        if(count($where)) {
-            return self::where($where)->count();
-        } else {
-            return self::count();
-        }
+        return $query->count();
     }
 
     /**
@@ -159,67 +157,47 @@ class ShopifyOrders extends BaseModal
             $order = $request->get('order')[0]['dir'];
         }
 
-        if($account_id) {
-            $where[] = array(
-                'shopify_orders.account_id',
-                '=',
-                $account_id
-            );
-        }
+        $query = self::where('account_id', '=', $account_id);
 
         if($request->get('name')) {
-            $where[] = array(
-                'shopify_orders.name',
-                'like',
-                '%' . $request->get('name') . '%'
-            );
+            $query->where('name', 'like', '%' . $request->get('name') . '%');
         }
-
-
-        if($request->get('customer_name')) {
-            $where[] = array(
-                'shopify_customers.name',
-                'like',
-                '%' . $request->get('customer_name') . '%'
-            );
-        }
-
 
         if($request->get('customer_email')) {
-            $where[] = array(
-                'shopify_customers.email',
-                'like',
-                '%' . $request->get('customer_email') . '%'
-            );
+
+            $like = $request->get('customer_email');
+            $customer_query = ShopifyCustomers::where('account_id', '=', Auth::User()->account_id);
+            $customer_query->where(function ($sub_query) use ($like) {
+                $sub_query->where('name', 'LIKE', '%' . $like . '%');
+                $sub_query->orWhere('email', 'LIKE', '%' . $like . '%');
+                $sub_query->orWhere('phone', 'LIKE', '%' . $like . '%');
+            });
+
+            $query_customers = $customer_query
+                ->select('customer_id')
+                ->limit(800)
+                ->get()->pluck('customer_id');
+
+            if(count($query_customers)) {
+                $query->whereIn('customer_id', $query_customers);
+            } else {
+                $query->where('email', 'like', '%' . $request->get('customer_email') . '%');
+            }
         }
 
-
-        if($request->get('customer_phone')) {
-            $where[] = array(
-                'shopify_customers.phone',
-                'like',
-                '%' . $request->get('customer_phone') . '%'
-            );
-        }
-
-        if(count($where)) {
-            return self::join('shopify_customers','shopify_customers.customer_id', '=', 'shopify_orders.customer_id')
-                ->where($where)
-                ->limit($iDisplayLength)->offset($iDisplayStart)
-                ->orderBy($orderBy,$order)
-                ->select(
-                    'shopify_customers.name as customer_name',
-                    'shopify_customers.email as customer_email',
-                    'shopify_customers.phone as customer_phone',
-                    'shopify_orders.*'
-                )
-                ->get();
-        } else {
-            return self::limit($iDisplayLength)
-                ->offset($iDisplayStart)
-                ->orderBy($orderBy,$order)
-                ->get();
-        }
+        return $query->limit($iDisplayLength)->offset($iDisplayStart)
+            ->orderBy($orderBy,$order)
+            ->select(
+                'shopify_orders.id',
+                'shopify_orders.customer_id',
+                'shopify_orders.order_id',
+                'shopify_orders.name',
+                'shopify_orders.email',
+                'shopify_orders.created_at',
+                'shopify_orders.financial_status',
+                'shopify_orders.fulfillment_status'
+            )
+            ->get();
     }
 
     /**
