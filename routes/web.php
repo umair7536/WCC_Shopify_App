@@ -178,6 +178,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     // GeneralSettings Routes end
 
     // Shopify Orders Routes start
+    Route::get('shopify_orders/book', ['uses' => 'Admin\ShopifyOrdersController@book', 'as' => 'shopify_orders.datatable']);
     Route::post('shopify_orders/datatable', ['uses' => 'Admin\ShopifyOrdersController@datatable', 'as' => 'shopify_orders.datatable']);
     Route::patch('shopify_orders/active/{id}', ['uses' => 'Admin\ShopifyOrdersController@active', 'as' => 'shopify_orders.active']);
     Route::patch('shopify_orders/inactive/{id}', ['uses' => 'Admin\ShopifyOrdersController@inactive', 'as' => 'shopify_orders.inactive']);
