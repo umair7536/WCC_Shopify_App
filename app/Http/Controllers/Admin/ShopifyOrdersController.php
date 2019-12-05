@@ -3,15 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Events\Shopify\Orders\SyncOrdersFire;
+use App\Helpers\ShopifyHelper;
 use App\Models\Accounts;
 use App\Models\ShopifyCustomers;
 use App\Models\ShopifyOrders;
+use App\Models\ShopifyShops;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
 use Auth;
 use Validator;
+use ZfrShopify\ShopifyClient;
 
 class ShopifyOrdersController extends Controller
 {
@@ -302,4 +305,76 @@ class ShopifyOrdersController extends Controller
 
         return redirect()->route('admin.shopify_orders.index');
     }
+
+
+    /**
+     * Validate form fields
+     *
+     * @param  \Illuminate\Http\Request $request
+     * @return Validator $validator;
+     */
+    protected function verifyBookFields(Request $request)
+    {
+        return $validator = Validator::make($request->all(), [
+            'id' => 'required',
+            'shop' => 'required',
+        ]);
+    }
+
+    /**
+     * Incoming Order booking preperation
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse|void
+     */
+    public function book(Request $request)
+    {
+        if (! Gate::allows('shopify_orders_manage')) {
+            return abort(401);
+        }
+
+        $validator = $this->verifyBookFields($request);
+
+        if (!$validator->fails()) {
+
+            /**
+             * Grab Shop
+             */
+            $shop = ShopifyShops::where([
+                'account_id' => Auth::User()->account_id
+            ])->first();
+
+            if($shop) {
+                try {
+
+                    /**
+                     * Prepare Shopify Request
+                     */
+                    $shopifyClient = new ShopifyClient([
+                        'private_app' => false,
+                        'api_key' => env('SHOPIFY_APP_API_KEY'), // In public app, this is the app ID
+                        'version' => env('SHOPIFY_API_VERSION'), // Put API Version
+                        'access_token' => $shop->access_token,
+                        'shop' => $shop->myshopify_domain
+                    ]);
+
+                    /**
+                     * Retrieve Order from Shopify
+                     */
+                    $order = $shopifyClient->getOrder([
+                        'id' => (int) $request->get('id')
+                    ]);
+
+                    ShopifyHelper::syncSingleOrder($order, $shop->toArray());
+
+                    return redirect()->route('admin.booked_packets.create',['order_id' => $order['id']]);
+
+                } catch (\Exception $exception) {}
+            }
+        }
+
+        flash('Incoming request is not valid.')->error()->important();
+        return redirect()->route('admin.shopify_orders.index');
+    }
+
 }
