@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Events\Shopify\Orders\SyncOrdersFire;
 use App\Models\Accounts;
+use App\Models\ShopifyCustomers;
 use App\Models\ShopifyOrders;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -68,20 +69,38 @@ class ShopifyOrdersController extends Controller
         $ShopifyOrders = ShopifyOrders::getRecords($request, $iDisplayStart, $iDisplayLength, Auth::User()->account_id);
 
         if($ShopifyOrders) {
+
+            /**
+             * On result time propare customer
+             */
             $customer_ids = array();
             foreach($ShopifyOrders as $shopify_order) {
-
+                $customer_ids[] = $shopify_order->customer_id;
             }
+
+            $customers = ShopifyCustomers::whereIn('customer_id', $customer_ids)
+                ->select('customer_id', 'name', 'email', 'phone')
+                ->get()->keyBy('customer_id');
+
             foreach($ShopifyOrders as $shopify_order) {
+
+                $customer = [$shopify_order->email];
+                if(isset($customers[$shopify_order->customer_id])) {
+                    $customer = [
+                        $customers[$shopify_order->customer_id]->name,
+                        $shopify_order->email,
+                        $customers[$shopify_order->customer_id]->phone,
+                    ];
+                    $customer = array_filter($customer);
+                }
+
                 $records["data"][] = array(
                     'id' => '<label class="mt-checkbox mt-checkbox-single mt-checkbox-outline"><input name="id[]" type="checkbox" class="checkboxes" value="'.$shopify_order->id.'"/><span></span></label>',
                     'name' => $shopify_order->name,
                     'closed_at' => Carbon::parse($shopify_order->created_at)->diffForHumans(),
-                    'customer_name' => $shopify_order->customer_name,
-                    'customer_email' => $shopify_order->customer_email,
-                    'customer_phone' => $shopify_order->customer_phone,
+                    'customer_email' => implode('<br/>', $customer),
+                    'financial_status' => $shopify_order->financial_status,
                     'fulfillment_status' => ($shopify_order->fulfillment_status) ? $shopify_order->fulfillment_status : 'pending',
-                    'customer' => Carbon::parse($shopify_order->created_at)->diffForHumans(),
                     'actions' => view('admin.shopify_orders.actions', compact('shopify_order'))->render(),
                 );
             }

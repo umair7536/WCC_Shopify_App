@@ -59,13 +59,12 @@
                                 <span></span>
                             </label>
                         </th>
-                        <th>@lang('global.shopify_orders.fields.name')</th>
-                        <th>@lang('global.shopify_orders.fields.closed_at')</th>
-                        <th>@lang('global.shopify_orders.fields.customer_name')</th>
+                        <th width="10%">@lang('global.shopify_orders.fields.name')</th>
+                        <th width="15%">@lang('global.shopify_orders.fields.closed_at')</th>
                         <th>@lang('global.shopify_orders.fields.customer_email')</th>
-                        <th>@lang('global.shopify_orders.fields.customer_phone')</th>
-                        <th>@lang('global.shopify_orders.fields.fulfillment_status')</th>
-                        <th width="20%">@lang('global.shopify_orders.fields.actions')</th>
+                        <th width="15%">@lang('global.shopify_orders.fields.financial_status')</th>
+                        <th width="15%">@lang('global.shopify_orders.fields.fulfillment_status')</th>
+                        <th width="10%">@lang('global.shopify_orders.fields.actions')</th>
                     </tr>
                     <tr role="row" class="filter">
                         <td></td>
@@ -74,18 +73,13 @@
                         </td>
                         <td></td>
                         <td>
-                            <input type="text" class="form-control form-filter input-sm" name="customer_name">
-                        </td>
-                        <td>
                             <input type="text" class="form-control form-filter input-sm" name="customer_email">
                         </td>
-                        <td>
-                            <input type="text" class="form-control form-filter input-sm" name="customer_phone">
-                        </td>
+                        <td></td>
                         <td></td>
                         <td>
                             <div class="margin-bottom-5">
-                                <button class="btn btn-sm green btn-outline filter-submit margin-bottom">
+                                <button class="btn btn-sm green btn-outline filter-submit margin-bottom-5">
                                     <i class="fa fa-search"></i> Search
                                 </button>
                                 <button class="btn btn-sm red btn-outline filter-cancel">
