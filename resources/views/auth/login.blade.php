@@ -1,6 +1,6 @@
 @extends('layouts.auth_new')
 
-@section('content')   
+@section('content')
                     @if (count($errors) > 0)
                         <div class="alert alert-danger">
                             <strong>Whoops!</strong> There were problems with input:
@@ -13,7 +13,15 @@
                         </div>
                     @endif
 
-                    <form class="login-form"
+
+                    @if (app('request')->input('logout') == '1')
+                        <div class="alert alert-success">
+                            You are logged out successfully.
+                        </div>
+                    @endif
+
+
+                        <form class="login-form"
                           role="form"
                           method="POST"
                           action="{{ url('login') }}">
