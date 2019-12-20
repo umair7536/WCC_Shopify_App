@@ -364,10 +364,6 @@ class BookedPackets extends BaseModal
         $data['account_id'] = $account_id;
         $data = self::prepareRecord($data);
 
-//        echo '<pre>';
-//        print_r($data);
-//        exit;
-
         /**
          * If Consigneee is 'other' then create this consignee into system
          */
@@ -741,6 +737,151 @@ class BookedPackets extends BaseModal
         }
 
         return $booked_packet;
+    }
+
+
+    /**
+     * Prepare Booking
+     *
+     * @param bool $order_id
+     * @param $account_id
+     * @return array
+     */
+    public static function prepareBooking($order_id = false, $account_id) {
+
+        /**
+         * Set Status
+         */
+        $status = true;
+
+        $fill_fields = array(
+            'packet_pieces' => 'quantity',
+            'net_weight' => 'total_weight',
+            'collect_amount' => 'total_price',
+            'order_id' => 'order_number',
+            'comments' => 'note',
+            'consignee_name' => 'name',
+            'consignee_email' => 'email',
+            'consignee_phone' => 'phone',
+            'consignee_address' => 'address1',
+            'destination_city' => 'city'
+        );
+
+        $booked_packet = array();
+
+        foreach($fill_fields as $key => $value) {
+            if(in_array($key, ['packet_pieces', 'net_weight', 'collect_amount'])) {
+                $booked_packet[$key] = 0;
+            } else {
+                $booked_packet[$key] = null;
+            }
+        }
+
+        if($order_id) {
+            $order = ShopifyOrders::where([
+                'account_id' => $account_id,
+                'order_id' => $order_id,
+            ])->first();
+
+            if($order) {
+                $order = $order->toArray();
+
+                $customer = ShopifyCustomers::where([
+                    'customer_id' => $order['customer_id']
+                ])->first();
+
+                if($customer) {
+                    $customer = $customer->toArray();
+                } else {
+                    $customer = [];
+                }
+
+                $order_items = ShopifyOrderItems::where([
+                    'order_id' => $order['order_id']
+                ])->get();
+
+                if($order_items) {
+                    $order_items = $order_items->toArray();
+                } else {
+                    $order_items = [];
+                }
+
+                foreach($fill_fields as $key => $value) {
+                    if($value == 'name') {
+                        continue;
+                    }
+                    if(array_key_exists($value, $order)) {
+                        if($value == 'total_weight') {
+                            $booked_packet[$key] = ($order[$value]) ? $order[$value] : '500';
+                        } else {
+                            $booked_packet[$key] = $order[$value];
+                        }
+                    }
+                }
+
+                if(count($customer)) {
+                    foreach($fill_fields as $key => $value) {
+                        if(array_key_exists($value, $customer)) {
+                            if($key == 'consignee_address') {
+                                $booked_packet[$key] = trim($customer['address1']) . ' ' . trim($customer['address2']);
+                            } else if($key == 'destination_city') {
+                                /**
+                                 * Grab City from Leopards System
+                                 */
+                                $city = LeopardsCities::where([
+                                    'account_id' => $account_id
+                                ])
+                                    ->where('name',
+                                        'like',
+                                        '%' . strtolower($customer[$value]) . '%')
+                                    ->select('city_id', 'name')
+                                    ->first();
+
+                                if($city) {
+                                    $booked_packet[$key] = $city->city_id;
+                                } else {
+                                    $status = false;
+                                }
+                            } else {
+                                $booked_packet[$key] = $customer[$value];
+                            }
+                        }
+                    }
+                }
+
+                if(count($order_items)) {
+                    foreach($fill_fields as $key => $value) {
+                        if($value == 'name') {
+                            continue;
+                        }
+                        foreach($order_items as $order_item) {
+                            if(array_key_exists($value, $order_item)) {
+                                $booked_packet[$key] += $order_item[$value];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        $booked_packet['booking_date'] = Carbon::now()->format('Y-m-d');
+        $booked_packet['shipment_type_id'] = '10';
+        if(!isset($booked_packet['comments']) || !$booked_packet['comments']) {
+            $booked_packet['comments'] = 'n/a';
+        }
+
+        // Shipper Information
+        $booked_packet['origin_city'] = 'self';
+        $booked_packet['shipper_id'] = 'self';
+        $booked_packet['shipment_name_eng'] = 'self';
+        $booked_packet['shipment_email'] = 'self';
+        $booked_packet['shipment_phone'] = 'self';
+        $booked_packet['shipment_address'] = 'self';
+
+        return array(
+            'status' => $status,
+            'packet' => $booked_packet,
+        );
     }
 
 

@@ -88,4 +88,19 @@ return [
     ),
     'status_cancel' => 3,
     'request_sent' => 0,
+    'financial_status' => [
+        'pending' => 'Pending',
+        'authorized' => 'Authorized',
+        'partially_paid' => 'Partially Paid',
+        'paid' => 'Paid',
+        'partially_refunded' => 'Partially Refunded',
+        'refunded' => 'Refunded',
+        'voided' => 'Voided'
+    ],
+    'fulfillment_status' => [
+        'null' => 'Pending',
+        'fulfilled' => 'Fulfilled',
+        'partial' => 'Partial',
+        'restocked' => 'Restocked',
+    ],
 ];

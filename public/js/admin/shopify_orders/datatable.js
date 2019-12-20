@@ -1,6 +1,7 @@
 var TableDatatablesAjax = function () {
     var a = function () {
-        $(".date-picker").datepicker({rtl: App.isRTL(), autoclose: !0});
+        $(".date_from").datepicker({rtl: App.isRTL(), autoclose: !0});
+        $(".date_to").datepicker({rtl: App.isRTL(), autoclose: !0});
         $('.select2').select2({ width: '100%' });
     };
 
@@ -31,8 +32,10 @@ var TableDatatablesAjax = function () {
                     { "data": "name" },
                     { "data": "closed_at" },
                     { "data": "customer_email" },
-                    { "data": "financial_status" },
                     { "data": "fulfillment_status" },
+                    { "data": "tags" },
+                    { "data": "financial_status" },
+                    { "data": "total_price" },
                     { "data": "actions","bSortable": false }
                 ],
                 ajax: {

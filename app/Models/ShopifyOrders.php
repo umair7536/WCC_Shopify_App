@@ -109,6 +109,34 @@ class ShopifyOrders extends BaseModal
             $query->where('name', 'like', '%' . $request->get('name') . '%');
         }
 
+        if ($request->get('date_from') && $request->get('date_from') != '') {
+            $query->where('created_at', '>=', $request->get('date_from'));
+        }
+
+        if ($request->get('date_to') && $request->get('date_to') != '') {
+            $query->where('created_at', '>=', $request->get('date_to'));
+        }
+
+        if ($request->get('fulfillment_status') && $request->get('fulfillment_status') != '') {
+            if($request->get('fulfillment_status') == 'null') {
+                $query->whereNull('fulfillment_status');
+            } else {
+                $query->where('fulfillment_status', '=', $request->get('fulfillment_status'));
+            }
+        }
+
+        if ($request->get('financial_status') && $request->get('financial_status') != '') {
+            $query->where('financial_status', '=', $request->get('financial_status'));
+        }
+
+        if($request->get('tags')) {
+            $query->where('tags', 'like', '%' . $request->get('tags') . '%');
+        }
+
+        if($request->get('total_price')) {
+            $query->where('total_price', 'like', '%' . $request->get('total_price') . '%');
+        }
+
         if($request->get('customer_email')) {
 
             $like = $request->get('customer_email');
@@ -163,6 +191,34 @@ class ShopifyOrders extends BaseModal
             $query->where('name', 'like', '%' . $request->get('name') . '%');
         }
 
+        if ($request->get('date_from') && $request->get('date_from') != '') {
+            $query->where('created_at', '>=', $request->get('date_from'));
+        }
+
+        if ($request->get('date_to') && $request->get('date_to') != '') {
+            $query->where('created_at', '>=', $request->get('date_to'));
+        }
+
+        if ($request->get('fulfillment_status') && $request->get('fulfillment_status') != '') {
+            if($request->get('fulfillment_status') == 'null') {
+                $query->whereNull('fulfillment_status');
+            } else {
+                $query->where('fulfillment_status', '=', $request->get('fulfillment_status'));
+            }
+        }
+
+        if ($request->get('financial_status') && $request->get('financial_status') != '') {
+            $query->where('financial_status', '=', $request->get('financial_status'));
+        }
+
+        if($request->get('tags')) {
+            $query->where('tags', 'like', '%' . $request->get('tags') . '%');
+        }
+
+        if($request->get('total_price')) {
+            $query->where('total_price', 'like', '%' . $request->get('total_price') . '%');
+        }
+
         if($request->get('customer_email')) {
 
             $like = $request->get('customer_email');
@@ -195,7 +251,9 @@ class ShopifyOrders extends BaseModal
                 'shopify_orders.email',
                 'shopify_orders.created_at',
                 'shopify_orders.financial_status',
-                'shopify_orders.fulfillment_status'
+                'shopify_orders.fulfillment_status',
+                'shopify_orders.total_price',
+                'shopify_orders.tags'
             )
             ->get();
     }

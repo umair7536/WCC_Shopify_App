@@ -40,16 +40,16 @@
         </div>
         <div class="portlet-body">
             <div class="table-container">
-                {{--<div class="table-actions-wrapper">--}}
-                    {{--<span> </span>--}}
-                    {{--<select class="table-group-action-input form-control input-inline input-small input-sm">--}}
-                        {{--<option value="">Select</option>--}}
-                        {{--<option value="Delete">Delete</option>--}}
-                    {{--</select>--}}
-                    {{--<button class="btn btn-sm red table-group-action-submit">--}}
-                        {{--<i class="fa fa-check"></i> Submit--}}
-                    {{--</button>--}}
-                {{--</div>--}}
+                <div class="table-actions-wrapper">
+                    <span> </span>
+                    <select class="table-group-action-input form-control input-inline input-small input-sm">
+                        <option value="">Bulk Action</option>
+                        <option value="book">Book Packets</option>
+                    </select>
+                    <button class="btn btn-sm red table-group-action-submit">
+                        <i class="fa fa-check"></i> Submit
+                    </button>
+                </div>
                 <table class="table table-striped table-bordered table-hover table-checkable" id="datatable_ajax">
                     <thead>
                     <tr role="row" class="heading">
@@ -62,8 +62,10 @@
                         <th width="10%">@lang('global.shopify_orders.fields.name')</th>
                         <th width="15%">@lang('global.shopify_orders.fields.closed_at')</th>
                         <th>@lang('global.shopify_orders.fields.customer_email')</th>
-                        <th width="15%">@lang('global.shopify_orders.fields.financial_status')</th>
                         <th width="15%">@lang('global.shopify_orders.fields.fulfillment_status')</th>
+                        <th width="15%">@lang('global.shopify_orders.fields.tags')</th>
+                        <th width="15%">@lang('global.shopify_orders.fields.financial_status')</th>
+                        <th width="15%">@lang('global.shopify_orders.fields.total_price')</th>
                         <th width="10%">@lang('global.shopify_orders.fields.actions')</th>
                     </tr>
                     <tr role="row" class="filter">
@@ -71,12 +73,31 @@
                         <td>
                             <input type="text" class="form-control form-filter input-sm" name="name">
                         </td>
-                        <td></td>
+                        <td>
+                            <div class="input-icon input-icon-sm right margin-bottom-5">
+                                <i class="fa fa-calendar"></i>
+                                <input name="date_from" data-date-format="yyyy-mm-dd" type="text" readonly="" class="form-control form-filter input-sm date_from" placeholder="From">
+                            </div>
+                            <div class="input-icon input-icon-sm right margin-bottom-5">
+                                <i class="fa fa-calendar"></i>
+                                <input name="date_to" data-date-format="yyyy-mm-dd" type="text" readonly="" class="form-control form-filter input-sm date_to" placeholder="To" >
+                            </div>
+                        </td>
                         <td>
                             <input type="text" class="form-control form-filter input-sm" name="customer_email">
                         </td>
-                        <td></td>
-                        <td></td>
+                        <td>
+                            {!! Form::select('fulfillment_status', $fulfillment_status, null, ['class' => 'form-control form-filter input-sm', 'placeholder' => 'Select a Status']) !!}
+                        </td>
+                        <td>
+                            <input type="text" class="form-control form-filter input-sm" name="tags">
+                        </td>
+                        <td>
+                            {!! Form::select('financial_status', $financial_status, null, ['class' => 'form-control form-filter input-sm', 'placeholder' => 'Select a Status']) !!}
+                        </td>
+                        <td>
+                            <input type="text" class="form-control form-filter input-sm" name="total_price">
+                        </td>
                         <td>
                             <div class="margin-bottom-5">
                                 <button class="btn btn-sm green btn-outline filter-submit margin-bottom-5">

@@ -5,15 +5,19 @@ namespace App\Http\Controllers\Admin;
 use App\Events\Shopify\Orders\SyncOrdersFire;
 use App\Helpers\ShopifyHelper;
 use App\Models\Accounts;
+use App\Models\BookedPackets;
+use App\Models\LeopardsSettings;
 use App\Models\ShopifyCustomers;
 use App\Models\ShopifyOrders;
 use App\Models\ShopifyShops;
 use Carbon\Carbon;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
 use Auth;
 use Validator;
+use Config;
 use ZfrShopify\ShopifyClient;
 
 class ShopifyOrdersController extends Controller
@@ -29,7 +33,10 @@ class ShopifyOrdersController extends Controller
             return abort(401);
         }
 
-        return view('admin.shopify_orders.index');
+        $financial_status = Config::get('constants.financial_status');
+        $fulfillment_status = Config::get('constants.fulfillment_status');
+
+        return view('admin.shopify_orders.index', compact('financial_status', 'fulfillment_status'));
     }
 
     /**
@@ -44,17 +51,12 @@ class ShopifyOrdersController extends Controller
         $records["data"] = array();
 
         if ($request->get('customActionType') && $request->get('customActionType') == "group_action") {
-            $ShopifyOrders = ShopifyOrders::getBulkData($request->get('id'));
-            if($ShopifyOrders) {
-                foreach($ShopifyOrders as $city) {
-                    // Check if child records exists or not, If exist then disallow to delete it.
-                    if(!ShopifyOrders::isChildExists($city->id, Auth::User()->account_id)) {
-                        $city->delete();
-                    }
-                }
-            }
-            $records["customActionStatus"] = "OK"; // pass custom message(useful for getting status of group actions)
-            $records["customActionMessage"] = "Records has been deleted successfully!"; // pass custom message(useful for getting status of group actions)
+            $response = $this->bulkActions($request);
+            $records["customActionStatus"] = $response['status']; // pass custom message(useful for getting status of group actions)
+            $records["customActionMessage"] = $response['message']; // pass custom message(useful for getting status of group actions)
+//
+//            $records["customActionStatus"] = "OK"; // pass custom message(useful for getting status of group actions)
+//            $records["customActionMessage"] = "Records has been deleted successfully!"; // pass custom message(useful for getting status of group actions)
         }
 
         // Get Total Records
@@ -100,10 +102,12 @@ class ShopifyOrdersController extends Controller
                 $records["data"][] = array(
                     'id' => '<label class="mt-checkbox mt-checkbox-single mt-checkbox-outline"><input name="id[]" type="checkbox" class="checkboxes" value="'.$shopify_order->id.'"/><span></span></label>',
                     'name' => $shopify_order->name,
-                    'closed_at' => Carbon::parse($shopify_order->created_at)->diffForHumans(),
+                    'closed_at' => Carbon::parse($shopify_order->created_at)->format('M j, Y h:i A'),
                     'customer_email' => implode('<br/>', $customer),
-                    'financial_status' => $shopify_order->financial_status,
-                    'fulfillment_status' => ($shopify_order->fulfillment_status) ? $shopify_order->fulfillment_status : 'pending',
+                    'fulfillment_status' => view('admin.shopify_orders.fulfillment_status', compact('shopify_order'))->render(),
+                    'tags' => $shopify_order->tags,
+                    'total_price' => number_format($shopify_order->total_price),
+                    'financial_status' => "<span class=\"label label-default\"> " . ucfirst($shopify_order->financial_status) . " </span>",
                     'actions' => view('admin.shopify_orders.actions', compact('shopify_order'))->render(),
                 );
             }
@@ -114,6 +118,188 @@ class ShopifyOrdersController extends Controller
         $records["recordsFiltered"] = $iTotalRecords;
 
         return response()->json($records);
+    }
+
+    /**
+     * Bulk Book Packets
+     *
+     * @param Request $request
+     * @return array
+     */
+    private function bulkActions(Request $request) : array {
+
+        $account_id = Auth::User()->account_id;
+
+        if (
+            $request->get('customActionType') == "group_action"
+            &&  $request->get('customActionName') == "book"
+        ) {
+            $ids = $request->get('id');
+
+            /**
+             * Check Current Billing Cycle Quota and take action as per response
+             */
+            $checkQuota = ShopifyHelper::getQuota($account_id);
+
+            if($checkQuota['status']) {
+                if($checkQuota['info']) {
+//                    flash($checkQuota['info'])->info()->important();
+                }
+            } else {
+//                flash($checkQuota['error'])->error()->important();
+                return [
+                    'status' => 'NO',
+                    'message' => $checkQuota['error']
+                ];
+            }
+
+            // Check Booked Packets with provided Orders
+            $orders = ShopifyOrders::where([
+                'account_id' => $account_id
+            ])->whereIn('id', $ids)
+                ->select('order_id', 'name', 'customer_id')
+                ->get();
+
+            if($orders) {
+
+                // Build Success Message
+                $message = 'Your request has been processed with following results:<br/>';
+                $message .= '<ul>';
+
+                $order_ids = [];
+                foreach ($orders as $order) {
+                    $order_ids[] = $order->order_id;
+                }
+
+                $booked_packets = BookedPackets::where([
+                    'account_id' => $account_id
+                ])
+                    ->whereIn('order_id', $order_ids)
+                    ->select('order_id', 'cn_number', 'id')
+                    ->orderBy('id', 'desc')
+                    ->get()->keyBy('order_id');
+
+                foreach ($orders as $order) {
+
+                    if($booked_packets->count()) {
+                        if(array_key_exists($order->order_id, $booked_packets)) {
+                            $message .= '<li>Order <b>' . $order->name . '</b> is already booked with ' . $booked_packets[$order->order_id]->cn_number . '. To book again <a target="_blank" href="' . route('admin.booked_packets.create',['order_id' => $order->order_id]) . '">Click Here</a></b>.</li>';
+                            continue;
+                        }
+                    }
+
+                    /**
+                     * If Order ID is provided then prepare data to automatically be filled
+                     */
+                    $booked_packet = BookedPackets::prepareBooking($order->order_id, $account_id);
+                    if($booked_packet['status']) {
+                        $booking_packet_request = new Request();
+                        $booking_packet_request->replace($booked_packet['packet']);
+                        $result = BookedPackets::createRecord($booking_packet_request, Auth::User()->account_id);
+                        echo '<pre>';
+                        print_r($result);
+                        exit;
+                    } else {
+                        $message .= '<li>Order <b>' . $order->name . '</b> has consignee city issue. Please select proper city for this packet to book.';
+                        continue;
+                    }
+                }
+
+                $message .= '</ul>';
+            }
+
+            echo $message;
+            exit;
+        }
+        exit;
+
+        /**
+         * If mode is test then stop booking packet in bulk.
+         */
+        $leopards_settings = LeopardsSettings::where([
+            'account_id' => $account_id
+        ])
+            ->select('slug', 'data')
+            ->orderBy('id', 'asc')
+            ->get()->keyBy('slug');
+
+        if($leopards_settings['mode']->data == '1') {
+            return [
+                'status' => 'NO',
+                'message' => 'Test mode is enabled, <b><a href="' . route('admin.leopards_settings.index') . '">Click Here</a></b> to disable test mode.</b>'
+            ];
+        }
+
+        $result = $this->getCompanyData($account_id);
+        if(!$result['status']) {
+            return [
+                'status' => 'NO',
+                'message' => 'Leopards Credentials are invalid, <b><a href="' . route('admin.leopards_settings.index') . '">Click Here</a></b> to setup credentials again.</b>'
+            ];
+        }
+
+        return [
+            'status' => 'NO',
+            'message' => 'Something went wrong, please try again later'
+        ];
+    }
+
+
+    /**
+     * Get Company Data from LCS.
+     *
+     * @param int
+     * @return array
+     */
+    private function getCompanyData($account_id)
+    {
+        $data = array(
+            'status' => true,
+            'company' => array(),
+        );
+
+        $leopards_settings = LeopardsSettings::where([
+            'account_id' => $account_id
+        ])
+            ->select('slug', 'data')
+            ->orderBy('id', 'asc')
+            ->get()->keyBy('slug');
+
+        if($leopards_settings) {
+            foreach($leopards_settings as $leopards_setting) {
+                if($leopards_setting->slug == 'company-id' && !$leopards_setting->data) {
+                    $data['status'] = false;
+                } else if(
+                    ($leopards_setting->slug == 'api-key' && !$leopards_setting->data)
+                    ||  ($leopards_setting->slug == 'api-password' && !$leopards_setting->data)
+                ) {
+                    $data['status'] = false;
+                }
+            }
+        }
+
+        try {
+            $client = new Client();
+            $response = $client->post(env('LCS_URL') . 'common_calls/getCountryById', array(
+                'form_params' => array(
+                    'company_id' => $leopards_settings['company-id']->data
+                )
+            ));
+
+            if($response->getStatusCode() == 200) {
+                if($response->getBody() != 'null') {
+                    $data['company'] = json_decode($response->getBody(), true);
+                } else {
+                    $data['status'] = false;
+                }
+            } else {
+                $data['status'] = false;
+            }
+        } catch (\Exception $exception) {
+            $data['status'] = false;
+        }
+
+        return $data;
     }
 
     /**
