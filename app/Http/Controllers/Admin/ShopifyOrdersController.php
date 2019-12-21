@@ -191,14 +191,35 @@ class ShopifyOrdersController extends Controller
                     /**
                      * If Order ID is provided then prepare data to automatically be filled
                      */
-                    $booked_packet = BookedPackets::prepareBooking($order->order_id, $account_id);
-                    if($booked_packet['status']) {
+                    $prepared_packet = BookedPackets::prepareBooking($order->order_id, $account_id);
+                    if($prepared_packet['status']) {
                         $booking_packet_request = new Request();
-                        $booking_packet_request->replace($booked_packet['packet']);
-                        $result = BookedPackets::createRecord($booking_packet_request, Auth::User()->account_id);
-                        echo '<pre>';
-                        print_r($result);
-                        exit;
+                        $booking_packet_request->replace($prepared_packet['packet']);
+                        $result = BookedPackets::createRecord($booking_packet_request, $account_id);
+
+                        /**
+                         * Add Booking information into Order
+                         */
+                        if($result['status']) {
+                            $booked_packet = BookedPackets::where([
+                                'account_id' => $account_id,
+                                'id' => $result['record_id'],
+                            ])->first();
+                            if($booked_packet) {
+
+                                ShopifyOrders::where([
+                                    'order_id' => $order->order_id,
+                                    'account_id' => $account_id,
+                                ])->update(array(
+                                   'booking_id' => $booked_packet->id,
+                                   'cn_number' => $booked_packet->cn_number,
+                                   'destination_city' => $booked_packet->destination_city,
+                                   'consignment_address' => $booked_packet->consignment_address
+                                ));
+
+                                $message .= '<li>Order <b>' . $order->name . '</b> has been booked. Assigned CN # is ' . $booked_packet->cn_number;
+                            }
+                        }
                     } else {
                         $message .= '<li>Order <b>' . $order->name . '</b> has consignee city issue. Please select proper city for this packet to book.';
                         continue;
@@ -206,12 +227,13 @@ class ShopifyOrdersController extends Controller
                 }
 
                 $message .= '</ul>';
-            }
 
-            echo $message;
-            exit;
+                return [
+                    'status' => 'OK',
+                    'message' => $message
+                ];
+            }
         }
-        exit;
 
         /**
          * If mode is test then stop booking packet in bulk.

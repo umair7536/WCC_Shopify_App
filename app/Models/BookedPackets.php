@@ -870,10 +870,13 @@ class BookedPackets extends BaseModal
             $booked_packet['comments'] = 'n/a';
         }
 
+        // Consignee Information
+        $booked_packet['consignee_id'] = 'self';
+
         // Shipper Information
         $booked_packet['origin_city'] = 'self';
         $booked_packet['shipper_id'] = 'self';
-        $booked_packet['shipment_name_eng'] = 'self';
+        $booked_packet['other'] = 'other';
         $booked_packet['shipment_email'] = 'self';
         $booked_packet['shipment_phone'] = 'self';
         $booked_packet['shipment_address'] = 'self';
