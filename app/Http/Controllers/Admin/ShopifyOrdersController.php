@@ -338,7 +338,7 @@ class ShopifyOrdersController extends Controller
             'consignee_id' => 'required',
             'destination_city' => 'required',
             'consignee_name' => 'required',
-            'consignee_email' => 'required|email',
+            'consignee_email' => 'nullable|email',
             'consignee_phone' => 'required',
             'consignee_address' => 'required',
             'comments' => 'required',
