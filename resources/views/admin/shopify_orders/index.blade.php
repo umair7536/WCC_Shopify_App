@@ -44,7 +44,9 @@
                     <span> </span>
                     <select class="table-group-action-input form-control input-inline input-small input-sm">
                         <option value="">Bulk Action</option>
-                        <option value="book">Book Packets</option>
+                        @foreach($shipment_types as $shipment_id => $shipment_name)
+                            <option value="{{ $shipment_id }}">Book Packets with {{ $shipment_name }}</option>
+                        @endforeach
                     </select>
                     <button class="btn btn-sm red table-group-action-submit">
                         <i class="fa fa-check"></i> Submit
@@ -59,13 +61,16 @@
                                 <span></span>
                             </label>
                         </th>
-                        <th width="10%">@lang('global.shopify_orders.fields.name')</th>
-                        <th width="15%">@lang('global.shopify_orders.fields.closed_at')</th>
+                        <th>@lang('global.shopify_orders.fields.name')</th>
+                        <th>@lang('global.shopify_orders.fields.closed_at')</th>
                         <th>@lang('global.shopify_orders.fields.customer_email')</th>
-                        <th width="15%">@lang('global.shopify_orders.fields.fulfillment_status')</th>
-                        <th width="15%">@lang('global.shopify_orders.fields.tags')</th>
-                        <th width="15%">@lang('global.shopify_orders.fields.financial_status')</th>
-                        <th width="15%">@lang('global.shopify_orders.fields.total_price')</th>
+                        <th>@lang('global.shopify_orders.fields.fulfillment_status')</th>
+                        <th>@lang('global.shopify_orders.fields.tags')</th>
+                        <th>@lang('global.shopify_orders.fields.cn_number')</th>
+                        <th>@lang('global.shopify_orders.fields.destination_city')</th>
+                        <th>@lang('global.shopify_orders.fields.consignment_address')</th>
+                        <th>@lang('global.shopify_orders.fields.financial_status')</th>
+                        <th>@lang('global.shopify_orders.fields.total_price')</th>
                         <th width="10%">@lang('global.shopify_orders.fields.actions')</th>
                     </tr>
                     <tr role="row" class="filter">
@@ -91,6 +96,15 @@
                         </td>
                         <td>
                             <input type="text" class="form-control form-filter input-sm" name="tags">
+                        </td>
+                        <td>
+                            <input type="text" class="form-control form-filter input-sm" name="cn_number">
+                        </td>
+                        <td>
+                            {!! Form::select('destination_city', $leopards_cities, null, ['class' => 'form-control form-filter input-sm', 'placeholder' => 'Select a City']) !!}
+                        </td>
+                        <td>
+                            <input type="text" class="form-control form-filter input-sm" name="consignment_address">
                         </td>
                         <td>
                             {!! Form::select('financial_status', $financial_status, null, ['class' => 'form-control form-filter input-sm', 'placeholder' => 'Select a Status']) !!}

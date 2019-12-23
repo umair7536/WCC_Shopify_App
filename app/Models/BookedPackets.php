@@ -418,6 +418,21 @@ class BookedPackets extends BaseModal
 
         $record = self::create($data);
 
+        /**
+         * Packet is booked now update Order
+         */
+        if(isset($data['order_id']) && $data['order_id']) {
+            ShopifyOrders::where([
+                'order_number' => $data['order_id'],
+                'account_id' => $account_id,
+            ])->update(array(
+                'booking_id' => $record->id,
+                'cn_number' => $data['cn_number'],
+                'destination_city' => $data['destination_city'],
+                'consignment_address' => $data['consignee_address']
+            ));
+        }
+
         AuditTrails::addEventLogger(self::$_table, 'create', $data, self::$_fillable, $record);
 
         return [
@@ -630,6 +645,7 @@ class BookedPackets extends BaseModal
             'collect_amount' => 'total_price',
             'order_id' => 'order_number',
             'comments' => 'note',
+            'title' => 'title',
             'consignee_name' => 'name',
             'consignee_email' => 'email',
             'consignee_phone' => 'phone',
@@ -722,15 +738,30 @@ class BookedPackets extends BaseModal
                 }
 
                 if(count($order_items)) {
+                    $items = [];
                     foreach($fill_fields as $key => $value) {
                         if($value == 'name') {
                             continue;
                         }
                         foreach($order_items as $order_item) {
                             if(array_key_exists($value, $order_item)) {
-                                $booked_packet[$key] += $order_item[$value];
+                                if($key == 'title') {
+                                    /**
+                                     * Add Line item name and qty into comments section
+                                     */
+                                    $items[] = $order_item['title'] . ' ' . $order_item['quantity'] . ' pc';
+                                } else {
+                                    $booked_packet[$key] += $order_item[$value];
+                                }
                             }
                         }
+                    }
+
+                    /**
+                     * if line items found then add them into comments
+                     */
+                    if(isset($booked_packet['comments'])) {
+                        $booked_packet['comments'] = $booked_packet['comments'] . ' ' . implode(', ', $items);
                     }
                 }
             }
@@ -744,10 +775,11 @@ class BookedPackets extends BaseModal
      * Prepare Booking
      *
      * @param bool $order_id
+     * @param int $shipment_type_id
      * @param $account_id
      * @return array
      */
-    public static function prepareBooking($order_id = false, $account_id) {
+    public static function prepareBooking($order_id = false, $shipment_type_id = 10, $account_id) {
 
         /**
          * Set Status
@@ -760,6 +792,7 @@ class BookedPackets extends BaseModal
             'collect_amount' => 'total_price',
             'order_id' => 'order_number',
             'comments' => 'note',
+            'title' => 'title',
             'consignee_name' => 'name',
             'consignee_email' => 'email',
             'consignee_phone' => 'phone',
@@ -850,22 +883,37 @@ class BookedPackets extends BaseModal
                 }
 
                 if(count($order_items)) {
+                    $items = [];
                     foreach($fill_fields as $key => $value) {
                         if($value == 'name') {
                             continue;
                         }
                         foreach($order_items as $order_item) {
                             if(array_key_exists($value, $order_item)) {
-                                $booked_packet[$key] += $order_item[$value];
+                                if($key == 'title') {
+                                    /**
+                                     * Add Line item name and qty into comments section
+                                     */
+                                    $items[] = $order_item['title'] . ' ' . $order_item['quantity'] . ' pc';
+                                } else {
+                                    $booked_packet[$key] += $order_item[$value];
+                                }
                             }
                         }
+                    }
+
+                    /**
+                     * if line items found then add them into comments
+                     */
+                    if(isset($booked_packet['comments'])) {
+                        $booked_packet['comments'] = $booked_packet['comments'] . ' ' . implode(', ', $items);
                     }
                 }
             }
         }
 
         $booked_packet['booking_date'] = Carbon::now()->format('Y-m-d');
-        $booked_packet['shipment_type_id'] = '10';
+        $booked_packet['shipment_type_id'] = $shipment_type_id;
         if(!isset($booked_packet['comments']) || !$booked_packet['comments']) {
             $booked_packet['comments'] = 'n/a';
         }
@@ -876,10 +924,10 @@ class BookedPackets extends BaseModal
         // Shipper Information
         $booked_packet['origin_city'] = 'self';
         $booked_packet['shipper_id'] = 'self';
-        $booked_packet['other'] = 'other';
-        $booked_packet['shipment_email'] = 'self';
-        $booked_packet['shipment_phone'] = 'self';
-        $booked_packet['shipment_address'] = 'self';
+        $booked_packet['shipper_name'] = 'self';
+        $booked_packet['shipper_email'] = 'self';
+        $booked_packet['shipper_phone'] = 'self';
+        $booked_packet['shipper_address'] = 'self';
 
         return array(
             'status' => $status,

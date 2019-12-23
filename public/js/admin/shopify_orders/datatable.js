@@ -34,6 +34,9 @@ var TableDatatablesAjax = function () {
                     { "data": "customer_email" },
                     { "data": "fulfillment_status" },
                     { "data": "tags" },
+                    { "data": "cn_number" },
+                    { "data": "destination_city" },
+                    { "data": "consignment_address" },
                     { "data": "financial_status" },
                     { "data": "total_price" },
                     { "data": "actions","bSortable": false }

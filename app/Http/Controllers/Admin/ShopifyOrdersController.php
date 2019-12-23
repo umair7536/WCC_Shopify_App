@@ -6,6 +6,7 @@ use App\Events\Shopify\Orders\SyncOrdersFire;
 use App\Helpers\ShopifyHelper;
 use App\Models\Accounts;
 use App\Models\BookedPackets;
+use App\Models\LeopardsCities;
 use App\Models\LeopardsSettings;
 use App\Models\ShopifyCustomers;
 use App\Models\ShopifyOrders;
@@ -35,8 +36,19 @@ class ShopifyOrdersController extends Controller
 
         $financial_status = Config::get('constants.financial_status');
         $fulfillment_status = Config::get('constants.fulfillment_status');
+        $shipment_types = Config::get('constants.shipment_type');
 
-        return view('admin.shopify_orders.index', compact('financial_status', 'fulfillment_status'));
+        $leopards_cities = LeopardsCities::where([
+            'account_id' => Auth::User()->account_id,
+        ])->get();
+
+        if($leopards_cities) {
+            $leopards_cities = $leopards_cities->pluck('name', 'city_id');
+        } else {
+            $leopards_cities = [];
+        }
+
+        return view('admin.shopify_orders.index', compact('financial_status', 'fulfillment_status', 'shipment_types', 'leopards_cities'));
     }
 
     /**
@@ -54,9 +66,6 @@ class ShopifyOrdersController extends Controller
             $response = $this->bulkActions($request);
             $records["customActionStatus"] = $response['status']; // pass custom message(useful for getting status of group actions)
             $records["customActionMessage"] = $response['message']; // pass custom message(useful for getting status of group actions)
-//
-//            $records["customActionStatus"] = "OK"; // pass custom message(useful for getting status of group actions)
-//            $records["customActionMessage"] = "Records has been deleted successfully!"; // pass custom message(useful for getting status of group actions)
         }
 
         // Get Total Records
@@ -75,6 +84,22 @@ class ShopifyOrdersController extends Controller
 
         if($ShopifyOrders) {
 
+            $cities = [];
+            foreach($ShopifyOrders as $ShopifyOrder) {
+                $cities[] = $ShopifyOrder->destination_city;
+            }
+
+            $leopards_cities = LeopardsCities::where([
+                'account_id' => Auth::User()->account_id,
+            ])->whereIn('city_id', $cities)
+                ->select('city_id', 'name')
+                ->get();
+            if($leopards_cities) {
+                $leopards_cities = $leopards_cities->keyBy('city_id');
+            } else {
+                $leopards_cities = [];
+            }
+
             /**
              * On result time propare customer
              */
@@ -87,13 +112,17 @@ class ShopifyOrdersController extends Controller
                 ->select('customer_id', 'name', 'email', 'phone')
                 ->get()->keyBy('customer_id');
 
+            $shop = ShopifyShops::where([
+                'account_id' => Auth::User()->account_id,
+            ])->first();
+
             foreach($ShopifyOrders as $shopify_order) {
 
                 $customer = [$shopify_order->email];
                 if(isset($customers[$shopify_order->customer_id])) {
                     $customer = [
                         $customers[$shopify_order->customer_id]->name,
-                        $shopify_order->email,
+                        ($shop) ? '<a target="_blank" href="https://' . $shop->myshopify_domain . '/admin/customers/' . $shopify_order->customer_id . '">' . $shopify_order->email . '&nbsp;<i class="fa fa-external-link"></i></a>' : $shopify_order->email,
                         $customers[$shopify_order->customer_id]->phone,
                     ];
                     $customer = array_filter($customer);
@@ -106,6 +135,9 @@ class ShopifyOrdersController extends Controller
                     'customer_email' => implode('<br/>', $customer),
                     'fulfillment_status' => view('admin.shopify_orders.fulfillment_status', compact('shopify_order'))->render(),
                     'tags' => $shopify_order->tags,
+                    'cn_number' => $shopify_order->cn_number,
+                    'destination_city' => isset($shopify_order->destination_city, $leopards_cities) ? $leopards_cities[$shopify_order->destination_city]->name : '',
+                    'consignment_address' => $shopify_order->consignment_address,
                     'total_price' => number_format($shopify_order->total_price),
                     'financial_status' => "<span class=\"label label-default\"> " . ucfirst($shopify_order->financial_status) . " </span>",
                     'actions' => view('admin.shopify_orders.actions', compact('shopify_order'))->render(),
@@ -130,9 +162,56 @@ class ShopifyOrdersController extends Controller
 
         $account_id = Auth::User()->account_id;
 
+        /**
+         * Verify if correct Shipment Type is choosed or not
+         */
+        $found = false;
+        $shipment_types = Config::get('constants.shipment_type');
+        foreach($shipment_types as $shipment_id => $shipment_name) {
+            if($request->get('customActionName') == $shipment_id) {
+                $found = true;
+                break;
+            }
+        }
+
+        if(!$found) {
+            return [
+                'status' => 'NO',
+                'message' => 'Please book with any of these options [' . implode(', ', $shipment_types) . ']'
+            ];
+        }
+        // Correct shipment type verification ends here
+
+        /**
+         * If mode is test then stop booking packet in bulk.
+         */
+        $leopards_settings = LeopardsSettings::where([
+            'account_id' => $account_id
+        ])
+            ->select('slug', 'data')
+            ->orderBy('id', 'asc')
+            ->get()->keyBy('slug');
+
+        if($leopards_settings['mode']->data == '1') {
+            return [
+                'status' => 'NO',
+                'message' => 'Test mode is enabled, <b><a target="_blank" href="' . route('admin.leopards_settings.index') . '">Click Here</a></b> to disable test mode.</b>'
+            ];
+        }
+
+        /**
+         * Check Booking Quota, If Quota is acceeding then stop booking
+         */
+        $result = $this->getCompanyData($account_id);
+        if(!$result['status']) {
+            return [
+                'status' => 'NO',
+                'message' => 'Leopards Credentials are invalid, <b><a target="_blank" href="' . route('admin.leopards_settings.index') . '">Click Here</a></b> to setup credentials again.</b>'
+            ];
+        }
+
         if (
             $request->get('customActionType') == "group_action"
-            &&  $request->get('customActionName') == "book"
         ) {
             $ids = $request->get('id');
 
@@ -143,10 +222,10 @@ class ShopifyOrdersController extends Controller
 
             if($checkQuota['status']) {
                 if($checkQuota['info']) {
-//                    flash($checkQuota['info'])->info()->important();
+                    flash($checkQuota['info'])->info()->important();
                 }
             } else {
-//                flash($checkQuota['error'])->error()->important();
+                flash($checkQuota['error'])->error()->important();
                 return [
                     'status' => 'NO',
                     'message' => $checkQuota['error']
@@ -157,7 +236,7 @@ class ShopifyOrdersController extends Controller
             $orders = ShopifyOrders::where([
                 'account_id' => $account_id
             ])->whereIn('id', $ids)
-                ->select('order_id', 'name', 'customer_id')
+                ->select('order_id', 'name', 'order_number', 'customer_id')
                 ->get();
 
             if($orders) {
@@ -166,24 +245,26 @@ class ShopifyOrdersController extends Controller
                 $message = 'Your request has been processed with following results:<br/>';
                 $message .= '<ul>';
 
-                $order_ids = [];
+                $order_numbers = [];
                 foreach ($orders as $order) {
-                    $order_ids[] = $order->order_id;
+                    $order_numbers[] = $order->order_number;
                 }
 
                 $booked_packets = BookedPackets::where([
                     'account_id' => $account_id
                 ])
-                    ->whereIn('order_id', $order_ids)
+                    ->whereIn('order_id', $order_numbers)
                     ->select('order_id', 'cn_number', 'id')
                     ->orderBy('id', 'desc')
                     ->get()->keyBy('order_id');
 
                 foreach ($orders as $order) {
-
+                    /**
+                     * Find already booked packet to avoid re-book
+                     */
                     if($booked_packets->count()) {
-                        if(array_key_exists($order->order_id, $booked_packets)) {
-                            $message .= '<li>Order <b>' . $order->name . '</b> is already booked with ' . $booked_packets[$order->order_id]->cn_number . '. To book again <a target="_blank" href="' . route('admin.booked_packets.create',['order_id' => $order->order_id]) . '">Click Here</a></b>.</li>';
+                        if(isset($booked_packets[$order->order_number])) {
+                            $message .= '<li>Order <b>' . $order->name . '</b> is already booked with <b>' . $booked_packets[$order->order_number]->cn_number . '</b>. To book again <b><a target="_blank" href="' . route('admin.booked_packets.create',['order_id' => $order->order_id]) . '">Click Here</a></b>.</li>';
                             continue;
                         }
                     }
@@ -191,10 +272,20 @@ class ShopifyOrdersController extends Controller
                     /**
                      * If Order ID is provided then prepare data to automatically be filled
                      */
-                    $prepared_packet = BookedPackets::prepareBooking($order->order_id, $account_id);
+                    $prepared_packet = BookedPackets::prepareBooking($order->order_id, $request->get('customActionName'), $account_id);
                     if($prepared_packet['status']) {
                         $booking_packet_request = new Request();
                         $booking_packet_request->replace($prepared_packet['packet']);
+
+                        /**
+                         * Verify Fields before send
+                         */
+                        $validator = $this->verifyPacketFields($booking_packet_request);
+                        if ($validator->fails()) {
+                            $message .= '<li>Order <b>' . $order->name . '</b> has some issues. [' . implode(', ', $validator->messages()->all()) . ']';
+                            continue;
+                        }
+
                         $result = BookedPackets::createRecord($booking_packet_request, $account_id);
 
                         /**
@@ -205,20 +296,18 @@ class ShopifyOrdersController extends Controller
                                 'account_id' => $account_id,
                                 'id' => $result['record_id'],
                             ])->first();
-                            if($booked_packet) {
 
-                                ShopifyOrders::where([
-                                    'order_id' => $order->order_id,
-                                    'account_id' => $account_id,
-                                ])->update(array(
-                                   'booking_id' => $booked_packet->id,
-                                   'cn_number' => $booked_packet->cn_number,
-                                   'destination_city' => $booked_packet->destination_city,
-                                   'consignment_address' => $booked_packet->consignment_address
-                                ));
+                            ShopifyOrders::where([
+                                'order_id' => $order->order_id,
+                                'account_id' => $account_id,
+                            ])->update(array(
+                                'booking_id' => $booked_packet->id,
+                                'cn_number' => $booked_packet->cn_number,
+                                'destination_city' => $booked_packet->destination_city,
+                                'consignment_address' => $booked_packet->consignee_address
+                            ));
 
-                                $message .= '<li>Order <b>' . $order->name . '</b> has been booked. Assigned CN # is ' . $booked_packet->cn_number;
-                            }
+                            $message .= '<li>Order <b>' . $order->name . '</b> has been booked. Assigned CN # is ' . $booked_packet->cn_number;
                         }
                     } else {
                         $message .= '<li>Order <b>' . $order->name . '</b> has consignee city issue. Please select proper city for this packet to book.';
@@ -235,35 +324,44 @@ class ShopifyOrdersController extends Controller
             }
         }
 
-        /**
-         * If mode is test then stop booking packet in bulk.
-         */
-        $leopards_settings = LeopardsSettings::where([
-            'account_id' => $account_id
-        ])
-            ->select('slug', 'data')
-            ->orderBy('id', 'asc')
-            ->get()->keyBy('slug');
-
-        if($leopards_settings['mode']->data == '1') {
-            return [
-                'status' => 'NO',
-                'message' => 'Test mode is enabled, <b><a href="' . route('admin.leopards_settings.index') . '">Click Here</a></b> to disable test mode.</b>'
-            ];
-        }
-
-        $result = $this->getCompanyData($account_id);
-        if(!$result['status']) {
-            return [
-                'status' => 'NO',
-                'message' => 'Leopards Credentials are invalid, <b><a href="' . route('admin.leopards_settings.index') . '">Click Here</a></b> to setup credentials again.</b>'
-            ];
-        }
-
         return [
             'status' => 'NO',
             'message' => 'Something went wrong, please try again later'
         ];
+    }
+
+    /**
+     * Validate form fields
+     *
+     * @param  \Illuminate\Http\Request $request
+     * @return Validator $validator;
+     */
+    protected function verifyPacketFields(Request $request)
+    {
+        return $validator = Validator::make($request->all(), [
+            'shipment_type_id' => 'required',
+            'booking_date' => 'required',
+            'packet_pieces' => 'required|numeric',
+            'net_weight' => 'required|numeric',
+            'collect_amount' => 'required|numeric',
+            'order_id' => 'nullable|numeric',
+            'vol_weight_w' => 'nullable|numeric',
+            'vol_weight_h' => 'nullable|numeric',
+            'vol_weight_l' => 'nullable|numeric',
+            'shipper_id' => 'required',
+            'origin_city' => 'required',
+            'shipper_name' => 'required',
+            'shipper_email' => 'nullable',
+            'shipper_phone' => 'required',
+            'shipper_address' => 'required',
+            'consignee_id' => 'required',
+            'destination_city' => 'required',
+            'consignee_name' => 'required',
+            'consignee_email' => 'required|email',
+            'consignee_phone' => 'required',
+            'consignee_address' => 'required',
+            'comments' => 'required',
+        ]);
     }
 
 

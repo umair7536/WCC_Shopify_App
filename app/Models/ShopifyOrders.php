@@ -253,7 +253,10 @@ class ShopifyOrders extends BaseModal
                 'shopify_orders.financial_status',
                 'shopify_orders.fulfillment_status',
                 'shopify_orders.total_price',
-                'shopify_orders.tags'
+                'shopify_orders.tags',
+                'shopify_orders.cn_number',
+                'shopify_orders.destination_city',
+                'shopify_orders.consignment_address'
             )
             ->get();
     }

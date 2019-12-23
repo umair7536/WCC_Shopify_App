@@ -235,7 +235,7 @@
 <div class="row">
     <div class="form-group col-md-12">
         {!! Form::label('comments', 'Special Instructions*', ['class' => 'control-label']) !!}
-        {!! Form::textarea('comments', old('comments'), ['rows' => '3', 'class' => 'form-control', 'required' => '']) !!}
+        {!! Form::textarea('comments', $data['booked_packet']['comments'], ['rows' => '3', 'class' => 'form-control', 'required' => '']) !!}
         @if($errors->has('comments'))
             <p class="help-block">
                 {{ $errors->first('comments') }}
