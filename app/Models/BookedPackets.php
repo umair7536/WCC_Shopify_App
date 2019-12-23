@@ -427,9 +427,7 @@ class BookedPackets extends BaseModal
                 'account_id' => $account_id,
             ])->update(array(
                 'booking_id' => $record->id,
-                'cn_number' => $data['cn_number'],
-                'destination_city' => $data['destination_city'],
-                'consignment_address' => $data['consignee_address']
+                'cn_number' => $data['cn_number']
             ));
         }
 

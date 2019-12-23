@@ -285,9 +285,7 @@ class ShopifyOrdersController extends Controller
                                 'account_id' => $account_id,
                             ])->update(array(
                                 'booking_id' => $booked_packet->id,
-                                'cn_number' => $booked_packet->cn_number,
-//                                'destination_city' => $booked_packet->destination_city,
-//                                'consignment_address' => $booked_packet->consignee_address
+                                'cn_number' => $booked_packet->cn_number
                             ));
 
                             $message .= '<li>Order <b>' . $order->name . '</b> has been booked. Assigned CN # is ' . $booked_packet->cn_number;
