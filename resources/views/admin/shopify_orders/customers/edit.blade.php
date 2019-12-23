@@ -11,7 +11,7 @@
             @include('partials.messages')
             <!-- Ends Form Validation Messages -->
 
-                @include('admin.shopify_orders.customers.editfields')
+                @include('admin.shopify_customers.editfields')
             </div>
             <div>
                 {!! Form::submit(trans('global.app_update'), ['class' => 'btn btn-success']) !!}
@@ -20,4 +20,4 @@
         </div>
     </div>
 </div>
-<script src="{{ url('js/admin/shopify_orders/customers.js') }}" type="text/javascript"></script>
+<script src="{{ url('js/admin/shopify_customers/fields.js') }}" type="text/javascript"></script>

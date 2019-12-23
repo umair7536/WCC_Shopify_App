@@ -13,7 +13,7 @@ var TableDatatablesAjax = function () {
             }, onDataLoad: function (a) {
             }, loadingMessage: "Loading...", dataTable: {
                 bStateSave: !0,
-                cache: !0,
+                cache: !1,
                 fnStateSaveParams: function (a, e) {
                     return $("#datatable_ajax tr.filter .form-control").each(function () {
                         e[$(this).attr("name")] = $(this).val()
@@ -35,7 +35,7 @@ var TableDatatablesAjax = function () {
                     { "data": "fulfillment_status" },
                     { "data": "tags" },
                     { "data": "cn_number" },
-                    { "data": "destination_city" },
+                    { "data": "destination_city","bSortable": false },
                     { "data": "consignment_address" },
                     { "data": "financial_status" },
                     { "data": "total_price" },
@@ -49,6 +49,7 @@ var TableDatatablesAjax = function () {
                     }
                 },
                 ordering: !0,
+                "fnDrawCallback" : function(e) {},
                 order: [[1, "desc"]]
             }
         }), a.getTableWrapper().on("click", ".table-group-action-submit", function (e) {

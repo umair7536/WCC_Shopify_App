@@ -43,7 +43,7 @@ class ShopifyOrdersController extends Controller
         ])->get();
 
         if($leopards_cities) {
-            $leopards_cities = $leopards_cities->pluck('name', 'city_id');
+            $leopards_cities = $leopards_cities->pluck('name', 'name');
         } else {
             $leopards_cities = [];
         }
@@ -83,23 +83,6 @@ class ShopifyOrdersController extends Controller
         $ShopifyOrders = ShopifyOrders::getRecords($request, $iDisplayStart, $iDisplayLength, Auth::User()->account_id);
 
         if($ShopifyOrders) {
-
-            $cities = [];
-            foreach($ShopifyOrders as $ShopifyOrder) {
-                $cities[] = $ShopifyOrder->destination_city;
-            }
-
-            $leopards_cities = LeopardsCities::where([
-                'account_id' => Auth::User()->account_id,
-            ])->whereIn('city_id', $cities)
-                ->select('city_id', 'name')
-                ->get();
-            if($leopards_cities) {
-                $leopards_cities = $leopards_cities->keyBy('city_id');
-            } else {
-                $leopards_cities = [];
-            }
-
             /**
              * On result time propare customer
              */
@@ -109,7 +92,7 @@ class ShopifyOrdersController extends Controller
             }
 
             $customers = ShopifyCustomers::whereIn('customer_id', $customer_ids)
-                ->select('customer_id', 'name', 'email', 'phone')
+                ->select('customer_id', 'name', 'email', 'phone', 'city', 'address1', 'address2')
                 ->get()->keyBy('customer_id');
 
             $shop = ShopifyShops::where([
@@ -136,8 +119,8 @@ class ShopifyOrdersController extends Controller
                     'fulfillment_status' => view('admin.shopify_orders.fulfillment_status', compact('shopify_order'))->render(),
                     'tags' => $shopify_order->tags,
                     'cn_number' => $shopify_order->cn_number,
-                    'destination_city' => isset($shopify_order->destination_city, $leopards_cities) ? $leopards_cities[$shopify_order->destination_city]->name : '',
-                    'consignment_address' => $shopify_order->consignment_address,
+                    'destination_city' => (isset($customers[$shopify_order->customer_id]) ? trim($customers[$shopify_order->customer_id]['city']) : ''),
+                    'consignment_address' => (isset($customers[$shopify_order->customer_id]) ? trim($customers[$shopify_order->customer_id]['address1']) . ' ' . trim($customers[$shopify_order->customer_id]['address2']) : ''),
                     'total_price' => number_format($shopify_order->total_price),
                     'financial_status' => "<span class=\"label label-default\"> " . ucfirst($shopify_order->financial_status) . " </span>",
                     'actions' => view('admin.shopify_orders.actions', compact('shopify_order'))->render(),
@@ -303,8 +286,8 @@ class ShopifyOrdersController extends Controller
                             ])->update(array(
                                 'booking_id' => $booked_packet->id,
                                 'cn_number' => $booked_packet->cn_number,
-                                'destination_city' => $booked_packet->destination_city,
-                                'consignment_address' => $booked_packet->consignee_address
+//                                'destination_city' => $booked_packet->destination_city,
+//                                'consignment_address' => $booked_packet->consignee_address
                             ));
 
                             $message .= '<li>Order <b>' . $order->name . '</b> has been booked. Assigned CN # is ' . $booked_packet->cn_number;

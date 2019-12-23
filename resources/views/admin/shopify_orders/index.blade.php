@@ -101,7 +101,7 @@
                             <input type="text" class="form-control form-filter input-sm" name="cn_number">
                         </td>
                         <td>
-                            {!! Form::select('destination_city', $leopards_cities, null, ['class' => 'form-control form-filter input-sm', 'placeholder' => 'Select a City']) !!}
+                            {!! Form::select('destination_city', $leopards_cities, null, ['class' => 'form-control form-filter input-sm select2', 'placeholder' => 'Select a City']) !!}
                         </td>
                         <td>
                             <input type="text" class="form-control form-filter input-sm" name="consignment_address">
@@ -134,6 +134,16 @@
     <!-- End: Demo Datatable 1 -->
     <!--Add New View model Start-->
     <div class="modal fade" id="ajax_shopify_orders" role="basic" aria-hidden="true"
+         style=" left:10%; width: 80%; top:2%;">
+        <div class="modal-content">
+            <div class="modal-body">
+                <span> &nbsp;&nbsp;Loading... </span>
+            </div>
+        </div>
+    </div>
+    <!--Add new View model End-->
+    <!--Add New View model Start-->
+    <div class="modal fade" id="ajax_shopify_customers" role="basic" aria-hidden="true"
          style=" left:10%; width: 80%; top:2%;">
         <div class="modal-content">
             <div class="modal-body">

@@ -33,17 +33,12 @@
     {!! Form::close() !!}
 @endif
 @if(Gate::allows('booked_packets_create'))
-    <div class="btn-group">
-        <button type="button" class="btn btn-success btn-sm"><i class="fa fa-truck"></i> Book</button>
-        <button type="button" class="btn btn-success btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-            <i class="fa fa-angle-down"></i>
-        </button>
-        <ul class="dropdown-menu" role="menu">
-            <li>
-                <a href="{{ route('admin.booked_packets.create',['order_id' => $shopify_order->order_id]) }}">
-                    Book in Leopards COD
-                </a>
-            </li>
-        </ul>
-    </div>
+    <a class="btn btn-xs btn-info margin-bottom-5" href="{{ route('admin.booked_packets.create',['order_id' => $shopify_order->order_id]) }}" target="_blank">
+        <i class="fa fa-truck"></i>&nbsp;Book in LCS
+    </a>
+@endif
+@if(Gate::allows('shopify_customers_edit'))
+    <a class="btn btn-xs btn-success" href="{{ route('admin.shopify_customers.edit',[$shopify_order->customer_id]) }}" data-target="#ajax_shopify_customers" data-toggle="modal">
+        <i class="fa fa-pencil"></i>&nbsp;Edit Customer
+    </a>
 @endif

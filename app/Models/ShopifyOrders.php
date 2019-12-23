@@ -137,6 +137,45 @@ class ShopifyOrders extends BaseModal
             $query->where('total_price', 'like', '%' . $request->get('total_price') . '%');
         }
 
+        if($request->get('cn_number')) {
+            $query->where('cn_number', 'like', '%' . $request->get('cn_number') . '%');
+        }
+
+        if($request->get('destination_city')) {
+            $like = $request->get('destination_city');
+
+            $customer_query = ShopifyCustomers::where('account_id', '=', $account_id);
+            $customer_query->where(function ($sub_query) use ($like) {
+                $sub_query->where('city', 'LIKE', '%' . $like . '%');
+            });
+            $query_customers = $customer_query
+                ->select('customer_id')
+                ->limit(800)
+                ->get()->pluck('customer_id');
+
+            if(count($query_customers)) {
+                $query->whereIn('customer_id', $query_customers);
+            }
+        }
+
+        if($request->get('consignment_address')) {
+            $like = $request->get('consignment_address');
+
+            $customer_query = ShopifyCustomers::where('account_id', '=', $account_id);
+            $customer_query->where(function ($sub_query) use ($like) {
+                $sub_query->where('address1', 'LIKE', '%' . $like . '%');
+                $sub_query->orWhere('address2', 'LIKE', '%' . $like . '%');
+            });
+            $query_customers = $customer_query
+                ->select('customer_id')
+                ->limit(800)
+                ->get()->pluck('customer_id');
+
+            if(count($query_customers)) {
+                $query->whereIn('customer_id', $query_customers);
+            }
+        }
+
         if($request->get('customer_email')) {
 
             $like = $request->get('customer_email');
@@ -219,6 +258,45 @@ class ShopifyOrders extends BaseModal
             $query->where('total_price', 'like', '%' . $request->get('total_price') . '%');
         }
 
+        if($request->get('cn_number')) {
+            $query->where('cn_number', 'like', '%' . $request->get('cn_number') . '%');
+        }
+
+        if($request->get('destination_city')) {
+            $like = $request->get('destination_city');
+
+            $customer_query = ShopifyCustomers::where('account_id', '=', $account_id);
+            $customer_query->where(function ($sub_query) use ($like) {
+                $sub_query->where('city', 'LIKE', '%' . $like . '%');
+            });
+            $query_customers = $customer_query
+                ->select('customer_id')
+                ->limit(800)
+                ->get()->pluck('customer_id');
+
+            if(count($query_customers)) {
+                $query->whereIn('customer_id', $query_customers);
+            }
+        }
+
+        if($request->get('consignment_address')) {
+            $like = $request->get('consignment_address');
+
+            $customer_query = ShopifyCustomers::where('account_id', '=', $account_id);
+            $customer_query->where(function ($sub_query) use ($like) {
+                $sub_query->where('address1', 'LIKE', '%' . $like . '%');
+                $sub_query->orWhere('address2', 'LIKE', '%' . $like . '%');
+            });
+            $query_customers = $customer_query
+                ->select('customer_id')
+                ->limit(800)
+                ->get()->pluck('customer_id');
+
+            if(count($query_customers)) {
+                $query->whereIn('customer_id', $query_customers);
+            }
+        }
+
         if($request->get('customer_email')) {
 
             $like = $request->get('customer_email');
@@ -254,9 +332,7 @@ class ShopifyOrders extends BaseModal
                 'shopify_orders.fulfillment_status',
                 'shopify_orders.total_price',
                 'shopify_orders.tags',
-                'shopify_orders.cn_number',
-                'shopify_orders.destination_city',
-                'shopify_orders.consignment_address'
+                'shopify_orders.cn_number'
             )
             ->get();
     }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Events\Shopify\Products\SyncCustomersFire;
 use App\Models\Accounts;
+use App\Models\LeopardsCities;
 use App\Models\ShopifyCustomers;
 use App\Models\ShopifyShops;
 use Illuminate\Http\Request;
@@ -315,10 +316,27 @@ class ShopifyCustomersController extends Controller
         $shopify_customer = ShopifyCustomers::getData($id);
 
         if(!$shopify_customer) {
+            $shopify_customer = ShopifyCustomers::where([
+                'account_id' => Auth::User()->account_id,
+                'customer_id' => $id,
+            ])->first();
+        }
+
+        if(!$shopify_customer) {
             return view('error', compact('lead_statuse'));
         }
 
-        return view('admin.shopify_customers.edit', compact('shopify_customer'));
+        $leopards_cities = LeopardsCities::where([
+            'account_id' => Auth::User()->account_id,
+        ])->get();
+
+        if($leopards_cities) {
+            $leopards_cities = $leopards_cities->pluck('name', 'name');
+        } else {
+            $leopards_cities = [];
+        }
+
+        return view('admin.shopify_customers.edit', compact('shopify_customer', 'leopards_cities'));
     }
 
     /**
@@ -442,6 +460,19 @@ class ShopifyCustomersController extends Controller
             }
 
             $customer_processed = ShopifyCustomers::prepareRecord($customer);
+
+            /**
+             * Set fields if provided
+             */
+            if($request->get('address1') != '') {
+                $customer_processed['address1'] = $request->get('address1');
+            }
+            if($request->get('address2') != '') {
+                $customer_processed['address2'] = $request->get('address2');
+            }
+            if($request->get('city') != '') {
+                $customer_processed['city'] = $request->get('city');
+            }
             $customer_processed['account_id'] = $shop['account_id'];
 
             $customer_record = ShopifyCustomers::where([
