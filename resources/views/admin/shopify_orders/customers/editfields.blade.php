@@ -53,7 +53,7 @@
 <div class="clearfix"></div>
 <div class="row">
     <div class="form-group col-md-12">
-        {!! Form::label('address1', 'Address1*', ['class' => 'control-label']) !!}
+        {!! Form::label('address1', 'Address 1*', ['class' => 'control-label']) !!}
         {!! Form::text('address1', old('address1'), ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
         @if($errors->has('address1'))
             <p class="help-block">
@@ -62,8 +62,8 @@
         @endif
     </div>
     <div class="form-group col-md-12">
-        {!! Form::label('address2', 'Address2*', ['class' => 'control-label']) !!}
-        {!! Form::text('address2', old('address2'), ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
+        {!! Form::label('address2', 'Address 2', ['class' => 'control-label']) !!}
+        {!! Form::text('address2', old('address2'), ['class' => 'form-control', 'placeholder' => '']) !!}
         @if($errors->has('address2'))
             <p class="help-block">
                 {{ $errors->first('address2') }}
