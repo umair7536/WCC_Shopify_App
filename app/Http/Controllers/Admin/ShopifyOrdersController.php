@@ -135,6 +135,12 @@ class ShopifyOrdersController extends Controller
         return response()->json($records);
     }
 
+    /**
+     * Book a single packet into LCS
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function bookPacket(Request $request) {
         if($request->get('id') == '') {
             flash('Order ID is a required field.')->error()->important();
