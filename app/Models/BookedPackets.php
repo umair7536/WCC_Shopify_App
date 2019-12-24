@@ -729,7 +729,11 @@ class BookedPackets extends BaseModal
                                     $booked_packet[$key] = $city->city_id;
                                 }
                             } else {
-                                $booked_packet[$key] = $customer[$value];
+                                if($value == 'name') {
+                                    $booked_packet[$key] = ($customer[$value]) ? trim(ucwords($customer[$value])) : trim(ucwords($customer['first_name'])) . ' ' . trim(ucwords($customer['last_name']));
+                                } else {
+                                    $booked_packet[$key] = $customer[$value];
+                                }
                             }
                         }
                     }
@@ -874,7 +878,11 @@ class BookedPackets extends BaseModal
                                     $status = false;
                                 }
                             } else {
-                                $booked_packet[$key] = $customer[$value];
+                                if($value == 'name') {
+                                    $booked_packet[$key] = ($customer[$value]) ? trim(ucwords($customer[$value])) : trim(ucwords($customer['first_name'])) . ' ' . trim(ucwords($customer['last_name']));
+                                } else {
+                                    $booked_packet[$key] = $customer[$value];
+                                }
                             }
                         }
                     }
