@@ -4,6 +4,16 @@ var TableDatatablesAjax = function () {
         $(".date_to").datepicker({rtl: App.isRTL(), autoclose: !0});
         $('.select2').select2({ width: '100%' });
 
+        $('.filter-cancel').click(function (e) {
+            // Destroy Multiselect
+            $(".mt-multiselect").multiselect("clearSelection");
+            $('.mt-multiselect').multiselect('destroy');
+            // Reset Multiselect
+            ms();
+        });
+    };
+
+    var ms = function() {
         $('.mt-multiselect').each(function(){
             var btn_class = $(this).attr('class');
             var clickable_groups = ($(this).data('clickable-groups')) ? $(this).data('clickable-groups') : false ;
@@ -55,7 +65,7 @@ var TableDatatablesAjax = function () {
                 buttonClass: btn_class,
             });
         });
-    };
+    }
 
     e = function () {
         var a = new Datatable;
@@ -125,7 +135,7 @@ var TableDatatablesAjax = function () {
 
     return {
         init: function () {
-            a(), e();
+            a(), e(), ms();
         }
     }
 }();
