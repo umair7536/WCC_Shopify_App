@@ -39,16 +39,16 @@
         </div>
         <div class="portlet-body">
             <div class="table-container">
-                {{--<div class="table-actions-wrapper">--}}
-                    {{--<span> </span>--}}
-                    {{--<select class="table-group-action-input form-control input-inline input-small input-sm">--}}
-                        {{--<option value="">Select</option>--}}
-                        {{--<option value="Delete">Delete</option>--}}
-                    {{--</select>--}}
-                    {{--<button class="btn btn-sm red table-group-action-submit">--}}
-                        {{--<i class="fa fa-check"></i> Submit--}}
-                    {{--</button>--}}
-                {{--</div>--}}
+                <div class="table-actions-wrapper">
+                    <span> </span>
+                    <select class="table-group-action-input form-control input-inline input-small input-sm">
+                        <option value="">Bulk Action</option>
+                        <option value="cancel">Cancel Booked Packets</option>
+                    </select>
+                    <button class="btn btn-sm red table-group-action-submit">
+                        <i class="fa fa-check"></i> Submit
+                    </button>
+                </div>
                 <table class="table table-striped table-bordered table-hover table-checkable" id="datatable_ajax">
                     <thead>
                     <tr role="row" class="heading">

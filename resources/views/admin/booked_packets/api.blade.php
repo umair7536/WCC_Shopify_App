@@ -33,9 +33,25 @@
         </div>
         <div class="portlet-body">
             <div class="table-container">
+                <div class="table-actions-wrapper">
+                    <span> </span>
+                    <select class="table-group-action-input form-control input-inline input-small input-sm">
+                        <option value="">Bulk Action</option>
+                        <option value="cancel">Cancel Booked Packets</option>
+                    </select>
+                    <button class="btn btn-sm red table-group-action-submit">
+                        <i class="fa fa-check"></i> Submit
+                    </button>
+                </div>
                 <table class="table table-striped table-bordered table-hover table-checkable" id="datatable_ajax">
                     <thead>
                     <tr role="row" class="heading">
+                        <th width="3%">
+                            <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                                <input type="checkbox" class="group-checkable" data-set="#sample_2 .checkboxes"/>
+                                <span></span>
+                            </label>
+                        </th>
                         <th>@lang('global.booked_packets.fields.status')</th>
                         <th>@lang('global.booked_packets.fields.order_id')</th>
                         <th>@lang('global.booked_packets.fields.shipment_type_id')</th>
@@ -50,6 +66,7 @@
                         <th>@lang('global.booked_packets.fields.collect_amount')</th>
                     </tr>
                     <tr role="row" class="filter">
+                        <td></td>
                         <td>
                             {!! Form::select('status', $status, null, ['class' => 'form-control form-filter input-sm', 'placeholder' => 'Select a Status']) !!}
                         </td>

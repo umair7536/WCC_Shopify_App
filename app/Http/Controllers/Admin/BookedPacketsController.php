@@ -63,18 +63,24 @@ class BookedPacketsController extends Controller
         $records = array();
         $records["data"] = array();
 
+//        if ($request->get('customActionType') && $request->get('customActionType') == "group_action") {
+//            $BookedPackets = BookedPackets::getBulkData($request->get('id'));
+//            if($BookedPackets) {
+//                foreach($BookedPackets as $city) {
+//                    // Check if child records exists or not, If exist then disallow to delete it.
+//                    if(!BookedPackets::isChildExists($city->id, Auth::User()->account_id)) {
+//                        $city->delete();
+//                    }
+//                }
+//            }
+//            $records["customActionStatus"] = "OK"; // pass custom message(useful for getting status of group actions)
+//            $records["customActionMessage"] = "Records has been deleted successfully!"; // pass custom message(useful for getting status of group actions)
+//        }
+
         if ($request->get('customActionType') && $request->get('customActionType') == "group_action") {
-            $BookedPackets = BookedPackets::getBulkData($request->get('id'));
-            if($BookedPackets) {
-                foreach($BookedPackets as $city) {
-                    // Check if child records exists or not, If exist then disallow to delete it.
-                    if(!BookedPackets::isChildExists($city->id, Auth::User()->account_id)) {
-                        $city->delete();
-                    }
-                }
-            }
-            $records["customActionStatus"] = "OK"; // pass custom message(useful for getting status of group actions)
-            $records["customActionMessage"] = "Records has been deleted successfully!"; // pass custom message(useful for getting status of group actions)
+            $response = $this->bulkActions($request);
+            $records["customActionStatus"] = $response['status']; // pass custom message(useful for getting status of group actions)
+            $records["customActionMessage"] = $response['message']; // pass custom message(useful for getting status of group actions)
         }
 
         /**
@@ -181,6 +187,12 @@ class BookedPacketsController extends Controller
         $records = array();
         $records["data"] = array();
 
+        if ($request->get('customActionType') && $request->get('customActionType') == "group_action") {
+            $response = $this->bulkActions($request);
+            $records["customActionStatus"] = $response['status']; // pass custom message(useful for getting status of group actions)
+            $records["customActionMessage"] = $response['message']; // pass custom message(useful for getting status of group actions)
+        }
+
         /**
          * Handle Packet as Production or Test
          * '1' as Test Mode
@@ -223,6 +235,7 @@ class BookedPacketsController extends Controller
 
             foreach($BookedPackets as $booked_packet) {
                 $records["data"][] = array(
+                    'id' => '<label class="mt-checkbox mt-checkbox-single mt-checkbox-outline"><input name="id[]" type="checkbox" class="checkboxes" value="'.$booked_packet->id.'"/><span></span></label>',
                     'status' => $status[$booked_packet->status],
                     'order_id' => $booked_packet->order_id,
                     'shipment_type_id' => $shipment_type[$booked_packet->shipment_type_id],
@@ -245,6 +258,83 @@ class BookedPacketsController extends Controller
         $records["recordsFiltered"] = $iTotalRecords;
 
         return response()->json($records);
+    }
+
+    /**
+     * Bulk Book Packets Actions
+     *
+     * @param Request $request
+     * @return array
+     */
+    private function bulkActions(Request $request) : array {
+
+        $account_id = Auth::User()->account_id;
+
+        /**
+         * Check Booking Quota, If Quota is acceeding then stop booking
+         */
+        $result = $this->getCompanyData($account_id);
+        if(!$result['status']) {
+            return [
+                'status' => 'NO',
+                'message' => 'Leopards Credentials are invalid, <b><a target="_blank" href="' . route('admin.leopards_settings.index') . '">Click Here</a></b> to setup credentials again.</b>'
+            ];
+        }
+
+        if (
+            $request->get('customActionType') == "group_action"
+            && $request->get('customActionName') == "cancel"
+        ) {
+            $ids = $request->get('id');
+
+            $booked_packets = BookedPackets::where([
+                'account_id' => $account_id
+            ])
+                ->whereIn('id', $ids)
+                ->select('id', 'cn_number', 'account_id')
+                ->orderBy('id', 'desc')
+                ->get();
+
+            if($booked_packets->count()) {
+
+                /**
+                 * Variable to track if any response was successful
+                 */
+                $any_success = false;
+
+                // Build Success Message
+                $message = 'Below are your results:<br/>';
+                $message .= '<ul>';
+
+                foreach ($booked_packets as $booked_packet) {
+                    $response = BookedPackets::cancelBookedPacket($booked_packet->cn_number, $booked_packet->account_id);
+                    if($response['status']) {
+                        // Any of the packets get success
+                        $any_success = true;
+
+                        $message .= '<li>CN # <b>' . $booked_packet->cn_number . '</b> has been cancelled.';
+                        /**
+                         * Update Packet status to Cancel
+                         */
+                        $booked_packet->update(['status' => Config::get('constants.status_cancel')]);
+                    } else {
+                        $message .= '<li>CN # <b>' . $booked_packet->cn_number . '</b> has some issues. [' . $response['message'] . ']';
+                    }
+                }
+
+                $message .= '</ul>';
+
+                return [
+                    'status' => ($any_success) ? 'OK' : 'NO',
+                    'message' => $message
+                ];
+            }
+        }
+
+        return [
+            'status' => 'NO',
+            'message' => 'Something went wrong, please try again later'
+        ];
     }
 
     /**

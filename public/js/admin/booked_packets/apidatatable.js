@@ -29,6 +29,7 @@ var TableDatatablesAjax = function () {
                 lengthMenu: [[25, 50, 100], [25, 50, 100]],
                 pageLength: 25,
                 "columns": [
+                    { "data": "id","bSortable": false },
                     { "data": "status","bSortable": true },
                     { "data": "order_id","bSortable": true },
                     { "data": "shipment_type_id","bSortable": true },

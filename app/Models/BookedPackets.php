@@ -542,6 +542,67 @@ class BookedPackets extends BaseModal
         }
     }
 
+    static public function cancelBookedPacket($cn_number, $account_id) {
+        try {
+
+            $leopards_settings = LeopardsSettings::where([
+                'account_id' => $account_id
+            ])
+                ->select('slug', 'data')
+                ->orderBy('id', 'asc')
+                ->get()->keyBy('slug');
+
+            /**
+             * Merge Booked Packet with LCS Credentials
+             */
+            $cn_data = array_merge(array(
+                'api_key' => $leopards_settings['api-key']->data,              // API Key provided by LCS
+                'api_password' => $leopards_settings['api-password']->data,    // API Password provided by LCS
+            ), [
+                'cn_numbers' => $cn_number
+            ]);
+
+            $client = new Client();
+            $response = $client->post(env('LCS_URL') . 'webservice/cancelBookedPackets/format/json/ ', array(
+                'form_params' => $cn_data
+            ));
+
+            if($response->getStatusCode() == 200) {
+                if($response->getBody()) {
+
+                    $result = json_decode($response->getBody(), true);
+
+                    if(
+                        $result['status']
+                    ) {
+                        return array(
+                            'status' => true,
+                            'message' => 'Packet has been cancelled successfully.',
+                        );
+                    } else {
+                        if(
+                            !$result['status']
+                            && (
+                                count($result['error'])
+                                &&  isset($result['error'][$cn_number])
+                            )
+                        ) {
+                            return array(
+                                'status' => false,
+                                'message' => $result['error'][$cn_number],
+                            );
+                        }
+                    }
+                }
+            }
+        } catch (\Exception $exception) {}
+
+        return array(
+            'status' => false,
+            'message' => 'Something went wrong.',
+        );
+    }
+
 
     /**
      * Delete Record
