@@ -343,6 +343,17 @@ class BookedPackets extends BaseModal
         $data = $request->all();
 
         /**
+         * If consignment emails is not provided, put a dummy email
+         */
+        if(
+            array_key_exists('consignee_email', $data) && !$data['consignee_email']
+        ) {
+            $data['consignee_email'] = Config::get('constants.lcs_dummy_email');
+            $request = new Request();
+            $request->replace($data);
+        }
+
+        /**
          * Book Packet in Leopards System
          */
         $response = BookedPackets::bookPacket($request, $account_id);

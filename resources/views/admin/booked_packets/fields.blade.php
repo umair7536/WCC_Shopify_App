@@ -179,8 +179,8 @@
         @endif
     </div>
     <div class="form-group col-md-4">
-        {!! Form::label('consignee_email', 'Consignee Email*', ['class' => 'control-label']) !!}
-        {!! Form::text('consignee_email', $data['booked_packet']['consignee_email'], ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
+        {!! Form::label('consignee_email', 'Consignee Email', ['class' => 'control-label']) !!}
+        {!! Form::text('consignee_email', $data['booked_packet']['consignee_email'], ['class' => 'form-control', 'placeholder' => '']) !!}
         @if($errors->has('consignee_email'))
             <p class="help-block">
                 {{ $errors->first('consignee_email') }}

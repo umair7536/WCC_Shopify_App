@@ -67,6 +67,7 @@ return [
         3 => 'Overland',
         10 => 'Overnight',
     ),
+    'lcs_dummy_email' => 'noemail@lcs.packet',
     'shipment_type_overnight' => 10,
     'status' => array(
         0 => 'Pickup Request not Send',
