@@ -774,7 +774,7 @@ class BookedPackets extends BaseModal
                      * if line items found then add them into comments
                      */
                     if(array_key_exists('comments', $booked_packet)) {
-                        $booked_packet['comments'] = $booked_packet['comments'] . ' ' . implode(', ', $items);
+                        $booked_packet['comments'] = trim($booked_packet['comments'] . ' ' . implode(', ', $items));
                     }
                 }
             }
