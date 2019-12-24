@@ -246,7 +246,7 @@ class ShopifyOrdersController extends Controller
             if($orders) {
 
                 // Build Success Message
-                $message = 'Your request has been processed with following results:<br/>';
+                $message = 'Below are your results:<br/>';
                 $message .= '<ul>';
 
                 $order_numbers = [];

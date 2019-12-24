@@ -270,7 +270,7 @@ class ShopifyCustomersController extends Controller
         return $validator = Validator::make($request->all(), [
             'first_name' => 'required',
             'last_name' => 'required',
-            'email' => 'required|email',
+            'email' => 'nullable|email',
         ]);
     }
 
@@ -369,6 +369,47 @@ class ShopifyCustomersController extends Controller
                 'message' => ['Provided Customer not found in our database.'],
             ));
         }
+
+        $customer_processed = ShopifyCustomers::prepareRecord($shopify_customer);
+
+        /**
+         * Set fields if provided
+         */
+        if($request->get('email') == '') {
+            $customer_processed['email'] = null;
+        }
+        if($request->get('address1') != '') {
+            $customer_processed['address1'] = $request->get('address1');
+        }
+        if($request->get('address2') != '') {
+            $customer_processed['address2'] = $request->get('address2');
+        }
+        if($request->get('city') != '') {
+            $customer_processed['city'] = trim($request->get('city'));
+        }
+        $customer_processed['account_id'] = Auth::User()->account_id;
+
+        $customer_record = ShopifyCustomers::where([
+            'id' => $id,
+            'account_id' => $customer_processed['account_id'],
+        ])->select('id')->first();
+
+        if($customer_record) {
+            ShopifyCustomers::where([
+                'id' => $id,
+                'account_id' => $customer_processed['account_id'],
+            ])->update($customer_processed);
+        } else {
+            //echo 'Product Created: ' . $customer_processed['title'] . "\n";
+            ShopifyCustomers::create($customer_processed);
+        }
+
+        flash('Record has been updated successfully.')->success()->important();
+
+        return response()->json(array(
+            'status' => 1,
+            'message' => 'Record has been updated successfully.',
+        ));
 
         /**
          * Set Customer's Basic Informaton

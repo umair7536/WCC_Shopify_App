@@ -751,7 +751,7 @@ class BookedPackets extends BaseModal
                                     /**
                                      * Add Line item name and qty into comments section
                                      */
-                                    $items[] = $order_item['title'] . ' ' . $order_item['quantity'] . ' pc';
+                                    $items[] = $order_item['variant_title'] . ' ' . $order_item['quantity'] . ' pc';
                                 } else {
                                     $booked_packet[$key] += $order_item[$value];
                                 }
@@ -900,7 +900,7 @@ class BookedPackets extends BaseModal
                                     /**
                                      * Add Line item name and qty into comments section
                                      */
-                                    $items[] = $order_item['title'] . ' ' . $order_item['quantity'] . ' pc';
+                                    $items[] = $order_item['variant_title'] . ' ' . $order_item['quantity'] . ' pc';
                                 } else {
                                     $booked_packet[$key] += $order_item[$value];
                                 }

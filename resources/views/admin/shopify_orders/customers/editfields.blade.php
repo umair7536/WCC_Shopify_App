@@ -20,8 +20,8 @@
 </div>
 <div class="row">
     <div class="form-group col-md-6">
-        {!! Form::label('email', 'Email*', ['class' => 'control-label']) !!}
-        {!! Form::text('email', old('email'), ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
+        {!! Form::label('email', 'Email', ['class' => 'control-label']) !!}
+        {!! Form::text('email', old('email'), ['class' => 'form-control', 'placeholder' => '']) !!}
         @if($errors->has('email'))
             <p class="help-block">
                 {{ $errors->first('email') }}

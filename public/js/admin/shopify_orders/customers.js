@@ -11,7 +11,7 @@ var FormValidation = function () {
             rules: {
                 first_name: {required: !0},
                 last_name: {required: !0},
-                email: {required: !0, email: !0},
+                email: {email: !0},
                 password: {required: '#password:visible'}
             },
             invalidHandler: function (e, t) {
