@@ -118,15 +118,22 @@ class ShopifyOrders extends BaseModal
         }
 
         if ($request->get('fulfillment_status') && $request->get('fulfillment_status') != '') {
-            if($request->get('fulfillment_status') == 'null') {
-                $query->whereNull('fulfillment_status');
-            } else {
-                $query->where('fulfillment_status', '=', $request->get('fulfillment_status'));
+            $like = $request->get('fulfillment_status');
+            if(count($like)) {
+                $query->where(function ($sub_query) use ($like) {
+                    foreach($like as $fulfillment_status) {
+                        if($fulfillment_status == 'null') {
+                            $sub_query->orWhereNull('fulfillment_status');
+                        } else {
+                            $sub_query->orWhere('fulfillment_status', '=', $fulfillment_status);
+                        }
+                    }
+                });
             }
         }
 
         if ($request->get('financial_status') && $request->get('financial_status') != '') {
-            $query->where('financial_status', '=', $request->get('financial_status'));
+            $query->whereIn('financial_status', $request->get('financial_status'));
         }
 
         if($request->get('tags')) {
@@ -141,20 +148,23 @@ class ShopifyOrders extends BaseModal
             $query->where('cn_number', 'like', '%' . $request->get('cn_number') . '%');
         }
 
-        if($request->get('destination_city')) {
+        if ($request->get('destination_city') && $request->get('destination_city') != '') {
             $like = $request->get('destination_city');
+            if(count($like)) {
+                $customer_query = ShopifyCustomers::where('account_id', '=', $account_id);
+                $customer_query->where(function ($sub_query) use ($like) {
+                    foreach($like as $city) {
+                        $sub_query->orWhere('city', 'like', '%' . $city . '%');
+                    }
+                });
+                $query_customers = $customer_query
+                    ->select('customer_id')
+                    ->limit(800)
+                    ->get()->pluck('customer_id');
 
-            $customer_query = ShopifyCustomers::where('account_id', '=', $account_id);
-            $customer_query->where(function ($sub_query) use ($like) {
-                $sub_query->where('city', 'LIKE', '%' . $like . '%');
-            });
-            $query_customers = $customer_query
-                ->select('customer_id')
-                ->limit(800)
-                ->get()->pluck('customer_id');
-
-            if(count($query_customers)) {
-                $query->whereIn('customer_id', $query_customers);
+                if(count($query_customers)) {
+                    $query->whereIn('customer_id', $query_customers);
+                }
             }
         }
 
@@ -239,15 +249,22 @@ class ShopifyOrders extends BaseModal
         }
 
         if ($request->get('fulfillment_status') && $request->get('fulfillment_status') != '') {
-            if($request->get('fulfillment_status') == 'null') {
-                $query->whereNull('fulfillment_status');
-            } else {
-                $query->where('fulfillment_status', '=', $request->get('fulfillment_status'));
+            $like = $request->get('fulfillment_status');
+            if(count($like)) {
+                $query->where(function ($sub_query) use ($like) {
+                    foreach($like as $fulfillment_status) {
+                        if($fulfillment_status == 'null') {
+                            $sub_query->orWhereNull('fulfillment_status');
+                        } else {
+                            $sub_query->orWhere('fulfillment_status', '=', $fulfillment_status);
+                        }
+                    }
+                });
             }
         }
 
         if ($request->get('financial_status') && $request->get('financial_status') != '') {
-            $query->where('financial_status', '=', $request->get('financial_status'));
+            $query->whereIn('financial_status', $request->get('financial_status'));
         }
 
         if($request->get('tags')) {
@@ -262,20 +279,23 @@ class ShopifyOrders extends BaseModal
             $query->where('cn_number', 'like', '%' . $request->get('cn_number') . '%');
         }
 
-        if($request->get('destination_city')) {
+        if ($request->get('destination_city') && $request->get('destination_city') != '') {
             $like = $request->get('destination_city');
+            if(count($like)) {
+                $customer_query = ShopifyCustomers::where('account_id', '=', $account_id);
+                $customer_query->where(function ($sub_query) use ($like) {
+                    foreach($like as $city) {
+                        $sub_query->orWhere('city', 'like', '%' . $city . '%');
+                    }
+                });
+                $query_customers = $customer_query
+                    ->select('customer_id')
+                    ->limit(800)
+                    ->get()->pluck('customer_id');
 
-            $customer_query = ShopifyCustomers::where('account_id', '=', $account_id);
-            $customer_query->where(function ($sub_query) use ($like) {
-                $sub_query->where('city', 'LIKE', '%' . $like . '%');
-            });
-            $query_customers = $customer_query
-                ->select('customer_id')
-                ->limit(800)
-                ->get()->pluck('customer_id');
-
-            if(count($query_customers)) {
-                $query->whereIn('customer_id', $query_customers);
+                if(count($query_customers)) {
+                    $query->whereIn('customer_id', $query_customers);
+                }
             }
         }
 

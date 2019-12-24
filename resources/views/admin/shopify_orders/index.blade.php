@@ -8,6 +8,7 @@
     <link href="{{ url('metronic/assets/global/plugins/datatables/datatables.min.css') }}" rel="stylesheet" type="text/css"/>
     <link href="{{ url('metronic/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.css') }}" rel="stylesheet" type="text/css"/>
     <link href="{{ url('metronic/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css') }}" rel="stylesheet" type="text/css"/>
+    <link href="{{ url('metronic/assets/global/plugins/bootstrap-multiselect/css/bootstrap-multiselect.css') }}" rel="stylesheet" type="text/css" />
     <!-- END PAGE LEVEL PLUGINS -->
     <style type="text/css">
         #service span.select2-container {
@@ -92,7 +93,11 @@
                             <input type="text" class="form-control form-filter input-sm" name="customer_email">
                         </td>
                         <td>
-                            {!! Form::select('fulfillment_status', $fulfillment_status, null, ['class' => 'form-control form-filter input-sm', 'placeholder' => 'Select a Status']) !!}
+                            {!! Form::select('fulfillment_status', $fulfillment_status, null, [
+                                    'multiple' => 'multiple', 'class' => 'form-control form-filter input-sm mt-multiselect',
+                                    'data-label' => 'left', 'data-select-all' => 'true', 'data-width' => '100%',
+                                    'data-filter' => 'true'
+                            ]) !!}
                         </td>
                         <td>
                             <input type="text" class="form-control form-filter input-sm" name="tags">
@@ -101,13 +106,21 @@
                             <input type="text" class="form-control form-filter input-sm" name="cn_number">
                         </td>
                         <td>
-                            {!! Form::select('destination_city', $leopards_cities, null, ['class' => 'form-control form-filter input-sm select2', 'placeholder' => 'Select a City']) !!}
+                            {!! Form::select('destination_city', $leopards_cities, null, [
+                                    'multiple' => 'multiple', 'class' => 'form-control form-filter input-sm mt-multiselect',
+                                    'data-label' => 'left', 'data-select-all' => 'true', 'data-width' => '100%',
+                                    'data-filter' => 'true'
+                            ]) !!}
                         </td>
                         <td>
                             <input type="text" class="form-control form-filter input-sm" name="consignment_address">
                         </td>
                         <td>
-                            {!! Form::select('financial_status', $financial_status, null, ['class' => 'form-control form-filter input-sm', 'placeholder' => 'Select a Status']) !!}
+                            {!! Form::select('financial_status', $financial_status, null, [
+                                    'multiple' => 'multiple', 'class' => 'form-control form-filter input-sm mt-multiselect',
+                                    'data-label' => 'left', 'data-select-all' => 'true', 'data-width' => '100%',
+                                    'data-filter' => 'true'
+                            ]) !!}
                         </td>
                         <td>
                             <input type="text" class="form-control form-filter input-sm" name="total_price">
@@ -161,6 +174,7 @@
     <script src="{{ url('metronic/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}" type="text/javascript"></script>
     <!-- END PAGE LEVEL PLUGINS -->
     <!-- BEGIN PAGE LEVEL SCRIPTS -->
+    <script src="{{ url('metronic/assets/global/plugins/bootstrap-multiselect/js/bootstrap-multiselect.js') }}" type="text/javascript"></script>
     <script src="{{ url('metronic/assets/global/scripts/datatable.js') }}" type="text/javascript"></script>
     <script src="{{ url('js/admin/shopify_orders/datatable.js') }}" type="text/javascript"></script>
     <!-- END PAGE LEVEL SCRIPTS -->
