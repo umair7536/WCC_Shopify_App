@@ -10,7 +10,6 @@ use App\Models\HeavyLifter;
 use App\Models\LeopardsSettings;
 use App\Models\ShopifyJobs;
 use App\Models\ShopifyLocations;
-use App\Models\ShopifyOrders;
 use Config;
 use Auth;
 
@@ -33,21 +32,6 @@ class HomeController extends Controller
      */
     public function index()
     {
-        /**
-         * Dispatch to check if Auto Fulfillment is 'true' or 'false'
-         * if 'true' then order will be fulfilled automatically
-         * if 'false' then order will not be fulfilled
-         */
-        $order = ShopifyOrders::where([
-            'account_id' => Auth::User()->account_id
-        ])->whereIn('order_id', ['2000622747741'])
-            ->select('order_id', 'name', 'order_number', 'customer_id', 'account_id')
-            ->first();
-        event(new SingleOrderFulfillmentFire($order->toArray(), 'LE781929495'));
-        echo 'event is dispatched';
-        exit;
-
-
         return view('home');
     }
 
