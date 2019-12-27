@@ -53,7 +53,7 @@ class ShopifyHelper
             ])->update($order_processed);
         } else {
             //echo 'Order Created: ' . $order_processed['title'] . "\n";
-            ShopifyOrders::create($order_processed);
+            $order_record = ShopifyOrders::create($order_processed);
         }
 
         /**
@@ -160,8 +160,9 @@ class ShopifyHelper
 //                                    ShopifyOrderItems::create($line_item_processed);
 //                                }
 //                            }
-            return true;
         }
+
+        return $order_record->id;
     }
 
 

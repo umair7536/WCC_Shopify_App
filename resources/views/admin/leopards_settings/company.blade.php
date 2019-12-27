@@ -69,6 +69,10 @@
                                         <td>{{ '****************' }}</td>
                                     @elseif($leopards_setting->slug == 'api-password' && $leopards_setting->data)
                                             <td>{{ '****************' }}</td>
+                                    @elseif($leopards_setting->slug == 'auto-fulfillment')
+                                        <td>{{ ($leopards_setting->data == '1') ? 'Yes' : 'No' }}</td>
+                                    @elseif($leopards_setting->slug == 'inventory-location')
+                                        <td>{{ ($leopards_setting->data && array_key_exists($leopards_setting->data, $shopify_locations)) ? $shopify_locations[$leopards_setting->data]['name'] : 'NA' }}</td>
                                     @else
                                         <td>{{ ($leopards_setting->slug == 'mode') ? ($leopards_setting->data ? 'Test Mode' : 'Production') : $leopards_setting->data }}</td>
                                     @endif

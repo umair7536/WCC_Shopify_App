@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\Shopify\Orders\SingleOrderFulfillmentFire;
 use App\Events\Shopify\Orders\SyncOrdersFire;
 use App\Helpers\ShopifyHelper;
 use App\Models\Accounts;
@@ -246,7 +247,7 @@ class ShopifyOrdersController extends Controller
             $orders = ShopifyOrders::where([
                 'account_id' => $account_id
             ])->whereIn('id', $ids)
-                ->select('order_id', 'name', 'order_number', 'customer_id')
+                ->select('order_id', 'name', 'order_number', 'customer_id', 'account_id')
                 ->get();
 
             if($orders) {
@@ -318,6 +319,13 @@ class ShopifyOrdersController extends Controller
                             ));
 
                             $message .= '<li>Order <b>' . $order->name . '</b> has been booked. Assigned CN # is ' . $booked_packet->cn_number;
+
+                            /**
+                             * Dispatch to check if Auto Fulfillment is 'true' or 'false'
+                             * if 'true' then order will be fulfilled automatically
+                             * if 'false' then order will not be fulfilled
+                             */
+                            event(new SingleOrderFulfillmentFire($order->toArray(), $booked_packet->cn_number));
                         }
                     } else {
                         $message .= '<li>Order <b>' . $order->name . '</b> has consignee city issue. Please select proper city for this packet to book.';
@@ -681,9 +689,9 @@ class ShopifyOrdersController extends Controller
                         'id' => (int) $request->get('id')
                     ]);
 
-                    ShopifyHelper::syncSingleOrder($order, $shop->toArray());
+                    $id = ShopifyHelper::syncSingleOrder($order, $shop->toArray());
 
-                    return redirect()->route('admin.booked_packets.create',['order_id' => $order['id']]);
+                    return redirect()->route('admin.shopify_orders.book_packet',['id' => $id]);
 
                 } catch (\Exception $exception) {}
             }

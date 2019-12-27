@@ -6,6 +6,7 @@ use App\Events\Leopards\SyncLeopardsCitiesFire;
 use App\Helpers\Leopards;
 use App\Models\Accounts;
 use App\Models\LeopardsSettings;
+use App\Models\ShopifyLocations;
 use Developifynet\LeopardsCOD\LeopardsCODClient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -28,13 +29,25 @@ class LeopardsSettingsController extends Controller
             return abort(401);
         }
 
+        $shopify_locations = ShopifyLocations::where([
+            'account_id' => Auth::User()->account_id
+        ])
+            ->select('location_id', 'name')
+            ->get()->keyBy('location_id');
+
+        if($shopify_locations) {
+            $shopify_locations = $shopify_locations->toArray();
+        } else {
+            $shopify_locations = [];
+        }
+
         $leopards_settings = LeopardsSettings::where([
             'account_id' => Auth::User()->account_id
         ])
             ->orderBy('id', 'asc')
             ->get();
 
-        return view('admin.leopards_settings.company', compact('leopards_settings'));
+        return view('admin.leopards_settings.company', compact('leopards_settings', 'shopify_locations'));
     }
 
     /**
@@ -48,13 +61,29 @@ class LeopardsSettingsController extends Controller
             return abort(401);
         }
 
+        $account_id = Auth::User()->account_id;
+
+        $shopify_locations = ShopifyLocations::where([
+            'account_id' => $account_id
+        ])->get();
+
+        if($shopify_locations) {
+            $shopify_locations = $shopify_locations->pluck('name', 'location_id');
+        } else {
+            $shopify_locations = [];
+        }
+
         $leopards_settings = LeopardsSettings::where([
-            'account_id' => Auth::User()->account_id
+            'account_id' => $account_id
         ])
             ->orderBy('id', 'asc')
             ->get();
 
-        return view('admin.leopards_settings.create',compact('leopards_settings'));
+        $inventory_location = LeopardsSettings::getDefaultInventoryLocation($account_id);
+        $fulfillment_status = LeopardsSettings::isAutoFulfillmentEnabled($account_id);
+        ($fulfillment_status) ? $fulfillment_status = '1' : '0';
+
+        return view('admin.leopards_settings.create',compact('leopards_settings', 'shopify_locations', 'inventory_location', 'fulfillment_status'));
     }
 
     /**

@@ -17,6 +17,7 @@ use App\Models\HeavyLifter;
 use App\Models\LeopardsSettings;
 use App\Models\ShopifyCollects;
 use App\Models\ShopifyJobs;
+use App\Models\ShopifyLocations;
 use App\Models\ShopifyPlans;
 use App\Models\ShopifyShops;
 use App\Models\TicketStatuses;
@@ -487,27 +488,37 @@ class ShopifyController extends Controller
          * LCS Settings
          */
         $global_leopards_settings = Config::get('setup.leopards_settings');
+        $sort_number = 0;
+        foreach($global_leopards_settings as $leopards_setting) {
+            $leopards_record = LeopardsSettings::where([
+                'account_id' => $account_id,
+                'slug' => $leopards_setting['slug'],
+            ])->select('id')->first();
 
-        $leopards = LeopardsSettings::where([
-            'account_id' => $account_id,
-        ])->get();
+            if(!$leopards_record) {
+                $data = null;
+                if($leopards_setting['slug'] == 'auto-fulfillment') {
+                    $data = 0;
+                } else if($leopards_setting['slug'] == 'inventory-location') {
+                    $location = ShopifyLocations::where([
+                        'account_id' => $account_id
+                    ])->first();
+                    if($location) {
+                        $data = $location->location_id;
+                    }
+                }
 
-        if(!$leopards || !$leopards->count()) {
-            $leopards_settings = [];
-            $sort_number = 0;
-            foreach($global_leopards_settings as $leopards_setting) {
-                $leopards_settings[] = array(
+                // Set Account ID
+                LeopardsSettings::create([
                     'name' => $leopards_setting['name'],
                     'slug' => $leopards_setting['slug'],
-                    'data' => null,
+                    'data' => $data,
                     'sort_number'=> $sort_number++,
                     'account_id' => $account_id,
                     'created_at' => \Carbon\Carbon::now(),
                     'updated_at' => \Carbon\Carbon::now(),
-                );
+                ]);
             }
-
-            LeopardsSettings::insert($leopards_settings);
         }
 
         return $account_id;

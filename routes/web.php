@@ -52,6 +52,7 @@ $this->post('password/reset', 'Auth\ResetPasswordController@reset')->name('auth.
 
 Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], function () {
     Route::get('/home', ['uses' => 'HomeController@index', 'as' => 'home']);
+    Route::get('/updatesettings', ['uses' => 'HomeController@updateSettings', 'as' => 'update_settings']);
     Route::get('/instructions', ['uses' => 'HomeController@instructions', 'as' => 'instructions']);
     Route::get('/run', ['uses' => 'HomeController@runQueue', 'as' => 'run_queue']);
     Route::get('/variant', ['uses' => 'HomeController@runVariantsQueue', 'as' => 'run_variant']);

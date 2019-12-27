@@ -15,7 +15,7 @@
                     <div class="row">
                         <div class="form-group col-md-6">
                             {!! Form::label('location_id', 'Location*', ['class' => 'control-label']) !!}
-                            {!! Form::select('location_id', $shopify_locations, old('location_id'), ['id' => 'location_id', 'class' => 'form-control', 'placeholder' => 'Select a Location', 'required' => '']) !!}
+                            {!! Form::select('location_id', $shopify_locations, $inventory_location, ['id' => 'location_id', 'class' => 'form-control', 'placeholder' => 'Select a Location', 'required' => '']) !!}
                             @if($errors->has('location_id'))
                                 <p class="help-block">
                                     {{ $errors->first('location_id') }}

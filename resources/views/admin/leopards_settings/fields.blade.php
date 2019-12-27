@@ -12,6 +12,28 @@
                             </p>
                         @endif
                     </div>
+                @elseif($leopards_setting->slug == 'auto-fulfillment')
+                    {!! Form::hidden('name', $leopards_setting->name, ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
+                    <div class="form-group">
+                        {!! Form::label('data', $leopards_setting->name, ['class' => 'control-label']) !!}
+                        {!! Form::select($leopards_setting->slug, ['0' => 'No', '1' => 'Yes'], $fulfillment_status, ['class' => 'form-control', 'placeholder' => 'Select an Option']) !!}
+                        @if($errors->has('data'))
+                            <p class="help-block">
+                                {{ $errors->first('data') }}
+                            </p>
+                        @endif
+                    </div>
+                @elseif($leopards_setting->slug == 'inventory-location')
+                    {!! Form::hidden('name', $leopards_setting->name, ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
+                    <div class="form-group">
+                        {!! Form::label('data', $leopards_setting->name, ['class' => 'control-label']) !!}
+                        {!! Form::select($leopards_setting->slug, $shopify_locations, $inventory_location, ['class' => 'form-control', 'placeholder' => 'Select a Location']) !!}
+                        @if($errors->has('data'))
+                            <p class="help-block">
+                                {{ $errors->first('data') }}
+                            </p>
+                        @endif
+                    </div>
                 @elseif($leopards_setting->slug == 'company-id')
                     <div class="form-group">
                         {!! Form::label($leopards_setting->slug, $leopards_setting->name . " (Optional, Will filled automatically after save)", ['class' => 'control-label']) !!}

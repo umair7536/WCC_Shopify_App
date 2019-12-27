@@ -57,4 +57,44 @@ class LeopardsSettings extends BaseModal
             return false;
         }
     }
+
+    /**
+     * Get Default Inventory Location
+     *
+     * @param $accont_id
+     * @return boolean|null
+     */
+    static public function getDefaultInventoryLocation($accont_id) {
+        $inventory_location = null;
+
+        $inventory_record = self::where([
+            'account_id' => $accont_id,
+            'slug' => 'inventory-location',
+        ])->select('id', 'data')->first();
+        if($inventory_record) {
+            $inventory_location = $inventory_record->data;
+        }
+
+        return $inventory_location;
+    }
+
+    /**
+     * check Auto Fulfillment Status
+     *
+     * @param $accont_id
+     * @return boolean true|false
+     */
+    static public function isAutoFulfillmentEnabled($accont_id) {
+        $enabled = false;
+
+        $record = self::where([
+            'account_id' => $accont_id,
+            'slug' => 'auto-fulfillment',
+        ])->select('id', 'data')->first();
+        if($record) {
+            $enabled = ($record->data == '1') ? true : false;
+        }
+
+        return $enabled;
+    }
 }

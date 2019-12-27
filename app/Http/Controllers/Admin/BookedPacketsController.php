@@ -630,6 +630,11 @@ class BookedPacketsController extends Controller
             ->first();
 
         /**
+         * Fetch default Inventory Location ID
+         */
+        $inventory_location = LeopardsSettings::getDefaultInventoryLocation(Auth::User()->account_id);
+
+        /**
          * Fulfill this order
          */
         $shop = ShopifyShops::where([
@@ -664,7 +669,7 @@ class BookedPacketsController extends Controller
                 'account_id' => Auth::User()->account_id
             ])->get()->pluck('name', 'location_id');
 
-            return view('admin.booked_packets.fulfill', compact('booked_packet', 'shopify_locations', 'fullfilments', 'shopify_order'));
+            return view('admin.booked_packets.fulfill', compact('booked_packet', 'shopify_locations', 'fullfilments', 'shopify_order', 'inventory_location'));
         }
     }
 

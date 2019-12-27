@@ -121,6 +121,14 @@ return [
         [
             'name' => 'API Password',
             'slug' => 'api-password',
+        ],
+        [
+            'name' => 'Auto Fulfillment',
+            'slug' => 'auto-fulfillment',
+        ],
+        [
+            'name' => 'Default Inventory Location',
+            'slug' => 'inventory-location',
         ]
     ),
 
