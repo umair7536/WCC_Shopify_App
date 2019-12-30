@@ -868,7 +868,7 @@ class BookedPackets extends BaseModal
         if($leopards_settings['shipper-type']->data == 'self') {
             // Shipper Information
             $booked_packet['origin_city'] = '';
-            $booked_packet['shipper_id'] = '';
+            $booked_packet['shipper_id'] = 'self';
             $booked_packet['shipper_name'] = '';
             $booked_packet['shipper_email'] = '';
             $booked_packet['shipper_phone'] = '';
