@@ -86,7 +86,7 @@
 <div class="row">
     <div class="form-group col-md-4">
         {!! Form::label('shipper_id', 'Shipper*', ['class' => 'control-label']) !!}
-        {!! Form::select('shipper_id', $shippers, $shipper_id, ['onchange' => 'BookedPacketValidation.changeShipper($(this).val());', 'id' => 'shipper_id', 'class' => 'form-control', 'placeholder' => 'Select a Shipper', 'required' => '']) !!}
+        {!! Form::select('shipper_id', $shippers, $data['booked_packet']['shipper_id'], ['onchange' => 'BookedPacketValidation.changeShipper($(this).val());', 'id' => 'shipper_id', 'class' => 'form-control', 'placeholder' => 'Select a Shipper', 'required' => '']) !!}
         @if($errors->has('shipper_id'))
             <p class="help-block">
                 {{ $errors->first('shipper_id') }}
@@ -95,7 +95,7 @@
     </div>
     <div class="form-group col-md-4">
         {!! Form::label('origin_city', 'Origin City*', ['class' => 'control-label']) !!}
-        {!! Form::select('origin_city', $leopards_cities, old('origin_city'), ['id' => 'origin_city', 'class' => 'form-control select2', 'placeholder' => 'Select Origin City', 'required' => '']) !!}
+        {!! Form::select('origin_city', $leopards_cities, $data['booked_packet']['origin_city'], ['id' => 'origin_city', 'class' => 'form-control select2', 'placeholder' => 'Select Origin City', 'required' => '']) !!}
         @if($errors->has('origin_city'))
             <p class="help-block">
                 {{ $errors->first('origin_city') }}
@@ -107,7 +107,7 @@
 <div class="row">
     <div class="form-group col-md-4">
         {!! Form::label('shipper_name', 'Shipper Name*', ['class' => 'control-label']) !!}
-        {!! Form::text('shipper_name', old('shipper_name'), ['id' => 'shipper_name', 'class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
+        {!! Form::text('shipper_name', $data['booked_packet']['shipper_name'], ['id' => 'shipper_name', 'class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
         @if($errors->has('shipper_name'))
             <p class="help-block">
                 {{ $errors->first('shipper_name') }}
@@ -116,7 +116,7 @@
     </div>
     <div class="form-group col-md-4">
         {!! Form::label('shipper_email', 'Shipper Email', ['class' => 'control-label']) !!}
-        {!! Form::text('shipper_email', old('shipper_email'), ['id' => 'shipper_email', 'class' => 'form-control', 'placeholder' => '']) !!}
+        {!! Form::text('shipper_email', $data['booked_packet']['shipper_email'], ['id' => 'shipper_email', 'class' => 'form-control', 'placeholder' => '']) !!}
         @if($errors->has('shipper_email'))
             <p class="help-block">
                 {{ $errors->first('shipper_email') }}
@@ -125,7 +125,7 @@
     </div>
     <div class="form-group col-md-4">
         {!! Form::label('shipper_phone', 'Shipper Phone*', ['class' => 'control-label']) !!}
-        {!! Form::text('shipper_phone', old('shipper_phone'), ['id' => 'shipper_phone', 'class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
+        {!! Form::text('shipper_phone', $data['booked_packet']['shipper_phone'], ['id' => 'shipper_phone', 'class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
         @if($errors->has('shipper_phone'))
             <p class="help-block">
                 {{ $errors->first('shipper_phone') }}
@@ -137,7 +137,7 @@
 <div class="row">
     <div class="form-group col-md-12">
         {!! Form::label('shipper_address', 'Shipper Address*', ['class' => 'control-label']) !!}
-        {!! Form::textarea('shipper_address', old('shipper_address'), ['id' => 'shipper_address', 'rows' => '3', 'class' => 'form-control', 'required' => '']) !!}
+        {!! Form::textarea('shipper_address', $data['booked_packet']['shipper_address'], ['id' => 'shipper_address', 'rows' => '3', 'class' => 'form-control', 'required' => '']) !!}
         @if($errors->has('shipper_address'))
             <p class="help-block">
                 {{ $errors->first('shipper_address') }}

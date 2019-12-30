@@ -124,11 +124,11 @@ var BookedPacketValidation = function () {
             $('#origin_city').val($('#company_origin_city').val());
             $('#origin_city').trigger('change');
         } else if(shipper_value == 'other') {
-            $('#shipper_name').val('');
-            $('#shipper_address').html('');
-            $('#shipper_phone').val('');
-            $('#shipper_email').val('');
-            $('#origin_city').val('');
+            $('#shipper_name').val($('#other_company_name_eng').val());
+            $('#shipper_address').html($('#other_company_address1_eng').val());
+            $('#shipper_phone').val($('#other_company_phone').val());
+            $('#shipper_email').val($('#other_company_email').val());
+            $('#origin_city').val($('#other_company_origin_city').val());
             $('#origin_city').trigger('change');
         } else {
             $('#shipper_name').val('');

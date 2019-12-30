@@ -10,6 +10,41 @@ var FormValidation = function () {
             },
             rules: {
                 name: {required: !0},
+                'shipper-name' : {
+                    required: {
+                        depends: function(element) {
+                            return $('#shipper-type').val() == 'other'
+                        }
+                    }
+                },
+                'shipper-email' : {
+                    required: {
+                        depends: function(element) {
+                            return $('#shipper-type').val() == 'other'
+                        }
+                    }
+                },
+                'shipper-phone' : {
+                    required: {
+                        depends: function(element) {
+                            return $('#shipper-type').val() == 'other'
+                        }
+                    }
+                },
+                'shipper-address' : {
+                    required: {
+                        depends: function(element) {
+                            return $('#shipper-type').val() == 'other'
+                        }
+                    }
+                },
+                'shipper-city' : {
+                    required: {
+                        depends: function(element) {
+                            return $('#shipper-type').val() == 'other'
+                        }
+                    }
+                },
             },
             invalidHandler: function (e, t) {
                 i.hide(), r.show(), App.scrollTo(r, -200)
@@ -59,6 +94,24 @@ var FormValidation = function () {
         });
     }
 
+    var cSM = function () {
+        if($('#shipper-type').val() != '') {
+            if($('#shipper-type').val() == 'self') {
+                $('.shipper-name').hide();
+                $('.shipper-phone').hide();
+                $('.shipper-email').hide();
+                $('.shipper-address').hide();
+                $('.shipper-city').hide();
+            } else {
+                $('.shipper-name').show();
+                $('.shipper-phone').show();
+                $('.shipper-email').show();
+                $('.shipper-address').show();
+                $('.shipper-city').show();
+            }
+        }
+    }
+
     var x = function (action, method, data, callback) {
         $.ajax({
             headers: {
@@ -99,8 +152,9 @@ var FormValidation = function () {
 
     return {
         init: function () {
-            e()
-        }
+            e(), cSM()
+        },
+        cSM: cSM
     }
 }();
 jQuery(document).ready(function () {

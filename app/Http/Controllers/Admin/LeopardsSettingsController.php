@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Events\Leopards\SyncLeopardsCitiesFire;
 use App\Helpers\Leopards;
 use App\Models\Accounts;
+use App\Models\LeopardsCities;
 use App\Models\LeopardsSettings;
 use App\Models\ShopifyLocations;
 use Developifynet\LeopardsCOD\LeopardsCODClient;
@@ -45,9 +46,24 @@ class LeopardsSettingsController extends Controller
             'account_id' => Auth::User()->account_id
         ])
             ->orderBy('id', 'asc')
-            ->get();
+            ->get()->keyBy('slug');
 
-        return view('admin.leopards_settings.company', compact('leopards_settings', 'shopify_locations'));
+        if($leopards_settings['shipper-type']->data == 'other') {
+            $leopards_cities = LeopardsCities::where([
+                'account_id' => Auth::User()->account_id,
+            ])->whereIn('city_id', [$leopards_settings['shipper-city']->data])
+                ->select('city_id', 'name')
+                ->get();
+            if($leopards_cities) {
+                $leopards_cities = $leopards_cities->keyBy('city_id')->toArray();
+            } else {
+                $leopards_cities = [];
+            }
+        } else {
+            $leopards_cities = [];
+        }
+
+        return view('admin.leopards_settings.company', compact('leopards_settings', 'shopify_locations', 'leopards_cities'));
     }
 
     /**
@@ -83,7 +99,22 @@ class LeopardsSettingsController extends Controller
         $fulfillment_status = LeopardsSettings::isAutoFulfillmentEnabled($account_id);
         ($fulfillment_status) ? $fulfillment_status = '1' : '0';
 
-        return view('admin.leopards_settings.create',compact('leopards_settings', 'shopify_locations', 'inventory_location', 'fulfillment_status'));
+        /**
+         * Manage Shipment Type
+         */
+        $shipment_type = Config::get('constants.shipment_type');
+        $leopards_cities = LeopardsCities::where([
+            'account_id' => Auth::User()->account_id,
+        ])
+            ->orderBy('name', 'asc')
+            ->get();
+        if($leopards_cities) {
+            $leopards_cities = $leopards_cities->pluck('name', 'city_id');
+        } else {
+            $leopards_cities = [];
+        }
+
+        return view('admin.leopards_settings.create',compact('leopards_settings', 'shopify_locations', 'inventory_location', 'fulfillment_status', 'leopards_cities'));
     }
 
     /**
@@ -153,6 +184,9 @@ class LeopardsSettingsController extends Controller
             'password' => 'required',
             'api-key' => 'required',
             'api-password' => 'required',
+            'auto-fulfillment' => 'required',
+            'inventory-location' => 'required',
+            'shipper-type' => 'required',
         ]);
     }
 

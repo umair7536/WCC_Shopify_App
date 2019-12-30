@@ -32,8 +32,7 @@
             </div>
             <div class="actions">
                 @if(Gate::allows('leopards_settings_edit'))
-                    <a class="btn btn-success" href="{{ route('admin.leopards_settings.create') }}"
-                       data-target="#ajax_leopards_settings" data-toggle="modal">@lang('global.app_edit')</a>
+                    <a class="btn btn-success" href="{{ route('admin.leopards_settings.create') }}">@lang('global.app_edit')</a>
                 @endif
             </div>
         </div>
@@ -54,14 +53,18 @@
                     <thead>
                     <tr>
                         <th width="5%"> # </th>
-                        <th width="15%"> Name </th>
+                        <th width="25%"> Name </th>
                         <th> Value </th>
                     </tr>
                     </thead>
                     @if($leopards_settings)
                         @php($sr = 1)
+                        @php($shipper_type = 'self')
                         <tbody>
                             @foreach($leopards_settings as $leopards_setting)
+                                @if($leopards_setting->slug == 'shipper-type')
+                                    @php($shipper_type = $leopards_setting->data)
+                                @endif
                                 <tr>
                                     <td>{{ $sr }}</td>
                                     <td>{{ $leopards_setting->name }}</td>
@@ -73,6 +76,17 @@
                                         <td>{{ ($leopards_setting->data == '1') ? 'Yes' : 'No' }}</td>
                                     @elseif($leopards_setting->slug == 'inventory-location')
                                         <td>{{ ($leopards_setting->data && array_key_exists($leopards_setting->data, $shopify_locations)) ? $shopify_locations[$leopards_setting->data]['name'] : 'NA' }}</td>
+                                    @elseif($leopards_setting->slug == 'shipper-type')
+                                        <td>{{ ($leopards_setting->data && array_key_exists($leopards_setting->data, Config::get('constants.shipment_mode'))) ? Config::get('constants.shipment_mode')[$leopards_setting->data] : Config::get('constants.shipment_mode')['self'] }}</td>
+                                    @elseif(
+                                        $leopards_setting->slug == 'shipper-name' ||
+                                        $leopards_setting->slug == 'shipper-email' ||
+                                        $leopards_setting->slug == 'shipper-phone' ||
+                                        $leopards_setting->slug == 'shipper-address'
+                                    )
+                                        <td>{{ ($shipper_type == 'self') ? 'Not Availabe' : $leopards_setting->data }}</td>
+                                    @elseif($leopards_setting->slug == 'shipper-city')
+                                        <td>{{ ($shipper_type == 'self') ? 'Not Availabe' : (array_key_exists($leopards_setting->data, $leopards_cities) ? $leopards_cities[$leopards_setting->data]['name'] : 'N/A') }}</td>
                                     @else
                                         <td>{{ ($leopards_setting->slug == 'mode') ? ($leopards_setting->data ? 'Test Mode' : 'Production') : $leopards_setting->data }}</td>
                                     @endif

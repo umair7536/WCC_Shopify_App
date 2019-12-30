@@ -773,6 +773,15 @@ class BookedPackets extends BaseModal
                     if(array_key_exists($value, $order)) {
                         if($value == 'total_weight') {
                             $booked_packet[$key] = ($order[$value]) ? $order[$value] : '';
+                        } elseif($value == 'total_price') {
+                            /**
+                             * If 'financial_status' is 'paid' then COD amount will be 0.00
+                             */
+                            if(array_key_exists('financial_status', $order) && $order['financial_status'] == 'paid') {
+                                $booked_packet[$key] = 0.001;
+                            } else {
+                                $booked_packet[$key] = $order[$value];
+                            }
                         } else {
                             $booked_packet[$key] = $order[$value];
                         }
@@ -792,8 +801,9 @@ class BookedPackets extends BaseModal
                                     'account_id' => $account_id
                                 ])
                                     ->where('name',
-                                        'like',
-                                        '%' . strtolower($customer[$value]) . '%')
+                                        '=',
+                                        trim($customer[$value])
+                                    )
                                     ->select('city_id', 'name')
                                     ->first();
 
@@ -839,6 +849,38 @@ class BookedPackets extends BaseModal
                     }
                 }
             }
+        }
+
+        /**
+         * Adjust Shipper Information as per LCS Settings
+         */
+        $leopards_settings = LeopardsSettings::where([
+            'account_id' => Auth::User()->account_id
+        ])
+            ->select('slug', 'data')
+            ->orderBy('id', 'asc')
+            ->get()->keyBy('slug');
+
+        /**
+         * If Type is 'self' then all fields will have 'self' word
+         * If Type is 'other' then all shipper information will be filled
+         */
+        if($leopards_settings['shipper-type']->data == 'self') {
+            // Shipper Information
+            $booked_packet['origin_city'] = '';
+            $booked_packet['shipper_id'] = '';
+            $booked_packet['shipper_name'] = '';
+            $booked_packet['shipper_email'] = '';
+            $booked_packet['shipper_phone'] = '';
+            $booked_packet['shipper_address'] = '';
+        } else {
+            // Shipper Information
+            $booked_packet['origin_city'] = $leopards_settings['shipper-city']->data;
+            $booked_packet['shipper_id'] = 'other';
+            $booked_packet['shipper_name'] = $leopards_settings['shipper-name']->data;
+            $booked_packet['shipper_email'] = $leopards_settings['shipper-email']->data;
+            $booked_packet['shipper_phone'] = $leopards_settings['shipper-phone']->data;
+            $booked_packet['shipper_address'] = $leopards_settings['shipper-address']->data;
         }
 
         return $booked_packet;
@@ -920,6 +962,15 @@ class BookedPackets extends BaseModal
                     if(array_key_exists($value, $order)) {
                         if($value == 'total_weight') {
                             $booked_packet[$key] = ($order[$value]) ? $order[$value] : '500';
+                        } elseif($value == 'total_price') {
+                            /**
+                             * If 'financial_status' is 'paid' then COD amount will be 0.00
+                             */
+                            if(array_key_exists('financial_status', $order) && $order['financial_status'] == 'paid') {
+                                $booked_packet[$key] = 0.001;
+                            } else {
+                                $booked_packet[$key] = $order[$value];
+                            }
                         } else {
                             $booked_packet[$key] = $order[$value];
                         }
@@ -939,8 +990,9 @@ class BookedPackets extends BaseModal
                                     'account_id' => $account_id
                                 ])
                                     ->where('name',
-                                        'like',
-                                        '%' . strtolower($customer[$value]) . '%')
+                                        '=',
+                                        trim($customer[$value])
+                                    )
                                     ->select('city_id', 'name')
                                     ->first();
 
@@ -972,7 +1024,7 @@ class BookedPackets extends BaseModal
                                     /**
                                      * Add Line item name and qty into comments section
                                      */
-                                    $items[] = $order_item['variant_title'] . ' ' . $order_item['quantity'] . ' pc';
+                                    $items[] = $order_item['title'] . ' ' . $order_item['quantity'] . ' pc';
                                 } else {
                                     $booked_packet[$key] += $order_item[$value];
                                 }
@@ -983,8 +1035,8 @@ class BookedPackets extends BaseModal
                     /**
                      * if line items found then add them into comments
                      */
-                    if(isset($booked_packet['comments'])) {
-                        $booked_packet['comments'] = $booked_packet['comments'] . ' ' . implode(', ', $items);
+                    if(array_key_exists('comments', $booked_packet) && count($items)) {
+                        $booked_packet['comments'] = trim($booked_packet['comments'] . ' ' . implode(', ', $items));
                     }
                 }
             }
@@ -996,16 +1048,40 @@ class BookedPackets extends BaseModal
             $booked_packet['comments'] = 'n/a';
         }
 
+        /**
+         * Adjust Shipper Information as per LCS Settings
+         */
+        $leopards_settings = LeopardsSettings::where([
+            'account_id' => Auth::User()->account_id
+        ])
+            ->select('slug', 'data')
+            ->orderBy('id', 'asc')
+            ->get()->keyBy('slug');
+
         // Consignee Information
         $booked_packet['consignee_id'] = 'self';
 
-        // Shipper Information
-        $booked_packet['origin_city'] = 'self';
-        $booked_packet['shipper_id'] = 'self';
-        $booked_packet['shipper_name'] = 'self';
-        $booked_packet['shipper_email'] = 'self';
-        $booked_packet['shipper_phone'] = 'self';
-        $booked_packet['shipper_address'] = 'self';
+        /**
+         * If Type is 'self' then all fields will have 'self' word
+         * If Type is 'other' then all shipper information will be filled
+         */
+        if($leopards_settings['shipper-type']->data == 'self') {
+            // Shipper Information
+            $booked_packet['origin_city'] = 'self';
+            $booked_packet['shipper_id'] = 'self';
+            $booked_packet['shipper_name'] = 'self';
+            $booked_packet['shipper_email'] = 'self';
+            $booked_packet['shipper_phone'] = 'self';
+            $booked_packet['shipper_address'] = 'self';
+        } else {
+            // Shipper Information
+            $booked_packet['origin_city'] = $leopards_settings['shipper-city']->data;
+            $booked_packet['shipper_id'] = 'other';
+            $booked_packet['shipper_name'] = $leopards_settings['shipper-name']->data;
+            $booked_packet['shipper_email'] = $leopards_settings['shipper-email']->data;
+            $booked_packet['shipper_phone'] = $leopards_settings['shipper-phone']->data;
+            $booked_packet['shipper_address'] = $leopards_settings['shipper-address']->data;
+        }
 
         return array(
             'status' => $status,

@@ -454,7 +454,9 @@ class BookedPacketsController extends Controller
         $shipment_type = Config::get('constants.shipment_type');
         $leopards_cities = LeopardsCities::where([
             'account_id' => Auth::User()->account_id,
-        ])->get();
+        ])
+            ->orderBy('name', 'asc')
+            ->get();
         if($leopards_cities) {
             $leopards_cities = $leopards_cities->pluck('name', 'city_id');
         } else {
@@ -467,17 +469,18 @@ class BookedPacketsController extends Controller
         /**
          * Manage Shippers
          */
-        $shipper_id = 'self';
-        $shippers = Shippers::where([
-            'account_id' => Auth::User()->account_id,
-        ])
-            ->select('id', 'name')
-            ->get();
-        if($shippers) {
-            $shippers = $shippers->pluck('name', 'id')->toArray();
-        } else {
-            $shippers = [];
-        }
+//        $shipper_id = 'self';
+//        $shippers = Shippers::where([
+//            'account_id' => Auth::User()->account_id,
+//        ])
+//            ->select('id', 'name')
+//            ->get();
+//        if($shippers) {
+//            $shippers = $shippers->pluck('name', 'id')->toArray();
+//        } else {
+//        }
+
+        $shippers = [];
         $shippers = (['self' => 'Self'] + $shippers + ['other' => 'Other']);
 
         /**

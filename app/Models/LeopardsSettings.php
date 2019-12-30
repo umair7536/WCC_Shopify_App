@@ -41,6 +41,17 @@ class LeopardsSettings extends BaseModal
         if($leopards_settings) {
             $data = $request->all();
 
+            /**
+             * If 'shipper-type' is 'self' then empty shipper information
+             */
+            if($data['shipper-type'] == 'self') {
+                $data['shipper-name'] = null;
+                $data['shipper-email'] = null;
+                $data['shipper-phone'] = null;
+                $data['shipper-address'] = null;
+                $data['shipper-city'] = null;
+            }
+
             foreach($leopards_settings as $leopards_setting) {
                 if(array_key_exists($leopards_setting->slug, $data)) {
                     self::where([

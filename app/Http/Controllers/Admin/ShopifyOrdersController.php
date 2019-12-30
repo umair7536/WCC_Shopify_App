@@ -149,7 +149,7 @@ class ShopifyOrdersController extends Controller
             $data['id'] = [$request->get('id')];
             $data['customActionName'] = Config::get('constants.shipment_type_overnight'); //
             $data['customActionType'] = 'group_action'; //
-            $data['skip_packet_checking'] = '1'; //
+            $data['skip_packet_checking'] = '0'; //
 
             $request->replace($data);
             $response = $this->bulkActions($request);
@@ -326,6 +326,9 @@ class ShopifyOrdersController extends Controller
                              * if 'false' then order will not be fulfilled
                              */
                             event(new SingleOrderFulfillmentFire($order->toArray(), $booked_packet->cn_number));
+                        } else {
+                            $message .= '<li>Order <b>' . $order->name . '</b> has some issues. [' . $result['error_msg'] . ']';
+                            continue;
                         }
                     } else {
                         $message .= '<li>Order <b>' . $order->name . '</b> has consignee city issue. Please select proper city for this packet to book.';

@@ -328,7 +328,9 @@ class ShopifyCustomersController extends Controller
 
         $leopards_cities = LeopardsCities::where([
             'account_id' => Auth::User()->account_id,
-        ])->get();
+        ])
+            ->orderBy('name', 'asc')
+            ->get();
 
         if($leopards_cities) {
             $leopards_cities = $leopards_cities->pluck('name', 'name');

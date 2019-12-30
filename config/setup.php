@@ -129,6 +129,30 @@ return [
         [
             'name' => 'Default Inventory Location',
             'slug' => 'inventory-location',
+        ],
+        [
+            'name' => 'Shipment Mode',
+            'slug' => 'shipper-type',
+        ],
+        [
+            'name' => 'Shipper Name',
+            'slug' => 'shipper-name',
+        ],
+        [
+            'name' => 'Shipper Phone',
+            'slug' => 'shipper-phone',
+        ],
+        [
+            'name' => 'Shipper Email',
+            'slug' => 'shipper-email',
+        ],
+        [
+            'name' => 'Shipper Address',
+            'slug' => 'shipper-address',
+        ],
+        [
+            'name' => 'Shipper City',
+            'slug' => 'shipper-city',
         ]
     ),
 
