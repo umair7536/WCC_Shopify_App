@@ -833,7 +833,18 @@ class BookedPackets extends BaseModal
                                     /**
                                      * Add Line item name and qty into comments section
                                      */
-                                    $items[] = $order_item['title'] . ' ' . $order_item['quantity'] . ' pc';
+                                    $single_item = substr($order_item['title'], 0, 30);
+                                    // Set SKU
+                                    if($order_item['sku']) {
+                                        $single_item .= ' ' . $order_item['sku'];
+                                    }
+                                    // Set Variant Title
+                                    if($order_item['variant_title']) {
+                                        $single_item .= ' (' . $order_item['variant_title'] . ')';
+                                    }
+                                    $single_item .= ' ' . $order_item['quantity'] . ' pc';
+                                    $items[] = $single_item;
+//                                    $items[] = $order_item['title'] . ' ' . $order_item['quantity'] . ' pc';
                                 } else {
                                     $booked_packet[$key] += $order_item[$value];
                                 }
@@ -1024,7 +1035,18 @@ class BookedPackets extends BaseModal
                                     /**
                                      * Add Line item name and qty into comments section
                                      */
-                                    $items[] = $order_item['title'] . ' ' . $order_item['quantity'] . ' pc';
+                                    $single_item = substr($order_item['title'], 0, 30);
+                                    // Set SKU
+                                    if($order_item['sku']) {
+                                        $single_item .= ' ' . $order_item['sku'];
+                                    }
+                                    // Set Variant Title
+                                    if($order_item['variant_title']) {
+                                        $single_item .= ' (' . $order_item['variant_title'] . ')';
+                                    }
+                                    $single_item .= ' ' . $order_item['quantity'] . ' pc';
+                                    $items[] = $single_item;
+//                                    $items[] = $order_item['title'] . ' ' . $order_item['quantity'] . ' pc';
                                 } else {
                                     $booked_packet[$key] += $order_item[$value];
                                 }
