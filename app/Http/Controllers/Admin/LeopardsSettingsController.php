@@ -104,7 +104,8 @@ class LeopardsSettingsController extends Controller
          */
         $shipment_type = Config::get('constants.shipment_type');
         $leopards_cities = LeopardsCities::where([
-            'account_id' => Auth::User()->account_id,
+            'account_id' => LeopardsCities::orderBy('id', 'desc')->first()->account_id,
+//            'account_id' => Auth::User()->account_id,
         ])
             ->orderBy('name', 'asc')
             ->get();
