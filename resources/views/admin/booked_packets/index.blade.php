@@ -69,6 +69,8 @@
                         <th>@lang('global.booked_packets.fields.consignee_phone')</th>
                         <th>@lang('global.booked_packets.fields.consignee_email')</th>
                         <th>@lang('global.booked_packets.fields.booking_date')</th>
+                        <th>@lang('global.booked_packets.fields.invoice_number')</th>
+                        <th>@lang('global.booked_packets.fields.invoice_date')</th>
                         <th>@lang('global.booked_packets.fields.collect_amount')</th>
                         <th width="17%">@lang('global.booked_packets.fields.actions')</th>
                     </tr>
@@ -112,6 +114,19 @@
                             <div class="input-icon input-icon-sm right margin-bottom-5">
                                 <i class="fa fa-calendar"></i>
                                 <input name="booking_date_to" data-date-format="yyyy-mm-dd" type="text" readonly="" class="form-control form-filter input-sm booking_date_to" placeholder="To" >
+                            </div>
+                        </td>
+                        <td>
+                            {!! Form::text('invoice_number', null, ['class' => 'form-control form-filter input-sm']) !!}
+                        </td>
+                        <td>
+                            <div class="input-icon input-icon-sm right margin-bottom-5">
+                                <i class="fa fa-calendar"></i>
+                                <input name="invoice_date_from" data-date-format="yyyy-mm-dd" type="text" readonly="" class="form-control form-filter input-sm invoice_date_from" placeholder="From">
+                            </div>
+                            <div class="input-icon input-icon-sm right margin-bottom-5">
+                                <i class="fa fa-calendar"></i>
+                                <input name="invoice_date_to" data-date-format="yyyy-mm-dd" type="text" readonly="" class="form-control form-filter input-sm invoice_date_to" placeholder="To" >
                             </div>
                         </td>
                         <td>

@@ -297,11 +297,24 @@ class WebhooksController extends Controller
                         }
                     }
 
-                    BookedPackets::where([
-                        'track_number' => $packet['track_number']
-                    ])->update(array(
-                        'status' => $status_id
-                    ));
+                    if(
+                            array_key_exists('invoice_number', $packet)
+                        &&  array_key_exists('invoice_date', $packet)
+                    ) {
+                        BookedPackets::where([
+                            'track_number' => $packet['track_number']
+                        ])->update(array(
+                            'status' => $status_id,
+                            'invoice_number' => $packet['invoice_number'],
+                            'invoice_date' => $packet['invoice_date']
+                        ));
+                    } else {
+                        BookedPackets::where([
+                            'track_number' => $packet['track_number']
+                        ])->update(array(
+                            'status' => $status_id
+                        ));
+                    }
                 }
             }
 

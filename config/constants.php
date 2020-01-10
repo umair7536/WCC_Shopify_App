@@ -86,7 +86,7 @@ return [
         17 => 'Being Return',
     ),
     'status_sync' => array(
-        0, 2, 4, 5, 6, 7, 8, 9, 14, 16, 17
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 14, 16, 17
     ),
     'shipment_mode' => array(
         'self' => 'Use Shipper info from LCS Account',

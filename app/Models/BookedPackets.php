@@ -171,6 +171,32 @@ class BookedPackets extends BaseModal
             );
         }
 
+
+        if ($request->get('invoice_date_from') && $request->get('invoice_date_from') != '') {
+            $where[] = array(
+                'invoice_date',
+                '>=',
+                $request->get('invoice_date_from') . ' 00:00:00'
+            );
+        }
+
+        if ($request->get('invoice_date_to') && $request->get('invoice_date_to') != '') {
+            $where[] = array(
+                'invoice_date',
+                '<=',
+                $request->get('invoice_date_to') . ' 23:59:59'
+            );
+        }
+
+
+        if($request->get('invoice_number')) {
+            $where[] = array(
+                'invoice_number',
+                'like',
+                '%' . $request->get('invoice_number') . '%'
+            );
+        }
+
         if(count($where)) {
             return self::where($where)->count();
         } else {
@@ -320,6 +346,31 @@ class BookedPackets extends BaseModal
                 'collect_amount',
                 'like',
                 '%' . $request->get('collect_amount') . '%'
+            );
+        }
+
+        if ($request->get('invoice_date_from') && $request->get('invoice_date_from') != '') {
+            $where[] = array(
+                'invoice_date',
+                '>=',
+                $request->get('invoice_date_from') . ' 00:00:00'
+            );
+        }
+
+        if ($request->get('invoice_date_to') && $request->get('invoice_date_to') != '') {
+            $where[] = array(
+                'invoice_date',
+                '<=',
+                $request->get('invoice_date_to') . ' 23:59:59'
+            );
+        }
+
+
+        if($request->get('invoice_number')) {
+            $where[] = array(
+                'invoice_number',
+                'like',
+                '%' . $request->get('invoice_number') . '%'
             );
         }
 

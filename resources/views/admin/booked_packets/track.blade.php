@@ -42,7 +42,7 @@
             <tr>
                 <th>Origin</th>
                 <td>
-                    @if(isset($booked_packet->origin_city, $leopards_cities))
+                    @if($booked_packet->origin_city && isset($booked_packet->origin_city, $leopards_cities))
                         {{ $leopards_cities[$booked_packet->origin_city]->name }}
                     @else
                         N/A
@@ -67,7 +67,7 @@
             <tr>
                 <th>Destination</th>
                 <td>
-                    @if(isset($booked_packet->destination_city, $leopards_cities))
+                    @if($booked_packet->destination_city && isset($booked_packet->destination_city, $leopards_cities))
                         {{ $leopards_cities[$booked_packet->destination_city]->name }}
                     @else
                         N/A

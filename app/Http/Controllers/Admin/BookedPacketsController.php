@@ -137,6 +137,8 @@ class BookedPacketsController extends Controller
                     'consignee_phone' => $booked_packet->consignee_phone,
                     'consignee_email' => ($booked_packet->consignee_email) ? $booked_packet->consignee_email : 'n/a',
                     'booking_date' => $booked_packet->booking_date,
+                    'invoice_number' => $booked_packet->invoice_number,
+                    'invoice_date' => $booked_packet->invoice_date,
                     'collect_amount' => number_format($booked_packet->collect_amount, 2),
                     'actions' => view('admin.booked_packets.actions', compact('booked_packet'))->render(),
                 );
@@ -829,7 +831,11 @@ class BookedPacketsController extends Controller
                 if(isset($response['packet_list']) && count($response['packet_list'])) {
 
                     $packet = $response['packet_list'][0];
-                    $track_history = array_reverse($packet['Tracking Detail']);
+                    if(count($packet['Tracking Detail'])) {
+                        $track_history = array_reverse($packet['Tracking Detail']);
+                    } else {
+                        $track_history = [];
+                    }
 
                     /**
                      * Update Packet Status
@@ -843,11 +849,24 @@ class BookedPacketsController extends Controller
                         }
                     }
 
-                    BookedPackets::where([
-                        'track_number' => $packet['track_number']
-                    ])->update(array(
-                        'status' => $status_id
-                    ));
+                    if(
+                            array_key_exists('invoice_number', $packet)
+                        &&  array_key_exists('invoice_date', $packet)
+                    ) {
+                        BookedPackets::where([
+                            'track_number' => $packet['track_number']
+                        ])->update(array(
+                            'status' => $status_id,
+                            'invoice_number' => $packet['invoice_number'],
+                            'invoice_date' => $packet['invoice_date']
+                        ));
+                    } else {
+                        BookedPackets::where([
+                            'track_number' => $packet['track_number']
+                        ])->update(array(
+                            'status' => $status_id
+                        ));
+                    }
                 }
             }
 

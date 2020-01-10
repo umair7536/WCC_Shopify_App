@@ -131,11 +131,24 @@ class SyncPacketStatus extends Command
                                 }
                             }
 
-                            BookedPackets::where([
-                                'track_number' => $booked_packet['track_number']
-                            ])->update(array(
-                                'status' => $status_id
-                            ));
+                            if(
+                                    array_key_exists('invoice_number', $booked_packet)
+                                &&  array_key_exists('invoice_date', $booked_packet)
+                            ) {
+                                BookedPackets::where([
+                                    'track_number' => $booked_packet['track_number']
+                                ])->update(array(
+                                    'status' => $status_id,
+                                    'invoice_number' => $booked_packet['invoice_number'],
+                                    'invoice_date' => $booked_packet['invoice_date']
+                                ));
+                            } else {
+                                BookedPackets::where([
+                                    'track_number' => $booked_packet['track_number']
+                                ])->update(array(
+                                    'status' => $status_id
+                                ));
+                            }
                         }
                     }
                 }

@@ -3,6 +3,8 @@ var TableDatatablesAjax = function () {
         $(".date-picker").datepicker({rtl: App.isRTL(), autoclose: !0});
         $(".booking_date_from").datepicker({rtl: App.isRTL(), autoclose: !0});
         $(".booking_date_to").datepicker({rtl: App.isRTL(), autoclose: !0});
+        $(".invoice_date_from").datepicker({rtl: App.isRTL(), autoclose: !0});
+        $(".invoice_date_to").datepicker({rtl: App.isRTL(), autoclose: !0});
         $('.select2').select2({ width: '100%' });
     };
 
@@ -41,6 +43,8 @@ var TableDatatablesAjax = function () {
                     { "data": "consignee_phone","bSortable": true },
                     { "data": "consignee_email","bSortable": true },
                     { "data": "booking_date","bSortable": true },
+                    { "data": "invoice_number","bSortable": true },
+                    { "data": "invoice_date","bSortable": true },
                     { "data": "collect_amount","bSortable": true },
                     { "data": "actions","bSortable": false }
                 ],
