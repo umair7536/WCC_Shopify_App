@@ -884,7 +884,7 @@ class BookedPackets extends BaseModal
                                     /**
                                      * Add Line item name and qty into comments section
                                      */
-                                    $single_item = substr($order_item['title'], 0, 30);
+                                    $single_item = substr($order_item['title'], 0, 60);
                                     // Set SKU
                                     if($order_item['sku']) {
                                         $single_item .= ' ' . $order_item['sku'];
@@ -1086,7 +1086,7 @@ class BookedPackets extends BaseModal
                                     /**
                                      * Add Line item name and qty into comments section
                                      */
-                                    $single_item = substr($order_item['title'], 0, 30);
+                                    $single_item = substr($order_item['title'], 0, 60);
                                     // Set SKU
                                     if($order_item['sku']) {
                                         $single_item .= ' ' . $order_item['sku'];
