@@ -15,8 +15,8 @@ var TableDatatablesAjax = function () {
             }, onError: function (a) {
             }, onDataLoad: function (a) {
             }, loadingMessage: "Loading...", dataTable: {
-                bStateSave: !0,
-                cache: !0,
+                bStateSave: !1,
+                cache: !1,
                 fnStateSaveParams: function (a, e) {
                     return $("#datatable_ajax tr.filter .form-control").each(function () {
                         e[$(this).attr("name")] = $(this).val()
