@@ -7,6 +7,7 @@
         <div class="form-group">
             {!! Form::open(['method' => 'POST', 'id' => 'form-fulfillment', 'route' => ['admin.booked_packets.savefulfillment', $booked_packet->id]]) !!}
                 {{ Form::hidden('order_id', $shopify_order->order_id, ['id' => 'order_id']) }}
+                {{ Form::hidden('order_number', $booked_packet->order_number, ['id' => 'order_number']) }}
                 <div class="form-body">
                     <!-- Starts Form Validation Messages -->
                     @include('partials.messages')

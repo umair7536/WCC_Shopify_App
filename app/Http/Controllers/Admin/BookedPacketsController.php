@@ -552,7 +552,8 @@ class BookedPacketsController extends Controller
             'packet_pieces' => 'required|numeric',
             'net_weight' => 'required|numeric',
             'collect_amount' => 'required|numeric',
-            'order_id' => 'nullable|numeric',
+            'order_number' => 'required|numeric',
+            'order_id' => 'nullable',
             'vol_weight_w' => 'nullable|numeric',
             'vol_weight_h' => 'nullable|numeric',
             'vol_weight_l' => 'nullable|numeric',
@@ -628,7 +629,7 @@ class BookedPacketsController extends Controller
         }
 
         $shopify_order = ShopifyOrders::where([
-            ['order_number','=',$booked_packet->order_id],
+            ['order_number','=',$booked_packet->order_number],
             ['account_id','=', Auth::User()->account_id]
         ])
             ->select('order_id')
@@ -778,7 +779,8 @@ class BookedPacketsController extends Controller
     protected function verifyFulfillment(Request $request)
     {
         return $validator = Validator::make($request->all(), [
-            'order_id' => 'required|numeric',
+            'order_id' => 'required',
+            'order_number' => 'required|numeric',
             'location_id' => 'required',
             'track_number' => 'required',
             'tracking_url' => 'required',

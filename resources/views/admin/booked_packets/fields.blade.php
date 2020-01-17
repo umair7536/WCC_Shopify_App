@@ -51,6 +51,7 @@
         @endif
     </div>
     <div class="form-group col-md-4">
+        {!! Form::hidden('order_number', $data['booked_packet']['order_number']) !!}
         {!! Form::label('order_id', 'Order ID', ['class' => 'control-label']) !!}
         {!! Form::text('order_id', $data['booked_packet']['order_id'], ['class' => 'form-control', 'placeholder' => '']) !!}
         @if($errors->has('order_id'))

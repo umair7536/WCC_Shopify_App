@@ -264,8 +264,8 @@ class ShopifyOrdersController extends Controller
                 $booked_packets = BookedPackets::where([
                     'account_id' => $account_id
                 ])
-                    ->whereIn('order_id', $order_numbers)
-                    ->select('order_id', 'cn_number', 'id')
+                    ->whereIn('order_number', $order_numbers)
+                    ->select('order_id', 'order_number', 'cn_number', 'id')
                     ->orderBy('id', 'desc')
                     ->get()->keyBy('order_id');
 
@@ -365,7 +365,8 @@ class ShopifyOrdersController extends Controller
             'packet_pieces' => 'required|numeric',
             'net_weight' => 'required|numeric',
             'collect_amount' => 'required|numeric',
-            'order_id' => 'nullable|numeric',
+            'order_number' => 'required|numeric',
+            'order_id' => 'nullable',
             'vol_weight_w' => 'nullable|numeric',
             'vol_weight_h' => 'nullable|numeric',
             'vol_weight_l' => 'nullable|numeric',

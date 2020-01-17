@@ -17,7 +17,7 @@ class BookedPackets extends BaseModal
     use SoftDeletes;
 
     protected $fillable = [
-        'booked_packet_id', 'shipment_type_id', 'booking_date', 'packet_pieces', 'net_weight', 'collect_amount', 'order_id',
+        'booked_packet_id', 'shipment_type_id', 'booking_date', 'packet_pieces', 'net_weight', 'collect_amount', 'order_id', 'order_number',
         'vol_weight_w', 'vol_weight_h', 'vol_weight_l', 'shipper_id', 'shipper_name', 'shipper_email', 'shipper_phone', 'shipper_address',
         'consignee_id', 'consignee_name', 'consignee_email', 'consignee_phone', 'consignee_phone_2', 'consignee_phone_3', 'consignee_address',
         'comments', 'track_number', 'slip_link', 'status', 'history', 'origin_city', 'destination_city', 'cn_number', 'booking_type',
@@ -27,7 +27,7 @@ class BookedPackets extends BaseModal
     protected static $skip_columns = ['variants', 'options', 'images'];
 
     protected static $_fillable = [
-        'booked_packet_id', 'shipment_type_id', 'booking_date', 'packet_pieces', 'net_weight', 'collect_amount', 'order_id',
+        'booked_packet_id', 'shipment_type_id', 'booking_date', 'packet_pieces', 'net_weight', 'collect_amount', 'order_id', 'order_number',
         'vol_weight_w', 'vol_weight_h', 'vol_weight_l', 'shipper_id', 'shipper_name', 'shipper_email', 'shipper_phone', 'shipper_address',
         'consignee_id', 'consignee_name', 'consignee_email', 'consignee_phone', 'consignee_phone_2', 'consignee_phone_3', 'consignee_address',
         'comments', 'track_number', 'slip_link', 'status', 'history', 'origin_city', 'destination_city', 'cn_number', 'booking_type',
@@ -485,7 +485,7 @@ class BookedPackets extends BaseModal
          */
         if(isset($data['order_id']) && $data['order_id']) {
             ShopifyOrders::where([
-                'order_number' => $data['order_id'],
+                'name' => $data['order_id'],
                 'account_id' => $account_id,
             ])->update(array(
                 'booking_id' => $record->id,
@@ -764,7 +764,8 @@ class BookedPackets extends BaseModal
             'packet_pieces' => 'quantity',
             'net_weight' => 'total_weight',
             'collect_amount' => 'total_price',
-            'order_id' => 'order_number',
+            'order_number' => 'order_number',
+            'order_id' => 'name',
             'comments' => 'note',
             'title' => 'title',
             'consignee_name' => 'name',
@@ -818,7 +819,7 @@ class BookedPackets extends BaseModal
                 }
 
                 foreach($fill_fields as $key => $value) {
-                    if($value == 'name') {
+                    if($key == 'consignee_name' && $value == 'name') {
                         continue;
                     }
                     if(array_key_exists($value, $order)) {
@@ -842,6 +843,9 @@ class BookedPackets extends BaseModal
                 if(count($customer)) {
                     foreach($fill_fields as $key => $value) {
                         if(array_key_exists($value, $customer)) {
+                            if($key != 'consignee_name' && $value == 'name') {
+                                continue;
+                            }
                             if($key == 'consignee_address') {
                                 $booked_packet[$key] = trim($customer['address1']) . ' ' . trim($customer['address2']);
                             } else if($key == 'destination_city') {
@@ -968,7 +972,8 @@ class BookedPackets extends BaseModal
             'packet_pieces' => 'quantity',
             'net_weight' => 'total_weight',
             'collect_amount' => 'total_price',
-            'order_id' => 'order_number',
+            'order_number' => 'order_number',
+            'order_id' => 'name',
             'comments' => 'note',
             'title' => 'title',
             'consignee_name' => 'name',
@@ -1018,7 +1023,7 @@ class BookedPackets extends BaseModal
                 }
 
                 foreach($fill_fields as $key => $value) {
-                    if($value == 'name') {
+                    if($key == 'consignee_name' && $value == 'name') {
                         continue;
                     }
                     if(array_key_exists($value, $order)) {
@@ -1041,6 +1046,9 @@ class BookedPackets extends BaseModal
 
                 if(count($customer)) {
                     foreach($fill_fields as $key => $value) {
+                        if($key != 'consignee_name' && $value == 'name') {
+                            continue;
+                        }
                         if(array_key_exists($value, $customer)) {
                             if($key == 'consignee_address') {
                                 $booked_packet[$key] = trim($customer['address1']) . ' ' . trim($customer['address2']);
