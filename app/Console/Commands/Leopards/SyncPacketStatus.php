@@ -2,13 +2,16 @@
 
 namespace App\Console\Commands\Leopards;
 
+use App\Helpers\ShopifyHelper;
 use App\Models\BookedPackets;
 use App\Models\ShopifyJobs;
+use App\Models\ShopifyOrders;
 use App\Models\ShopifyProductImages;
 use App\Models\ShopifyProductOptions;
 use App\Models\ShopifyProducts;
 use App\Models\ShopifyProductTags;
 use App\Models\ShopifyProductVariants;
+use App\Models\ShopifyShops;
 use App\Models\ShopifyTags;
 use Carbon\Carbon;
 use Developifynet\LeopardsCOD\LeopardsCODClient;
@@ -142,6 +145,104 @@ class SyncPacketStatus extends Command
                                     'invoice_number' => $booked_packet['invoice_number'],
                                     'invoice_date' => $booked_packet['invoice_date']
                                 ));
+
+
+                                /**
+                                 * Mark as Paid
+                                 */
+                                if(
+                                    (
+                                            $booked_packet['invoice_date']
+                                        &&  $booked_packet['invoice_number']
+                                    )
+                                        &&
+                                    (
+                                            array_key_exists('aut_mark_paid', $lcs)
+                                        &&  $lcs['aut_mark_paid'] == '1'
+                                    )
+                                ) {
+                                    /**
+                                     * Grab Packet information
+                                     */
+                                    $packet = BookedPackets::where([
+                                        'track_number' => $booked_packet['track_number']
+                                    ])
+                                        ->select('order_number', 'account_id')
+                                        ->first();
+                                    if($packet) {
+                                        /**
+                                         * Grab Order from Online Store
+                                         */
+                                        $order = ShopifyOrders::where([
+                                            'account_id' => $packet['account_id'],
+                                            'order_number' => $packet['order_number'],
+                                        ])->first();
+                                        if($order) {
+                                            try {
+                                                $shop = ShopifyShops::where([
+                                                    'account_id' => $packet['account_id']
+                                                ])->first();
+
+                                                $shopifyClient = new ShopifyClient([
+                                                    'private_app' => false,
+                                                    'api_key' => env('SHOPIFY_APP_API_KEY'), // In public app, this is the app ID
+                                                    'version' => env('SHOPIFY_API_VERSION'), // Put API Version
+                                                    'access_token' => $shop->access_token,
+                                                    'shop' => $shop->myshopify_domain
+                                                ]);
+
+                                                /**
+                                                 * Retrieve Order from Shopify
+                                                 */
+                                                $shopifyOrder = $shopifyClient->getOrder([
+                                                    'id' => (int) $order->order_id
+                                                ]);
+                                                $shopifyOrder['order_id'] = $shopifyOrder['id'];
+                                                $shopifyOrder['account_id'] = $order->account_id;
+
+                                                if(
+                                                        $shopifyOrder['processing_method'] == 'manual'
+                                                    &&  $shopifyOrder['financial_status'] == 'pending'
+                                                ) {
+                                                    $transactions = $shopifyClient->getTransactions([
+                                                        'order_id' => (int) $shopifyOrder['order_id']
+                                                    ]);
+
+                                                    if(count($transactions)) {
+                                                        foreach ($transactions as $transaction) {
+                                                            if(
+                                                                    $transaction['kind'] == 'sale'
+                                                                &&  $transaction['status'] == 'pending'
+                                                            ) {
+                                                                /**
+                                                                 * Update Transaction
+                                                                 */
+                                                                $shopifyClient->createTransaction([
+                                                                    'order_id' => (int) $transaction['order_id'],
+                                                                    'kind' => 'capture',
+                                                                    'gateway' => $transaction['gateway'],
+                                                                    'amount' => $transaction['amount'],
+                                                                    'parent_id' => (int) $transaction['id'],
+                                                                    'status' => 'success',
+                                                                    'currency' => $transaction['currency'],
+                                                                ]);
+
+                                                                /**
+                                                                 * Sync Single Order into system
+                                                                 */
+                                                                $shopifyOrder = $shopifyClient->getOrder([
+                                                                    'id' => (int) $order['order_id']
+                                                                ]);
+                                                                $shopifyOrder['order_id'] = $shopifyOrder['id'];
+                                                                ShopifyHelper::syncSingleOrder($shopifyOrder, $shop->toArray());
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            } catch (\Exception $exception) {}
+                                        }
+                                    }
+                                }
                             } else {
                                 BookedPackets::where([
                                     'track_number' => $booked_packet['track_number']

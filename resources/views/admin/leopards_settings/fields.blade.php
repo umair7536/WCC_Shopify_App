@@ -12,7 +12,10 @@
                             </p>
                         @endif
                     </div>
-                @elseif($leopards_setting->slug == 'auto-fulfillment')
+                @elseif(
+                        $leopards_setting->slug == 'auto-fulfillment'
+                    ||  $leopards_setting->slug == 'auto-mark-paid'
+                )
                     {!! Form::hidden('name', $leopards_setting->name, ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
                     <div class="form-group">
                         {!! Form::label('data', $leopards_setting->name, ['class' => 'control-label']) !!}

@@ -153,6 +153,10 @@ return [
         [
             'name' => 'Shipper City',
             'slug' => 'shipper-city',
+        ],
+        [
+            'name' => 'Auto Mark Order as Paid',
+            'slug' => 'auto-mark-paid',
         ]
     ),
 

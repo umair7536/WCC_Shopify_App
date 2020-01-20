@@ -75,6 +75,7 @@ class FullSyncPacketStatusListener implements ShouldQueue
                                 'leopards' => array(
                                     'api_key' => $leopards_settings['api-key']->data,
                                     'api_password' => $leopards_settings['api-password']->data,
+                                    'aut_mark_paid' => $leopards_settings['auto-mark-paid']->data,
                                 ),
                             );
 

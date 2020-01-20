@@ -57,7 +57,9 @@ class HomeController extends Controller
 
                 if(!$leopards_record) {
                     $data = null;
-                    if($leopards_setting['slug'] == 'auto-fulfillment') {
+                    if($leopards_setting['slug'] == 'auto-mark-paid') {
+                        $data = 0;
+                    } else if($leopards_setting['slug'] == 'auto-fulfillment') {
                         $data = 0;
                     } else if($leopards_setting['slug'] == 'inventory-location') {
                         $location = ShopifyLocations::where([
