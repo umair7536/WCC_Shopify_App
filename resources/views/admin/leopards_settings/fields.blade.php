@@ -12,10 +12,18 @@
                             </p>
                         @endif
                     </div>
-                @elseif(
-                        $leopards_setting->slug == 'auto-fulfillment'
-                    ||  $leopards_setting->slug == 'auto-mark-paid'
-                )
+                @elseif($leopards_setting->slug == 'auto-fulfillment')
+                    {!! Form::hidden('name', $leopards_setting->name, ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
+                    <div class="form-group">
+                        {!! Form::label('data', $leopards_setting->name, ['class' => 'control-label']) !!}
+                        {!! Form::select($leopards_setting->slug, ['0' => 'No', '1' => 'Yes'], $fulfillment_status, ['class' => 'form-control', 'placeholder' => 'Select an Option', 'required' => '']) !!}
+                        @if($errors->has('data'))
+                            <p class="help-block">
+                                {{ $errors->first('data') }}
+                            </p>
+                        @endif
+                    </div>
+                @elseif($leopards_setting->slug == 'auto-mark-paid')
                     {!! Form::hidden('name', $leopards_setting->name, ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
                     <div class="form-group">
                         {!! Form::label('data', $leopards_setting->name, ['class' => 'control-label']) !!}
