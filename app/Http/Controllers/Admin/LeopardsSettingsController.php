@@ -98,6 +98,8 @@ class LeopardsSettingsController extends Controller
         $inventory_location = LeopardsSettings::getDefaultInventoryLocation($account_id);
         $fulfillment_status = LeopardsSettings::isAutoFulfillmentEnabled($account_id);
         ($fulfillment_status) ? $fulfillment_status = '1' : '0';
+        $mark_status = LeopardsSettings::isAutoMarkPaidEnabled($account_id);
+        ($mark_status) ? $mark_status = '1' : '0';
 
         /**
          * Manage Shipment Type
@@ -115,7 +117,7 @@ class LeopardsSettingsController extends Controller
             $leopards_cities = [];
         }
 
-        return view('admin.leopards_settings.create',compact('leopards_settings', 'shopify_locations', 'inventory_location', 'fulfillment_status', 'leopards_cities'));
+        return view('admin.leopards_settings.create',compact('leopards_settings', 'shopify_locations', 'inventory_location', 'fulfillment_status', 'mark_status', 'leopards_cities'));
     }
 
     /**

@@ -27,7 +27,7 @@
                     {!! Form::hidden('name', $leopards_setting->name, ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
                     <div class="form-group">
                         {!! Form::label('data', $leopards_setting->name, ['class' => 'control-label']) !!}
-                        {!! Form::select($leopards_setting->slug, ['0' => 'No', '1' => 'Yes'], $fulfillment_status, ['class' => 'form-control', 'placeholder' => 'Select an Option', 'required' => '']) !!}
+                        {!! Form::select($leopards_setting->slug, ['0' => 'No', '1' => 'Yes'], $mark_status, ['class' => 'form-control', 'placeholder' => 'Select an Option', 'required' => '']) !!}
                         @if($errors->has('data'))
                             <p class="help-block">
                                 {{ $errors->first('data') }}

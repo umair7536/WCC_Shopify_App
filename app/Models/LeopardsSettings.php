@@ -108,4 +108,24 @@ class LeopardsSettings extends BaseModal
 
         return $enabled;
     }
+
+    /**
+     * check Auto Mark Paid Status
+     *
+     * @param $accont_id
+     * @return boolean true|false
+     */
+    static public function isAutoMarkPaidEnabled($accont_id) {
+        $enabled = false;
+
+        $record = self::where([
+            'account_id' => $accont_id,
+            'slug' => 'auto-mark-paid',
+        ])->select('id', 'data')->first();
+        if($record) {
+            $enabled = ($record->data == '1') ? true : false;
+        }
+
+        return $enabled;
+    }
 }
