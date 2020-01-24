@@ -72,62 +72,64 @@ class WebhooksController extends Controller
     public function orders(ServerRequestInterface $request)
     {
 
-        $shopify_topic = $request->getHeaderLine('X-Shopify-Topic');
-        $shopify_test_mode = $request->getHeaderLine('X-Shopify-Test');
-        $shopify_hmac_sha256 = $request->getHeaderLine('X-Shopify-Hmac-Sha256');
-        $shopify_shop_domain = $request->getHeaderLine('X-Shopify-Shop-Domain');
-        $shopify_order_id = $request->getHeaderLine('X-Shopify-Order-ID');
+        try {
+            $shopify_topic = $request->getHeaderLine('X-Shopify-Topic');
+            $shopify_test_mode = $request->getHeaderLine('X-Shopify-Test');
+            $shopify_hmac_sha256 = $request->getHeaderLine('X-Shopify-Hmac-Sha256');
+            $shopify_shop_domain = $request->getHeaderLine('X-Shopify-Shop-Domain');
+            $shopify_order_id = $request->getHeaderLine('X-Shopify-Order-ID');
 
-        /**
-         * Check if packet is coming from test mode
-         */
-        if(!$shopify_test_mode || $shopify_test_mode == 'false') {
-            try {
+            /**
+             * Check if packet is coming from test mode
+             */
+            if(!$shopify_test_mode || $shopify_test_mode == 'false') {
+                try {
 
-                $validator = new WebhookValidator();
-                $validator->validateWebhook($request, env('SHOPIFY_APP_SHARED_SECRET'));
+                    $validator = new WebhookValidator();
+                    $validator->validateWebhook($request, env('SHOPIFY_APP_SHARED_SECRET'));
 
-                $shop = ShopifyShops::where([
-                    'myshopify_domain' => $shopify_shop_domain
-                ])->first();
+                    $shop = ShopifyShops::where([
+                        'myshopify_domain' => $shopify_shop_domain
+                    ])->first();
 
-                if($shop) {
+                    if($shop) {
 
-                    $shop = $shop->toArray();
-                    $order = json_decode($request->getBody(), true);
+                        $shop = $shop->toArray();
+                        $order = json_decode($request->getBody(), true);
 
-                    switch ($shopify_topic) {
-                        case 'orders/delete':
-                            /**
-                             * Delete records
-                             */
-                            ShopifyOrderItems::where(array(
-                                'order_id' => $order['order_id'],
-                                'account_id' => $shop['account_id'],
-                            ))->forceDelete();
+                        switch ($shopify_topic) {
+                            case 'orders/delete':
+                                /**
+                                 * Delete records
+                                 */
+                                ShopifyOrderItems::where(array(
+                                    'order_id' => $order['order_id'],
+                                    'account_id' => $shop['account_id'],
+                                ))->forceDelete();
 
-                            /**
-                             * Delete Order
-                             */
-                            ShopifyOrders::where(array(
-                                'order_id' => $order['order_id'],
-                                'account_id' => $shop['account_id'],
-                            ))->forceDelete();
+                                /**
+                                 * Delete Order
+                                 */
+                                ShopifyOrders::where(array(
+                                    'order_id' => $order['order_id'],
+                                    'account_id' => $shop['account_id'],
+                                ))->forceDelete();
 
-                            break;
-                        default:
-                            /**
-                             * Dispatch Sync Leopards Cities Event and Delte existing records
-                             */
-                            event(new SingleOrderFire($order, $shop));
-                            break;
+                                break;
+                            default:
+                                /**
+                                 * Dispatch Sync Leopards Cities Event and Delte existing records
+                                 */
+                                event(new SingleOrderFire($order, $shop));
+                                break;
+                        }
                     }
-                }
 
-            } catch (InvalidRequestException $exception) {
-                // Handle your error heres
+                } catch (InvalidRequestException $exception) {
+                    // Handle your error heres
+                }
             }
-        }
+        } catch (\Exception $exception) {}
 
         return response()->json(['status' => true]);
     }
