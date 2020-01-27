@@ -106,6 +106,16 @@ class HomeController extends Controller
         return view('instructions', compact('leopards_settings'));
     }
 
+    /**
+     * Our Apps section
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function ourApps()
+    {
+        return view('our_apps');
+    }
+
     public function runQueue() {
         event(new SyncProductsFire(Accounts::find(Auth::User()->account_id)));
         echo 'Sync Products Event is dispatched';

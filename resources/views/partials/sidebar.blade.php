@@ -26,6 +26,14 @@
                 </a>
             </li>
 
+            <!-- END SIDEBAR TOGGLER BUTTON -->
+            <li class="nav-item start {{ $request->segment(2) == 'our-apps' ? 'active' : '' }}">
+                <a href="{{ route('admin.our_apps') }}" class="nav-link ">
+                    <i class="icon-flag"></i>
+                    <span class="title">@lang('global.our_apps')</span>
+                </a>
+            </li>
+
             @if(Gate::allows('permissions_manage') || Gate::allows('roles_manage') || Gate::allows('users_manage') || Gate::allows('user_types_manage'))
                 <li class="nav-item start @if(
                     $request->segment(2) == 'permissions' ||
