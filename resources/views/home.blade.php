@@ -93,20 +93,20 @@ $booked_packets_test = \App\Models\BookedPackets::where([
 
 
         @if(Gate::allows('shopify_customers_manage'))
-            <div class="col-md-4">
-                <!-- BEGIN WIDGET THUMB -->
-                <div class="widget-thumb widget-bg-color-white text-uppercase margin-bottom-20 bordered">
-                    <h4 class="widget-thumb-heading">Customers</h4>
-                    <div class="widget-thumb-wrap">
-                        <i class="widget-thumb-icon bg-green icon-users"></i>
-                        <div class="widget-thumb-body">
-                            <span class="widget-thumb-subtitle">Total</span>
-                            <span class="widget-thumb-body-stat" data-counter="counterup" data-value="{{ number_format($customers) }}">{{ number_format($customers) }}</span>
-                        </div>
-                    </div>
-                </div>
-                <!-- END WIDGET THUMB -->
-            </div>
+{{--            <div class="col-md-4">--}}
+{{--                <!-- BEGIN WIDGET THUMB -->--}}
+{{--                <div class="widget-thumb widget-bg-color-white text-uppercase margin-bottom-20 bordered">--}}
+{{--                    <h4 class="widget-thumb-heading">Customers</h4>--}}
+{{--                    <div class="widget-thumb-wrap">--}}
+{{--                        <i class="widget-thumb-icon bg-green icon-users"></i>--}}
+{{--                        <div class="widget-thumb-body">--}}
+{{--                            <span class="widget-thumb-subtitle">Total</span>--}}
+{{--                            <span class="widget-thumb-body-stat" data-counter="counterup" data-value="{{ number_format($customers) }}">{{ number_format($customers) }}</span>--}}
+{{--                        </div>--}}
+{{--                    </div>--}}
+{{--                </div>--}}
+{{--                <!-- END WIDGET THUMB -->--}}
+{{--            </div>--}}
         @endif
 
         @if(Gate::allows('shopify_orders_manage'))

@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\Leopards\BookedPackets\FullSyncPacketStatusFire;
 use App\Events\Shopify\Orders\SingleOrderFulfillmentFire;
+use App\Events\Shopify\Orders\SyncOrdersFire;
 use App\Events\Shopify\Products\SyncProductsFire;
 use App\Events\Shopify\Products\UploadVariantsFire;
+use App\Events\Shopify\Webhooks\CreateWebhooksFire;
 use App\Models\Accounts;
 use App\Models\HeavyLifter;
 use App\Models\LeopardsSettings;
@@ -117,8 +120,29 @@ class HomeController extends Controller
     }
 
     public function runQueue() {
-        event(new SyncProductsFire(Accounts::find(Auth::User()->account_id)));
-        echo 'Sync Products Event is dispatched';
+//        event(new SyncProductsFire(Accounts::find(Auth::User()->account_id)));
+//        echo 'Sync Products Event is dispatched';
+
+        try {
+
+            $accounts = Accounts::where([
+                'suspended' => 0
+            ])->get();
+
+            if($accounts) {
+                foreach ($accounts as $account) {
+                    event(new CreateWebhooksFire($account));
+                    event(new SyncOrdersFire($account));
+                }
+            }
+
+            echo 'so far so good';
+        } catch(\Exception $e) {
+            echo "\n";
+            echo 'Exception came';
+            echo "\n";
+            echo "\n";
+        }
     }
 
     public function runVariantsQueue() {

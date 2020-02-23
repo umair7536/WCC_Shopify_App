@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Events\Shopify\Orders\SingleOrderFire;
 use App\Http\Controllers\Controller;
+use App\Models\BillingAddresses;
 use App\Models\BookedPackets;
 use App\Models\LeopardsSettings;
+use App\Models\ShippingAddresses;
+use App\Models\ShopifyCustomers;
 use App\Models\ShopifyOrderItems;
 use App\Models\ShopifyOrders;
 use App\Models\ShopifyShops;
@@ -100,10 +103,23 @@ class WebhooksController extends Controller
                         switch ($shopify_topic) {
                             case 'orders/delete':
                                 /**
+                                 * Delete Addresses
+                                 */
+                                ShippingAddresses::where(array(
+                                    'order_id' => $order['id'],
+                                    'account_id' => $shop['account_id'],
+                                ))->forceDelete();
+
+                                BillingAddresses::where(array(
+                                    'order_id' => $order['id'],
+                                    'account_id' => $shop['account_id'],
+                                ))->forceDelete();
+
+                                /**
                                  * Delete records
                                  */
                                 ShopifyOrderItems::where(array(
-                                    'order_id' => $order['order_id'],
+                                    'order_id' => $order['id'],
                                     'account_id' => $shop['account_id'],
                                 ))->forceDelete();
 
@@ -111,7 +127,7 @@ class WebhooksController extends Controller
                                  * Delete Order
                                  */
                                 ShopifyOrders::where(array(
-                                    'order_id' => $order['order_id'],
+                                    'order_id' => $order['id'],
                                     'account_id' => $shop['account_id'],
                                 ))->forceDelete();
 
@@ -130,6 +146,109 @@ class WebhooksController extends Controller
                 }
             }
         } catch (\Exception $exception) {}
+
+        return response()->json(['status' => true]);
+    }
+
+
+    /**
+     * Customers Webhook
+     *
+     * @param \Psr\Http\Message\ServerRequestInterface
+     * @return \Illuminate\Http\Response
+     */
+    public function customers(ServerRequestInterface $request)
+    {
+
+        try {
+            $shopify_topic = $request->getHeaderLine('X-Shopify-Topic');
+            $shopify_test_mode = $request->getHeaderLine('X-Shopify-Test');
+            $shopify_hmac_sha256 = $request->getHeaderLine('X-Shopify-Hmac-Sha256');
+            $shopify_shop_domain = $request->getHeaderLine('X-Shopify-Shop-Domain');
+
+            /**
+             * Check if packet is coming from test mode
+             */
+            if(!$shopify_test_mode || $shopify_test_mode == 'false') {
+                try {
+
+                    $validator = new WebhookValidator();
+                    $validator->validateWebhook($request, env('SHOPIFY_APP_SHARED_SECRET'));
+
+                    $shop = ShopifyShops::where([
+                        'myshopify_domain' => $shopify_shop_domain
+                    ])->first();
+
+                    if($shop) {
+
+                        $shop = $shop->toArray();
+                        $customer = json_decode($request->getBody(), true);
+
+                        switch ($shopify_topic) {
+                            case 'customers/delete':
+                                /**
+                                 * Delete Order
+                                 */
+                                ShopifyOrders::where(array(
+                                    'customer_id' => $customer['id'],
+                                    'account_id' => $shop['account_id'],
+                                ))->forceDelete();
+
+                                break;
+                            default:
+                                /**
+                                 * Sync Order Customer
+                                 */
+                                if(isset($customer['id']) && count($customer)) {
+                                    /*
+                                    * Prepare record before insert
+                                    */
+                                    $customer['customer_id'] = $customer['id'];
+                                    unset($customer['id']);
+
+                                    if(isset($customer['default_address']) && count($customer['default_address'])) {
+                                        $default_address = $customer['default_address'];
+                                        unset($default_address['id']);
+                                        unset($default_address['customer_id']);
+                                        $customer = array_merge($customer, $default_address);
+                                        $customer['default_address'] = json_encode($customer['default_address']);
+                                    }
+
+                                    /**
+                                     * Set Address based on array provided
+                                     */
+                                    if(isset($customer['addresses']) && count($customer['addresses'])) {
+                                        $customer['addresses'] = json_encode($customer['addresses']);
+                                    }
+
+                                    $customer_processed = ShopifyCustomers::prepareRecord($customer);
+                                    $customer_processed['account_id'] = $shop['account_id'];
+
+                                    $customer_record = ShopifyCustomers::where([
+                                        'customer_id' => $customer_processed['customer_id'],
+                                        'account_id' => $customer_processed['account_id'],
+                                    ])->select('id')->first();
+
+                                    if($customer_record) {
+                                        ShopifyCustomers::where([
+                                            'customer_id' => $customer_processed['customer_id'],
+                                            'account_id' => $customer_processed['account_id'],
+                                        ])->update($customer_processed);
+                                    } else {
+                                        ShopifyCustomers::create($customer_processed);
+                                    }
+
+                                }
+
+                                break;
+                        }
+                    }
+
+                } catch (InvalidRequestException $exception) {
+                }
+            }
+        } catch (\Exception $exception) {
+        }
 
         return response()->json(['status' => true]);
     }

@@ -14,6 +14,7 @@ class VerifyCsrfToken extends BaseVerifier
     protected $except = [
         'webhooks/app',
         'webhooks/orders',
+        'webhooks/customers',
         'customers/data_request',
         'customers/redact',
         'shop/redact'

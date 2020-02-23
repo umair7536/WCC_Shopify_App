@@ -37,6 +37,8 @@ return [
 //        'products/create' => 'Product Creation',
 //        'products/delete' => 'Product Deletion',
 //        'products/update' => 'Product Update',
+        'customers/create' => 'Customer Creation',
+        'customers/update' => 'Customer Update',
         'orders/cancelled' => 'Order Cancellation',
         'orders/create' => 'Order Creation',
         'orders/delete' => 'Order Deletion',

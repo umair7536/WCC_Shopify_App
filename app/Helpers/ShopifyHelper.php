@@ -10,7 +10,9 @@
 namespace App\Helpers;
 
 
+use App\Models\BillingAddresses;
 use App\Models\BookedPackets;
+use App\Models\ShippingAddresses;
 use App\Models\ShopifyBillings;
 use App\Models\ShopifyCustomers;
 use App\Models\ShopifyOrderItems;
@@ -55,6 +57,57 @@ class ShopifyHelper
             //echo 'Order Created: ' . $order_processed['title'] . "\n";
             $order_record = ShopifyOrders::create($order_processed);
         }
+
+        /**
+         * Sync Shipping Address
+         */
+        if(isset($order['shipping_address']) && count($order['shipping_address'])) {
+
+            $order['shipping_address']['order_id'] = $order['order_id'];
+            $shipping_address = ShippingAddresses::prepareRecord($order['shipping_address']);
+            $shipping_address['account_id'] = $shop['account_id'];
+
+            $shipping_address_record = ShippingAddresses::where([
+                'order_id' => $shipping_address['order_id'],
+                'account_id' => $shipping_address['account_id'],
+            ])->select('id')->first();
+
+            if($shipping_address_record) {
+                ShippingAddresses::where([
+                    'order_id' => $shipping_address['order_id'],
+                    'account_id' => $shipping_address['account_id'],
+                ])->update($shipping_address);
+            } else {
+                //echo 'Order Created: ' . $order_processed['title'] . "\n";
+                $shipping_address_record = ShippingAddresses::create($shipping_address);
+            }
+        }
+
+        /**
+         * Sync Billing Address
+         */
+        if(isset($order['billing_address']) && count($order['billing_address'])) {
+
+            $order['billing_address']['order_id'] = $order['order_id'];
+            $billing_address = BillingAddresses::prepareRecord($order['billing_address']);
+            $billing_address['account_id'] = $shop['account_id'];
+
+            $billing_address_record = BillingAddresses::where([
+                'order_id' => $billing_address['order_id'],
+                'account_id' => $billing_address['account_id'],
+            ])->select('id')->first();
+
+            if($billing_address_record) {
+                BillingAddresses::where([
+                    'order_id' => $billing_address['order_id'],
+                    'account_id' => $billing_address['account_id'],
+                ])->update($billing_address);
+            } else {
+                //echo 'Order Created: ' . $order_processed['title'] . "\n";
+                $billing_address_record = BillingAddresses::create($billing_address);
+            }
+        }
+
 
         /**
          * Sync Order Customer

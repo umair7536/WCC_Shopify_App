@@ -106,7 +106,7 @@ class ShopifyOrdersController extends Controller
                 if(isset($customers[$shopify_order->customer_id])) {
                     $customer = [
                         ($shop) ? '<a target="_blank" href="https://' . $shop->myshopify_domain . '/admin/customers/' . $shopify_order->customer_id . '">' . $customers[$shopify_order->customer_id]->name . '&nbsp;<i class="fa fa-external-link"></i></a>' : $customers[$shopify_order->customer_id]->name,
-                        $shopify_order->email,
+//                        $shopify_order->email,
                         $customers[$shopify_order->customer_id]->phone,
                     ];
                     $customer = array_filter($customer);
