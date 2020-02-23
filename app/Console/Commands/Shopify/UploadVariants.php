@@ -71,6 +71,12 @@ class UploadVariants extends Command
                             'price' => $result['price'],
                             'compare_at_price' => $result['compare_at_price'],
                         ));
+                    } else {
+                        ShopifyJobs::where([
+                            'id' => $job->id
+                        ])->update(array(
+                            'attempts' => 1
+                        ));
                     }
                 }
             }

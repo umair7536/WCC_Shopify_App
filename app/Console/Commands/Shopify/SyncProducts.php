@@ -80,6 +80,12 @@ class SyncProducts extends Command
                         ShopifyJobs::where([
                             'id' => $job->id
                         ])->delete();
+                    } else {
+                        ShopifyJobs::where([
+                            'id' => $job->id
+                        ])->update(array(
+                            'attempts' => 1
+                        ));
                     }
                 }
             }
