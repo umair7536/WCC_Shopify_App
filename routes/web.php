@@ -187,6 +187,8 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::patch('shopify_orders/active/{id}', ['uses' => 'Admin\ShopifyOrdersController@active', 'as' => 'shopify_orders.active']);
     Route::patch('shopify_orders/inactive/{id}', ['uses' => 'Admin\ShopifyOrdersController@inactive', 'as' => 'shopify_orders.inactive']);
     Route::get('shopify_orders/sync-custom-collections', ['uses' => 'Admin\ShopifyOrdersController@syncOrders', 'as' => 'shopify_orders.orders']);
+    Route::get('shopify_orders/shipping', ['uses' => 'Admin\ShopifyOrdersController@shipping', 'as' => 'shopify_orders.shipping']);
+    Route::put('shopify_orders/{id}/shipping', ['uses' => 'Admin\ShopifyOrdersController@updateShipping', 'as' => 'shopify_orders.shipping_update']);
     Route::resource('shopify_orders', 'Admin\ShopifyOrdersController');
     // Shopify Orders Routes end
 

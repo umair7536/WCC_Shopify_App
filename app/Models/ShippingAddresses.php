@@ -26,6 +26,38 @@ class ShippingAddresses extends BaseModal
 
     protected static $skip_columns = [];
 
+    /**
+     * Update Record
+     *
+     * @param \Illuminate\Http\Request $request
+     *
+     * @return (mixed)
+     */
+    static public function updateRecord($id, $order_id, $request, $account_id)
+    {
+        $old_data = (ShopifyOrders::find($id))->toArray();
+
+        $data = $request->all();
+
+        // Set Account ID
+        $data['account_id'] = $account_id;
+        $data['updated_at'] = Carbon::now()->toDateTimeString();
+
+        $record = self::where([
+            'id' => $id,
+            'order_id' => $order_id,
+            'account_id' => $account_id
+        ])->first();
+
+        if(!$record) {
+            return null;
+        }
+
+        $record->update($data);
+
+        return $record;
+    }
+
     /*
      * Prepare provided record
      */

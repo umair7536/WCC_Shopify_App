@@ -9,6 +9,7 @@ use App\Models\Accounts;
 use App\Models\BookedPackets;
 use App\Models\LeopardsCities;
 use App\Models\LeopardsSettings;
+use App\Models\ShippingAddresses;
 use App\Models\ShopifyCustomers;
 use App\Models\ShopifyOrders;
 use App\Models\ShopifyShops;
@@ -88,13 +89,19 @@ class ShopifyOrdersController extends Controller
              * On result time propare customer
              */
             $customer_ids = array();
+            $order_ids = array();
             foreach($ShopifyOrders as $shopify_order) {
                 $customer_ids[] = $shopify_order->customer_id;
+                $order_ids[] = $shopify_order->order_id;
             }
 
             $customers = ShopifyCustomers::whereIn('customer_id', $customer_ids)
                 ->select('customer_id', 'name', 'email', 'phone', 'city', 'address1', 'address2')
                 ->get()->keyBy('customer_id');
+
+            $shipping_addresses = ShippingAddresses::whereIn('order_id', $order_ids)
+                ->select('id', 'order_id', 'first_name', 'last_name', 'name', 'phone', 'city', 'address1', 'address2')
+                ->get()->keyBy('order_id');
 
             $shop = ShopifyShops::where([
                 'account_id' => Auth::User()->account_id,
@@ -102,29 +109,48 @@ class ShopifyOrdersController extends Controller
 
             foreach($ShopifyOrders as $shopify_order) {
 
-                $customer = [$shopify_order->email];
-                if(isset($customers[$shopify_order->customer_id])) {
+                $destination_city = '';
+                $consignment_address = null;
+
+                $customer = [];
+                if(isset($shipping_addresses[$shopify_order->order_id])) {
                     $customer = [
-                        ($shop) ? '<a target="_blank" href="https://' . $shop->myshopify_domain . '/admin/customers/' . $shopify_order->customer_id . '">' . $customers[$shopify_order->customer_id]->name . '&nbsp;<i class="fa fa-external-link"></i></a>' : $customers[$shopify_order->customer_id]->name,
-//                        $shopify_order->email,
-                        $customers[$shopify_order->customer_id]->phone,
+                        $shipping_addresses[$shopify_order->order_id]->name,
+                        $shipping_addresses[$shopify_order->order_id]->phone,
                     ];
                     $customer = array_filter($customer);
+                    $destination_city = trim($shipping_addresses[$shopify_order->order_id]['city']);
+                    $consignment_address = trim($shipping_addresses[$shopify_order->order_id]['address1']) . ' ' . trim($shipping_addresses[$shopify_order->order_id]['address2']);
+                } else {
+//                    $customer = [$shopify_order->email];
+                    if(isset($customers[$shopify_order->customer_id])) {
+                        $customer = [
+//                        ($shop) ? '<a target="_blank" href="https://' . $shop->myshopify_domain . '/admin/customers/' . $shopify_order->customer_id . '">' . $customers[$shopify_order->customer_id]->name . '&nbsp;<i class="fa fa-external-link"></i></a>' : $customers[$shopify_order->customer_id]->name,
+                            $customers[$shopify_order->customer_id]->name,
+//                        $shopify_order->email,
+                            $customers[$shopify_order->customer_id]->phone,
+                        ];
+                        $customer = array_filter($customer);
+                        $destination_city = trim($customers[$shopify_order->customer_id]['city']);
+                        $consignment_address = trim($customers[$shopify_order->customer_id]['address1']) . ' ' . trim($customers[$shopify_order->customer_id]['address2']);
+                    }
                 }
 
                 $records["data"][] = array(
                     'id' => '<label class="mt-checkbox mt-checkbox-single mt-checkbox-outline"><input name="id[]" type="checkbox" class="checkboxes" value="'.$shopify_order->id.'"/><span></span></label>',
-                    'name' => $shopify_order->name,
+                    'name' => ($shop) ? '<a target="_blank" href="https://' . $shop->myshopify_domain . '/admin/orders/' . $shopify_order->order_id . '">' . $shopify_order->name . '&nbsp;<i class="fa fa-external-link"></i></a>' : $shopify_order->name,
                     'closed_at' => Carbon::parse($shopify_order->created_at)->format('M j, Y h:i A'),
-                    'customer_email' => implode('<br/>', $customer),
+                    'customer_email' => "<div id=\"customer_email-" . $shopify_order->id . "\">" . implode('<br/>', $customer) . "</div>",
                     'fulfillment_status' => view('admin.shopify_orders.fulfillment_status', compact('shopify_order'))->render(),
                     'tags' => $shopify_order->tags,
                     'cn_number' => $shopify_order->cn_number,
-                    'destination_city' => (isset($customers[$shopify_order->customer_id]) ? trim($customers[$shopify_order->customer_id]['city']) : ''),
-                    'consignment_address' => (isset($customers[$shopify_order->customer_id]) ? trim($customers[$shopify_order->customer_id]['address1']) . ' ' . trim($customers[$shopify_order->customer_id]['address2']) : ''),
+//                    'destination_city' => (isset($customers[$shopify_order->customer_id]) ? trim($customers[$shopify_order->customer_id]['city']) : ''),
+//                    'consignment_address' => (isset($shipping_addresses[$shopify_order->order_id]) ? trim($shipping_addresses[$shopify_order->order_id]['address1']) . ' ' . trim($shipping_addresses[$shopify_order->order_id]['address2']) : ''),
+                    'destination_city' => "<div id=\"destination_city-" . $shopify_order->id . "\">"  . $destination_city . "</div>",
+                    'consignment_address' => "<div id=\"consignment_address-" . $shopify_order->id . "\">" . $consignment_address . "</div>",
                     'total_price' => number_format($shopify_order->total_price),
                     'financial_status' => "<span class=\"label label-default\"> " . ucfirst($shopify_order->financial_status) . " </span>",
-                    'actions' => view('admin.shopify_orders.actions', compact('shopify_order'))->render(),
+                    'actions' => view('admin.shopify_orders.actions', compact('shopify_order', 'shipping_addresses'))->render(),
                 );
             }
         }
@@ -527,6 +553,230 @@ class ShopifyOrdersController extends Controller
         }
 
         return view('admin.shopify_orders.edit', compact('shopify_order'));
+    }
+
+    /**
+     * Show the form for editing Shipping Address.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function shipping(Request $request)
+    {
+        if (! Gate::allows('shopify_orders_create')) {
+            return abort(401);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'order_id' => 'required',
+            'shipping_id' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return view('error');
+        }
+
+        $data = $request->all();
+        $order_id = $request->get('order_id');
+
+        $shipping_address = ShippingAddresses::where([
+            'account_id' => Auth::User()->account_id,
+            'order_id' => $data['order_id'],
+            'id' => $data['shipping_id'],
+        ])->first();
+
+        if(!$shipping_address) {
+            return view('error');
+        }
+
+        $leopards_cities = LeopardsCities::where([
+            'account_id' => Auth::User()->account_id,
+        ])
+            ->orderBy('name', 'asc')
+            ->get();
+
+        if($leopards_cities) {
+            $leopards_cities = $leopards_cities->pluck('name', 'name');
+        } else {
+            $leopards_cities = [];
+        }
+
+        return view('admin.shopify_orders.shipping', compact('order_id', 'shipping_address', 'leopards_cities'));
+    }
+
+    /**
+     * Update Permission in storage.
+     *
+     * @param  \Illuminate\Http\Request $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function updateShipping(Request $request, $id)
+    {
+        if (! Gate::allows('shopify_orders_create')) {
+            return abort(401);
+        }
+
+        $data = $request->all();
+
+        $validator = $this->verifyShippingFields($request);
+
+        if ($validator->fails()) {
+            return response()->json(array(
+                'status' => 0,
+                'message' => $validator->messages()->all(),
+            ));
+        }
+
+        $shipping_address = ShippingAddresses::where([
+            'account_id' => Auth::User()->account_id,
+            'order_id' => $data['order_id'],
+            'id' => $id,
+        ])->first();
+
+        if(!$shipping_address) {
+            return response()->json(array(
+                'status' => 0,
+                'message' => ['Provided record not found.'],
+                'customer_email' => '',
+                'destination_city' => '',
+                'consignment_address' => '',
+            ));
+        }
+
+        $shopify_order = ShopifyOrders::where([
+            'order_id' => $data['order_id'],
+            'account_id' => Auth::User()->account_id,
+        ])->first();
+
+        if(!$shopify_order) {
+            return response()->json(array(
+                'status' => 0,
+                'message' => ['Provided Customer not found in our database.'],
+                'customer_email' => '',
+                'destination_city' => '',
+                'consignment_address' => '',
+            ));
+        }
+
+        $customer_processed = ShopifyCustomers::prepareRecord($data);
+
+        if($request->get('address1') != '') {
+            $customer_processed['address1'] = $request->get('address1');
+        }
+        if($request->get('address2') != '') {
+            $customer_processed['address2'] = $request->get('address2');
+        }
+        if($request->get('city') != '') {
+            $customer_processed['city'] = trim($request->get('city'));
+        }
+        $customer_processed['account_id'] = Auth::User()->account_id;
+
+        $customer_record = ShopifyCustomers::where([
+            'customer_id' => $shopify_order->customer_id,
+            'account_id' => $customer_processed['account_id'],
+        ])->select('id')->first();
+
+        if($customer_record) {
+            ShopifyCustomers::where([
+                'customer_id' => $id,
+                'account_id' => $customer_processed['account_id'],
+            ])->update($customer_processed);
+        } else {
+            //echo 'Product Created: ' . $customer_processed['title'] . "\n";
+            ShopifyCustomers::create($customer_processed);
+        }
+
+        if(ShippingAddresses::updateRecord($id, $data['order_id'], $request, Auth::User()->account_id)) {
+            flash('Record has been updated successfully.')->success()->important();
+
+            try {
+                /**
+                 * Update in Shopify as well
+                 */
+                $shop = ShopifyShops::where([
+                    'account_id' => Auth::User()->account_id
+                ])->first();
+
+                if($shop) {
+                    $shopifyClient = new ShopifyClient([
+                        'private_app' => false,
+                        'api_key' => env('SHOPIFY_APP_API_KEY'), // In public app, this is the app ID
+                        'version' => env('SHOPIFY_API_VERSION'), // Put API Version
+                        'access_token' => $shop->access_token,
+                        'shop' => $shop->myshopify_domain
+                    ]);
+
+                    $shopifyClient->updateOrder([
+                        'id' => (int) $data['order_id'],
+                        'shipping_address' => array(
+                            'first_name' => $data['first_name'],
+                            'last_name' => $data['last_name'],
+                            'company' => $data['company'],
+                            'phone' => $data['phone'],
+                            'city' => $data['city'],
+                            'address1' => $data['address1'],
+                            'address2' => $data['address2'],
+                        )
+                    ]);
+                }
+            } catch (\Exception $exception) {
+                return response()->json(array(
+                    'status' => 0,
+                    'message' => 'Unable to update in Shopify.',
+                    'customer_email' => '',
+                    'destination_city' => '',
+                    'consignment_address' => '',
+                ));
+            }
+
+            /**
+             * Prepare Records
+             */
+            $customer = [
+                $data['first_name'] . ' ' . $data['last_name'],
+                $data['phone']
+            ];
+
+            $customer = array_filter($customer);
+            $destination_city = trim($data['city']);
+            $consignment_address = trim($data['address1']) . ' ' . trim($data['address2']);
+
+            return response()->json(array(
+                'status' => 1,
+                'message' => 'Record has been updated successfully.',
+                'customer_email' => implode('<br/>', $customer),
+                'destination_city' => $destination_city,
+                'consignment_address' => $consignment_address,
+                'id' => $shopify_order->id,
+            ));
+        } else {
+            return response()->json(array(
+                'status' => 0,
+                'message' => 'Something went wrong, please try again later.',
+                'customer_email' => '',
+                'destination_city' => '',
+                'consignment_address' => '',
+            ));
+        }
+    }
+
+    /**
+     * Validate form fields
+     *
+     * @param  \Illuminate\Http\Request $request
+     * @return Validator $validator;
+     */
+    protected function verifyShippingFields(Request $request)
+    {
+        return $validator = Validator::make($request->all(), [
+            'order_id' => 'required',
+            'first_name' => 'required',
+            'last_name' => 'required',
+            'phone' => 'required',
+            'city' => 'required',
+            'address1' => 'required',
+        ]);
     }
 
     /**

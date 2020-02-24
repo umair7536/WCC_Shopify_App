@@ -165,6 +165,16 @@
         </div>
     </div>
     <!--Add new View model End-->
+    <!--Add New View model Start-->
+    <div class="modal fade" id="ajax_shipping_address" role="basic" aria-hidden="true"
+         style=" left:10%; width: 80%; top:2%;">
+        <div class="modal-content">
+            <div class="modal-body">
+                <span> &nbsp;&nbsp;Loading... </span>
+            </div>
+        </div>
+    </div>
+    <!--Add new View model End-->
 @stop
 
 @section('javascript')

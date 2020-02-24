@@ -52,6 +52,13 @@ class Kernel extends ConsoleKernel
 //            ->everyMinute();
 
         /*
+         * Sync Products from Shopify
+         */
+        $schedule->command('lcs:sync-packet-status')
+            ->withoutOverlapping()
+            ->everyMinute();
+
+        /*
          * Sync Customers from Shopify
          */
         $schedule->command('shopify:sync-customers')

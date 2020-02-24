@@ -808,6 +808,16 @@ class BookedPackets extends BaseModal
                     $customer = [];
                 }
 
+                $shipping_address = ShippingAddresses::where([
+                    'order_id' => $order['order_id']
+                ])->first();
+
+                if($shipping_address) {
+                    $shipping_address = $shipping_address->toArray();
+                } else {
+                    $shipping_address = [];
+                }
+
                 $order_items = ShopifyOrderItems::where([
                    'order_id' => $order['order_id']
                 ])->get();
@@ -840,14 +850,14 @@ class BookedPackets extends BaseModal
                     }
                 }
 
-                if(count($customer)) {
+                if(count($shipping_address)) {
                     foreach($fill_fields as $key => $value) {
-                        if(array_key_exists($value, $customer)) {
+                        if(array_key_exists($value, $shipping_address)) {
                             if($key != 'consignee_name' && $value == 'name') {
                                 continue;
                             }
                             if($key == 'consignee_address') {
-                                $booked_packet[$key] = trim($customer['address1']) . ' ' . trim($customer['address2']);
+                                $booked_packet[$key] = trim($shipping_address['address1']) . ' ' . trim($shipping_address['address2']);
                             } else if($key == 'destination_city') {
                                 /**
                                  * Grab City from Leopards System
@@ -857,7 +867,7 @@ class BookedPackets extends BaseModal
                                 ])
                                     ->where('name',
                                         '=',
-                                        trim($customer[$value])
+                                        trim($shipping_address[$value])
                                     )
                                     ->select('city_id', 'name')
                                     ->first();
@@ -867,9 +877,45 @@ class BookedPackets extends BaseModal
                                 }
                             } else {
                                 if($value == 'name') {
-                                    $booked_packet[$key] = ($customer[$value]) ? trim(ucwords($customer[$value])) : trim(ucwords($customer['first_name'])) . ' ' . trim(ucwords($customer['last_name']));
+                                    $booked_packet[$key] = ($shipping_address[$value]) ? trim(ucwords($shipping_address[$value])) : trim(ucwords($shipping_address['first_name'])) . ' ' . trim(ucwords($shipping_address['last_name']));
                                 } else {
-                                    $booked_packet[$key] = $customer[$value];
+                                    $booked_packet[$key] = $shipping_address[$value];
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if(count($customer)) {
+                        foreach($fill_fields as $key => $value) {
+                            if(array_key_exists($value, $customer)) {
+                                if($key != 'consignee_name' && $value == 'name') {
+                                    continue;
+                                }
+                                if($key == 'consignee_address') {
+                                    $booked_packet[$key] = trim($customer['address1']) . ' ' . trim($customer['address2']);
+                                } else if($key == 'destination_city') {
+                                    /**
+                                     * Grab City from Leopards System
+                                     */
+                                    $city = LeopardsCities::where([
+                                        'account_id' => $account_id
+                                    ])
+                                        ->where('name',
+                                            '=',
+                                            trim($customer[$value])
+                                        )
+                                        ->select('city_id', 'name')
+                                        ->first();
+
+                                    if($city) {
+                                        $booked_packet[$key] = $city->city_id;
+                                    }
+                                } else {
+                                    if($value == 'name') {
+                                        $booked_packet[$key] = ($customer[$value]) ? trim(ucwords($customer[$value])) : trim(ucwords($customer['first_name'])) . ' ' . trim(ucwords($customer['last_name']));
+                                    } else {
+                                        $booked_packet[$key] = $customer[$value];
+                                    }
                                 }
                             }
                         }
@@ -1012,6 +1058,16 @@ class BookedPackets extends BaseModal
                     $customer = [];
                 }
 
+                $shipping_address = ShippingAddresses::where([
+                    'order_id' => $order['order_id']
+                ])->first();
+
+                if($shipping_address) {
+                    $shipping_address = $shipping_address->toArray();
+                } else {
+                    $shipping_address = [];
+                }
+
                 $order_items = ShopifyOrderItems::where([
                     'order_id' => $order['order_id']
                 ])->get();
@@ -1044,14 +1100,14 @@ class BookedPackets extends BaseModal
                     }
                 }
 
-                if(count($customer)) {
+                if(count($shipping_address)) {
                     foreach($fill_fields as $key => $value) {
                         if($key != 'consignee_name' && $value == 'name') {
                             continue;
                         }
-                        if(array_key_exists($value, $customer)) {
+                        if(array_key_exists($value, $shipping_address)) {
                             if($key == 'consignee_address') {
-                                $booked_packet[$key] = trim($customer['address1']) . ' ' . trim($customer['address2']);
+                                $booked_packet[$key] = trim($shipping_address['address1']) . ' ' . trim($shipping_address['address2']);
                             } else if($key == 'destination_city') {
                                 /**
                                  * Grab City from Leopards System
@@ -1061,7 +1117,7 @@ class BookedPackets extends BaseModal
                                 ])
                                     ->where('name',
                                         '=',
-                                        trim($customer[$value])
+                                        trim($shipping_address[$value])
                                     )
                                     ->select('city_id', 'name')
                                     ->first();
@@ -1073,9 +1129,47 @@ class BookedPackets extends BaseModal
                                 }
                             } else {
                                 if($value == 'name') {
-                                    $booked_packet[$key] = ($customer[$value]) ? trim(ucwords($customer[$value])) : trim(ucwords($customer['first_name'])) . ' ' . trim(ucwords($customer['last_name']));
+                                    $booked_packet[$key] = ($shipping_address[$value]) ? trim(ucwords($shipping_address[$value])) : trim(ucwords($shipping_address['first_name'])) . ' ' . trim(ucwords($shipping_address['last_name']));
                                 } else {
-                                    $booked_packet[$key] = $customer[$value];
+                                    $booked_packet[$key] = $shipping_address[$value];
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if(count($customer)) {
+                        foreach($fill_fields as $key => $value) {
+                            if($key != 'consignee_name' && $value == 'name') {
+                                continue;
+                            }
+                            if(array_key_exists($value, $customer)) {
+                                if($key == 'consignee_address') {
+                                    $booked_packet[$key] = trim($customer['address1']) . ' ' . trim($customer['address2']);
+                                } else if($key == 'destination_city') {
+                                    /**
+                                     * Grab City from Leopards System
+                                     */
+                                    $city = LeopardsCities::where([
+                                        'account_id' => $account_id
+                                    ])
+                                        ->where('name',
+                                            '=',
+                                            trim($customer[$value])
+                                        )
+                                        ->select('city_id', 'name')
+                                        ->first();
+
+                                    if($city) {
+                                        $booked_packet[$key] = $city->city_id;
+                                    } else {
+                                        $status = false;
+                                    }
+                                } else {
+                                    if($value == 'name') {
+                                        $booked_packet[$key] = ($customer[$value]) ? trim(ucwords($customer[$value])) : trim(ucwords($customer['first_name'])) . ' ' . trim(ucwords($customer['last_name']));
+                                    } else {
+                                        $booked_packet[$key] = $customer[$value];
+                                    }
                                 }
                             }
                         }
