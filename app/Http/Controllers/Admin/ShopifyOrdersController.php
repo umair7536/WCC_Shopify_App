@@ -569,7 +569,7 @@ class ShopifyOrdersController extends Controller
 
         $validator = Validator::make($request->all(), [
             'order_id' => 'required',
-            'shipping_id' => 'required',
+//            'shipping_id' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -579,11 +579,50 @@ class ShopifyOrdersController extends Controller
         $data = $request->all();
         $order_id = $request->get('order_id');
 
-        $shipping_address = ShippingAddresses::where([
-            'account_id' => Auth::User()->account_id,
-            'order_id' => $data['order_id'],
-            'id' => $data['shipping_id'],
-        ])->first();
+        /**
+         * If Shipping Address Not found then create new one
+         */
+        if(!$data['shipping_id'] && isset($data['customer_id'])) {
+            /**
+             * Update in Shopify as well
+             */
+            $shop = ShopifyShops::where([
+                'account_id' => Auth::User()->account_id
+            ])->first();
+
+            if($shop) {
+                try {
+                    $shopifyClient = new ShopifyClient([
+                        'private_app' => false,
+                        'api_key' => env('SHOPIFY_APP_API_KEY'), // In public app, this is the app ID
+                        'version' => env('SHOPIFY_API_VERSION'), // Put API Version
+                        'access_token' => $shop->access_token,
+                        'shop' => $shop->myshopify_domain
+                    ]);
+
+                    $shopify_order = $shopifyClient->getOrder([
+                        'id' => (int) $data['order_id'],
+                    ]);
+                } catch (\Exception $exception) {
+                    return view('error');
+                }
+
+                ShopifyHelper::syncSingleOrder($shopify_order, $shop->toArray());
+            } else {
+                return view('error');
+            }
+
+            $shipping_address = ShippingAddresses::where([
+                'account_id' => Auth::User()->account_id,
+                'order_id' => $data['order_id']
+            ])->first();
+        } else {
+            $shipping_address = ShippingAddresses::where([
+                'account_id' => Auth::User()->account_id,
+                'order_id' => $data['order_id'],
+                'id' => $data['shipping_id'],
+            ])->first();
+        }
 
         if(!$shipping_address) {
             return view('error');

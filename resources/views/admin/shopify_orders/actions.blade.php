@@ -40,14 +40,18 @@
         <i class="fa fa-gears"></i>&nbsp;Manual Book in LCS
     </a>
 @endif
-@if(Gate::allows('shopify_customers_edit') && $shopify_order->customer_id)
+{{--@if(Gate::allows('shopify_customers_edit') && $shopify_order->customer_id)--}}
 {{--    <a class="btn btn-xs btn-warning" href="{{ route('admin.shopify_customers.edit',[$shopify_order->customer_id]) }}" data-target="#ajax_shopify_customers" data-toggle="modal">--}}
 {{--        <i class="fa fa-pencil"></i>&nbsp;Edit Customer--}}
 {{--    </a>--}}
-@endif
+{{--@endif--}}
 @if(Gate::allows('booked_packets_create'))
     @if(isset($shipping_addresses[$shopify_order->order_id]))
         <a class="btn btn-xs btn-warning" href="{{ route('admin.shopify_orders.shipping',['order_id' => $shopify_order->order_id, 'shipping_id' => $shipping_addresses[$shopify_order->order_id]->id]) }}" data-target="#ajax_shipping_address" data-toggle="modal">
+            <i class="fa fa-pencil"></i>&nbsp;Edit Customer
+        </a>
+    @elseif(Gate::allows('shopify_customers_edit') && $shopify_order->customer_id)
+        <a class="btn btn-xs btn-warning" href="{{ route('admin.shopify_orders.shipping',['order_id' => $shopify_order->order_id, 'shipping_id' => '', 'customer_id' => $shopify_order->customer_id]) }}" data-target="#ajax_shipping_address" data-toggle="modal">
             <i class="fa fa-pencil"></i>&nbsp;Edit Customer
         </a>
     @endif
