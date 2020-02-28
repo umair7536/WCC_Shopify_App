@@ -46,25 +46,25 @@
                         @endif
                     </div>
                 @elseif($leopards_setting->slug == 'company-id')
-                    <div class="form-group">
-                        {!! Form::label($leopards_setting->slug, $leopards_setting->name . " (Optional, Will filled automatically after save)", ['class' => 'control-label']) !!}
-                        {!! Form::text($leopards_setting->slug, $leopards_setting->data, ['class' => 'form-control', 'placeholder' => '', 'readonly' => 'true']) !!}
-                        @if($errors->has($leopards_setting->slug))
-                            <p class="help-block">
-                                {{ $errors->first($leopards_setting->slug) }}
-                            </p>
-                        @endif
-                    </div>
+{{--                    <div class="form-group">--}}
+{{--                        {!! Form::label($leopards_setting->slug, $leopards_setting->name . " (Optional, Will filled automatically after save)", ['class' => 'control-label']) !!}--}}
+{{--                        {!! Form::text($leopards_setting->slug, $leopards_setting->data, ['class' => 'form-control', 'placeholder' => '', 'readonly' => 'true']) !!}--}}
+{{--                        @if($errors->has($leopards_setting->slug))--}}
+{{--                            <p class="help-block">--}}
+{{--                                {{ $errors->first($leopards_setting->slug) }}--}}
+{{--                            </p>--}}
+{{--                        @endif--}}
+{{--                    </div>--}}
                 @elseif($leopards_setting->slug == 'password')
-                    <div class="form-group">
-                        {!! Form::label($leopards_setting->slug, $leopards_setting->name, ['class' => 'control-label']) !!}
-                        {!! Form::input('password', $leopards_setting->slug, $leopards_setting->data, ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
-                        @if($errors->has($leopards_setting->slug))
-                            <p class="help-block">
-                                {{ $errors->first($leopards_setting->slug) }}
-                            </p>
-                        @endif
-                    </div>
+{{--                    <div class="form-group">--}}
+{{--                        {!! Form::label($leopards_setting->slug, $leopards_setting->name, ['class' => 'control-label']) !!}--}}
+{{--                        {!! Form::input('password', $leopards_setting->slug, $leopards_setting->data, ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}--}}
+{{--                        @if($errors->has($leopards_setting->slug))--}}
+{{--                            <p class="help-block">--}}
+{{--                                {{ $errors->first($leopards_setting->slug) }}--}}
+{{--                            </p>--}}
+{{--                        @endif--}}
+{{--                    </div>--}}
                 @elseif($leopards_setting->slug == 'api-password')
                     <div class="form-group">
                         {!! Form::label($leopards_setting->slug, $leopards_setting->name, ['class' => 'control-label']) !!}
@@ -110,6 +110,16 @@
                             </p>
                         @endif
                     </div>
+                @elseif($leopards_setting->slug == 'username')
+{{--                    <div class="form-group">--}}
+{{--                        {!! Form::label($leopards_setting->slug, $leopards_setting->name, ['class' => 'control-label']) !!}--}}
+{{--                        {!! Form::text($leopards_setting->slug, $leopards_setting->data, ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}--}}
+{{--                        @if($errors->has($leopards_setting->slug))--}}
+{{--                            <p class="help-block">--}}
+{{--                                {{ $errors->first($leopards_setting->slug) }}--}}
+{{--                            </p>--}}
+{{--                        @endif--}}
+{{--                    </div>--}}
                 @else
                     <div class="form-group">
                         {!! Form::label($leopards_setting->slug, $leopards_setting->name, ['class' => 'control-label']) !!}

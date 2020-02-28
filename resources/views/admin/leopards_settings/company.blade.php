@@ -65,6 +65,12 @@
                                 @if($leopards_setting->slug == 'shipper-type')
                                     @php($shipper_type = $leopards_setting->data)
                                 @endif
+                                @if(
+                                    in_array($leopards_setting->slug, [
+                                        'username', 'password', 'company-id', 'shipper-type'
+                                    ]))
+                                    @continue
+                                @endif
                                 <tr>
                                     <td>{{ $sr }}</td>
                                     <td>{{ $leopards_setting->name }}</td>

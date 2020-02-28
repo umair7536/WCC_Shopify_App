@@ -507,7 +507,7 @@ class ShopifyController extends Controller
                         $data = $location->location_id;
                     }
                 } else if($leopards_setting['slug'] == 'shipper-type') {
-                    $data = 'self';
+                    $data = 'other';
                 }
 
                 // Set Account ID

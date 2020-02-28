@@ -15,6 +15,7 @@ use App\Models\ShopifyJobs;
 use App\Models\ShopifyLocations;
 use Config;
 use Auth;
+use GuzzleHttp\Client;
 
 class HomeController extends Controller
 {
@@ -133,6 +134,106 @@ class HomeController extends Controller
                 foreach ($accounts as $account) {
                     event(new CreateWebhooksFire($account));
                     event(new SyncOrdersFire($account));
+                }
+            }
+
+            echo 'so far so good';
+        } catch(\Exception $e) {
+            echo "\n";
+            echo 'Exception came';
+            echo "\n";
+            echo "\n";
+        }
+    }
+
+    public function runToFixShipping() {
+        try {
+
+            $accounts = Accounts::select('id')->get();
+
+            if($accounts) {
+                foreach ($accounts as $account) {
+
+                    $mappings = [
+                        'shipper-type' => 'other',
+                        'shipper-name' => 'company_name_eng',
+                        'shipper-email' => 'company_email',
+                        'shipper-phone' => 'company_phone',
+                        'shipper-address' => 'company_address1_eng',
+                        'shipper-city' => 'tbl_lcs_city_city_id'
+                    ];
+
+                    $updateable_data = [];
+
+                    $leopards_settings = LeopardsSettings::where([
+                        'account_id' => $account->id
+                    ])
+                        ->orderBy('id', 'asc')
+                        ->select('id', 'slug', 'data')
+                        ->get()->keyBy('slug');
+
+                    $company = [];
+
+                    if(
+                                $leopards_settings['shipper-type']->data == 'self'
+                        && (
+                                    $leopards_settings['api-key']->data
+                                &&  $leopards_settings['api-password']->data
+                                &&  $leopards_settings['company-id']->data
+                        )
+                    ) {
+                        try {
+                            $client = new Client();
+                            $response = $client->post(env('LCS_URL') . 'common_calls/getCountryById', array(
+                                'form_params' => array(
+                                    'company_id' => $leopards_settings['company-id']->data
+                                )
+                            ));
+
+                            if($response->getStatusCode() == 200) {
+                                if($response->getBody() != 'null') {
+                                    $company = json_decode($response->getBody(), true);
+
+                                    foreach ($mappings as $setting_val => $company_val) {
+                                        if($setting_val == 'shipper-type') {
+                                            $updateable_data[$setting_val] = 'other';
+                                        } else if($setting_val == 'shipper-address') {
+                                            $updateable_data[$setting_val] = trim($company['company_address1_eng']);
+                                            if($company['company_address2_eng']) {
+                                                $updateable_data[$setting_val] .= ' ' . trim($company['company_address2_eng']);
+                                            }
+                                        } else {
+                                            $updateable_data[$setting_val] = trim($company[$company_val]);
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (\Exception $exception) {
+                            echo $exception->getLine() . ' - ' . $exception->getMessage(); exit;
+                        }
+
+                        if(count($company) && count($updateable_data)) {
+                            foreach ($updateable_data as $slug => $data) {
+                                LeopardsSettings::where([
+                                    'account_id' => $account->id,
+                                    'slug' => $slug,
+                                ])
+                                    ->update([
+                                        'data' => $data
+                                    ]);
+                            }
+                            echo "<br/><br/> AC ID: " . $account->id . ' updated';
+                        }
+                    } else if($leopards_settings['shipper-type']->data == 'self') {
+                        echo "<br/><br/> AC ID: " . $account->id . ' updated to self only';
+                        LeopardsSettings::where([
+                            'account_id' => $account->id,
+                            'slug' => 'shipper-type',
+                        ])
+                            ->update([
+                                'data' => 'other'
+                            ]);
+                    }
                 }
             }
 

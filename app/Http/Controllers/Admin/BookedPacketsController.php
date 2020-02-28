@@ -361,10 +361,8 @@ class BookedPacketsController extends Controller
 
         if($leopards_settings) {
             foreach($leopards_settings as $leopards_setting) {
-                if($leopards_setting->slug == 'company-id' && !$leopards_setting->data) {
-                    $data['status'] = false;
-                } else if(
-                        ($leopards_setting->slug == 'api-key' && !$leopards_setting->data)
+                if(
+                    ($leopards_setting->slug == 'api-key' && !$leopards_setting->data)
                     ||  ($leopards_setting->slug == 'api-password' && !$leopards_setting->data)
                 ) {
                     $data['status'] = false;
@@ -372,26 +370,11 @@ class BookedPacketsController extends Controller
             }
         }
 
-        try {
-            $client = new Client();
-            $response = $client->post(env('LCS_URL') . 'common_calls/getCountryById', array(
-                'form_params' => array(
-                    'company_id' => $leopards_settings['company-id']->data
-                )
-            ));
-
-            if($response->getStatusCode() == 200) {
-                if($response->getBody() != 'null') {
-                    $data['company'] = json_decode($response->getBody(), true);
-                } else {
-                    $data['status'] = false;
-                }
-            } else {
-                $data['status'] = false;
-            }
-        } catch (\Exception $exception) {
-            $data['status'] = false;
-        }
+        $data['company']['company_name_eng'] = $leopards_settings['shipper-name']->data;
+        $data['company']['company_email'] = $leopards_settings['shipper-email']->data;
+        $data['company']['company_phone'] = $leopards_settings['shipper-phone']->data;
+        $data['company']['company_address1_eng'] = $leopards_settings['shipper-address']->data;
+        $data['company']['tbl_lcs_city_city_id'] = $leopards_settings['shipper-city']->data;
 
         return $data;
     }
@@ -406,24 +389,6 @@ class BookedPacketsController extends Controller
     {
         if (! Gate::allows('booked_packets_create')) {
             return abort(401);
-        }
-
-        /**
-         * Check Current Billing Cycle Quota and take action as per response
-         */
-        $checkQuota = ShopifyHelper::getQuota(Auth::User()->account_id);
-
-        if($checkQuota['status']) {
-            if($checkQuota['info']) {
-                flash($checkQuota['info'])->info()->important();
-            }
-        } else {
-            flash($checkQuota['error'])->error()->important();
-            if (Gate::allows('shopify_billings_manage')) {
-                return redirect()->route('admin.shopify_billings.index');
-            } else {
-                return redirect()->route('admin.booked_packets.index');
-            }
         }
 
         /**
@@ -467,20 +432,6 @@ class BookedPacketsController extends Controller
 
         // Volumetric Dimensions Calculated
         $volumetric_dimensions_calculated = 'N/A';
-
-        /**
-         * Manage Shippers
-         */
-//        $shipper_id = 'self';
-//        $shippers = Shippers::where([
-//            'account_id' => Auth::User()->account_id,
-//        ])
-//            ->select('id', 'name')
-//            ->get();
-//        if($shippers) {
-//            $shippers = $shippers->pluck('name', 'id')->toArray();
-//        } else {
-//        }
 
         $shippers = [];
         $shippers = (['self' => 'Self'] + $shippers + ['other' => 'Other']);

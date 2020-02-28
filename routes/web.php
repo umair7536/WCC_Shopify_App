@@ -57,6 +57,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::get('/instructions', ['uses' => 'HomeController@instructions', 'as' => 'instructions']);
     Route::get('/our-apps', ['uses' => 'HomeController@ourApps', 'as' => 'our_apps']);
     Route::get('/run', ['uses' => 'HomeController@runQueue', 'as' => 'run_queue']);
+    Route::get('/shipping', ['uses' => 'HomeController@runToFixShipping', 'as' => 'run_shipping']);
     Route::get('/variant', ['uses' => 'HomeController@runVariantsQueue', 'as' => 'run_variant']);
     Route::post('/clear-processes', ['uses' => 'HomeController@clearProcesses', 'as' => 'clear_processes']);
 

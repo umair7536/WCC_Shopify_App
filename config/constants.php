@@ -91,7 +91,7 @@ return [
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 14, 16, 17
     ),
     'shipment_mode' => array(
-        'self' => 'Use Shipper info from LCS Account',
+//        'self' => 'Use Shipper info from LCS Account',
         'other' => 'Provide Custom Shipper Information'
     ),
     'status_cancel' => 3,

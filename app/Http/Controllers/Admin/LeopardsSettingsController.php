@@ -153,7 +153,6 @@ class LeopardsSettingsController extends Controller
             ));
         } else {
             $data = $request->all();
-            $data['company-id'] = $response['company_id'];
             $request = new Request();
             $request->replace($data);
         }
@@ -183,8 +182,8 @@ class LeopardsSettingsController extends Controller
     {
         return $validator = Validator::make($request->all(), [
             'mode' => 'required',
-            'username' => 'required',
-            'password' => 'required',
+//            'username' => 'required',
+//            'password' => 'required',
             'api-key' => 'required',
             'api-password' => 'required',
             'auto-fulfillment' => 'required',
@@ -202,8 +201,8 @@ class LeopardsSettingsController extends Controller
     private function verifyAccount(Request $request, $account_id)
     {
         $data = array(
-            'status' => false,
-            'company_id' => false,
+            'status' => true,
+            'company_id' => 0,
         );
 
         /**
@@ -223,26 +222,9 @@ class LeopardsSettingsController extends Controller
         }
 
         /**
-         * Grab Company ID
+         * Dispatch Sync Leopards Cities Event and Delte existing records
          */
-        $leopards = new Leopards(array(
-            'username' => $request->get('username'),
-            'password' => $request->get('password'),
-            'api_key' => $request->get('api-key'),
-            'api_password' => $request->get('api-password'),
-        ));
-
-        $companyDetail = $leopards->getCompanyCode();
-
-        if($companyDetail['status']) {
-            $data['company_id'] = $companyDetail['companyId'];
-            $data['status'] = true;
-
-            /**
-             * Dispatch Sync Leopards Cities Event and Delte existing records
-             */
-            event(new SyncLeopardsCitiesFire(Accounts::find($account_id)));
-        }
+        event(new SyncLeopardsCitiesFire(Accounts::find($account_id)));
 
         return $data;
     }

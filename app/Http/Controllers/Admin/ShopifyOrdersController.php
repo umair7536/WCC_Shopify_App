@@ -252,23 +252,6 @@ class ShopifyOrdersController extends Controller
         ) {
             $ids = $request->get('id');
 
-            /**
-             * Check Current Billing Cycle Quota and take action as per response
-             */
-            $checkQuota = ShopifyHelper::getQuota($account_id);
-
-            if($checkQuota['status']) {
-                if($checkQuota['info']) {
-                    flash($checkQuota['info'])->info()->important();
-                }
-            } else {
-                flash($checkQuota['error'])->error()->important();
-                return [
-                    'status' => 'NO',
-                    'message' => $checkQuota['error']
-                ];
-            }
-
             // Check Booked Packets with provided Orders
             $orders = ShopifyOrders::where([
                 'account_id' => $account_id
@@ -357,7 +340,7 @@ class ShopifyOrdersController extends Controller
                             continue;
                         }
                     } else {
-                        $message .= '<li>Order <b>' . $order->name . '</b> has consignee city issue. Please select proper city for this packet to book.';
+                        $message .= '<li>Order <b>' . $order->name . '</b> has consignee city / shipper information issue. Please select proper city or check shipper information from settings for this packet to book.';
                         continue;
                     }
                 }
@@ -435,9 +418,7 @@ class ShopifyOrdersController extends Controller
 
         if($leopards_settings) {
             foreach($leopards_settings as $leopards_setting) {
-                if($leopards_setting->slug == 'company-id' && !$leopards_setting->data) {
-                    $data['status'] = false;
-                } else if(
+                if(
                     ($leopards_setting->slug == 'api-key' && !$leopards_setting->data)
                     ||  ($leopards_setting->slug == 'api-password' && !$leopards_setting->data)
                 ) {
@@ -446,26 +427,11 @@ class ShopifyOrdersController extends Controller
             }
         }
 
-        try {
-            $client = new Client();
-            $response = $client->post(env('LCS_URL') . 'common_calls/getCountryById', array(
-                'form_params' => array(
-                    'company_id' => $leopards_settings['company-id']->data
-                )
-            ));
-
-            if($response->getStatusCode() == 200) {
-                if($response->getBody() != 'null') {
-                    $data['company'] = json_decode($response->getBody(), true);
-                } else {
-                    $data['status'] = false;
-                }
-            } else {
-                $data['status'] = false;
-            }
-        } catch (\Exception $exception) {
-            $data['status'] = false;
-        }
+        $data['company']['company_name_eng'] = $leopards_settings['shipper-name']->data;
+        $data['company']['company_email'] = $leopards_settings['shipper-email']->data;
+        $data['company']['company_phone'] = $leopards_settings['shipper-phone']->data;
+        $data['company']['company_address1_eng'] = $leopards_settings['shipper-address']->data;
+        $data['company']['tbl_lcs_city_city_id'] = $leopards_settings['shipper-city']->data;
 
         return $data;
     }
