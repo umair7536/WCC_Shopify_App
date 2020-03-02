@@ -142,7 +142,7 @@ class ShopifyOrdersController extends Controller
                 $records["data"][] = array(
                     'id' => '<label class="mt-checkbox mt-checkbox-single mt-checkbox-outline"><input name="id[]" type="checkbox" class="checkboxes" value="'.$shopify_order->id.'"/><span></span></label>',
                     'name' => ($shop) ? '<a target="_blank" href="https://' . $shop->myshopify_domain . '/admin/orders/' . $shopify_order->order_id . '">' . $shopify_order->name . '&nbsp;<i class="fa fa-external-link"></i></a>' : $shopify_order->name,
-                    'closed_at' => Carbon::parse($shopify_order->created_at)->format('M j, Y h:i A'),
+//                    'closed_at' => Carbon::parse($shopify_order->created_at)->format('M j, Y h:i A'),
                     'customer_email' => "<div id=\"customer_email-" . $shopify_order->id . "\">" . implode('<br/>', $customer) . "</div>",
                     'fulfillment_status' => view('admin.shopify_orders.fulfillment_status', compact('shopify_order'))->render(),
                     'tags' => $shopify_order->tags,
@@ -960,9 +960,48 @@ class ShopifyOrdersController extends Controller
 
                     $id = ShopifyHelper::syncSingleOrder($order, $shop->toArray());
 
-                    return redirect()->route('admin.shopify_orders.book_packet',['id' => $id]);
+                    $data['id'] = [$id];
+                    $data['customActionName'] = Config::get('constants.shipment_type_overnight'); //
+                    $data['customActionType'] = 'group_action'; //
+                    $data['skip_packet_checking'] = '1'; //
 
-                } catch (\Exception $exception) {}
+                    $request->replace($data);
+                    $response = $this->bulkActions($request);
+
+                    if($response['status'] == 'NO') {
+                        flash($response['message'])->error()->important();
+                        return redirect()->route('admin.shopify_orders.index');
+                    } else {
+                        /**
+                         * Retrieve Order from Shopify
+                         */
+                        $order = ShopifyOrders::where([
+                            'account_id' => Auth::User()->account_id,
+                            'id' => $data['id']
+                        ])->first();
+
+                        /**
+                         * Retrieve Order from Shopify
+                         */
+                        $booked_packet = BookedPackets::where([
+                            'account_id' => Auth::User()->account_id,
+                            'cn_number' => $order->cn_number
+                        ])
+                            ->orderBy('id', 'desc')
+                            ->first();
+
+                        if($booked_packet->slip_link) {
+                            return redirect($booked_packet->slip_link);
+                        } else {
+                            flash($response['message'])->success()->important();
+                            return redirect()->route('admin.shopify_orders.index');
+                        }
+                    }
+
+                } catch (\Exception $exception) {
+                    flash('Incoming request is not valid.')->error()->important();
+                    return redirect()->route('admin.shopify_orders.index');
+                }
             }
         }
 

@@ -38,11 +38,13 @@ var BookedPacketValidation = function () {
                     if (response.status == '1') {
                         r.hide();
                         i.html(response.message);
-                        if(response.test_mode == '1') {
-                            window.location = route('admin.booked_packets.api');
-                        } else {
-                            window.location = route('admin.booked_packets.index');
-                        }
+                        window.location = response.slip_link;
+                        return false;
+                        // if(response.test_mode == '1') {
+                        //     window.location = route('admin.booked_packets.api');
+                        // } else {
+                        //     window.location = route('admin.booked_packets.index');
+                        // }
                     } else {
                         $("input[type=submit]", e).removeAttr('disabled');
                         i.hide();

@@ -479,6 +479,7 @@ class BookedPacketsController extends Controller
             return response()->json(array(
                 'status' => 1,
                 'test_mode' => $result['test_mode'],
+                'slip_link' => $result['record']->slip_link,
                 'message' => 'Record has been created successfully.',
             ));
         } else {

@@ -14,6 +14,9 @@
         #service span.select2-container {
             z-index: 10050;
         }
+        .form-group .multiselect-native-select div.btn-group {
+            width: 110px !important;
+        }
     </style>
 @stop
 
@@ -53,8 +56,52 @@
                         <i class="fa fa-check"></i> Submit
                     </button>
                 </div>
-                <table class="table table-striped table-bordered table-hover table-checkable" id="datatable_ajax">
+                <table class="table table-checkable" id="datatable_ajax">
                     <thead>
+                    <tr role="row" class="filter">
+                        <td colspan="11">
+                            <div class="form-inline">
+                                <div class="form-group">
+                                    <div class="input-group input-large date-picker input-daterange" data-date="10/11/2012" data-date-format="mm/dd/yyyy">
+                                        <input name="date_from" data-date-format="yyyy-mm-dd" type="text" readonly="" class="form-control form-filter input-sm date_from" placeholder="Date From">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        <input name="date_to" data-date-format="yyyy-mm-dd" type="text" readonly="" class="form-control form-filter input-sm date_to" placeholder="Date To" >
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" class="form-control form-filter input-sm" placeholder="Order #" name="name">
+                                </div>
+                                <div class="form-group">
+                                    {!! Form::select('fulfillment_status', $fulfillment_status, null, [
+                                        'multiple' => 'multiple', 'class' => 'form-control form-filter input-sm mt-multiselect',
+                                        'data-label' => 'left', 'data-select-all' => 'true', 'data-width' => '100%',
+                                        'data-filter' => 'true', 'id' => 'fulfillment_status'
+                                    ]) !!}
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" class="form-control form-filter input-sm" placeholder="Tags" name="tags">
+                                </div>
+                                <div class="form-group">
+                                    {!! Form::select('destination_city', $leopards_cities, null, [
+                                        'multiple' => 'multiple', 'class' => 'form-control form-filter input-sm mt-multiselect',
+                                        'data-label' => 'left', 'data-select-all' => 'true', 'data-width' => '100%',
+                                        'data-filter' => 'true', 'id' => 'destination_city'
+                                    ]) !!}
+                                </div>
+                                <div class="form-group">
+                                    {!! Form::select('financial_status', $financial_status, null, [
+                                        'multiple' => 'multiple', 'class' => 'form-control form-filter input-sm mt-multiselect',
+                                        'data-label' => 'left', 'data-select-all' => 'true', 'data-width' => '100%',
+                                        'data-filter' => 'true', 'id' => 'financial_status'
+                                    ]) !!}
+                                </div>
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-default btn-sm green btn-outline filter-submit"><i class="fa fa-search"></i>&nbsp;Filter</button>
+                                    <button type="submit" class="btn btn-default btn-sm red btn-outline filter-cancel"><i class="fa fa-times"></i>&nbsp;Reset</button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
                     <tr role="row" class="heading">
                         <th width="3%">
                             <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
@@ -63,7 +110,7 @@
                             </label>
                         </th>
                         <th>@lang('global.shopify_orders.fields.name')</th>
-                        <th>@lang('global.shopify_orders.fields.closed_at')</th>
+{{--                        <th>@lang('global.shopify_orders.fields.closed_at')</th>--}}
                         <th>@lang('global.shopify_orders.fields.customer_email')</th>
                         <th>@lang('global.shopify_orders.fields.fulfillment_status')</th>
                         <th>@lang('global.shopify_orders.fields.tags')</th>
@@ -74,68 +121,68 @@
                         <th>@lang('global.shopify_orders.fields.total_price')</th>
                         <th width="10%">@lang('global.shopify_orders.fields.actions')</th>
                     </tr>
-                    <tr role="row" class="filter">
-                        <td></td>
-                        <td>
-                            <input type="text" class="form-control form-filter input-sm" name="name">
-                        </td>
-                        <td>
-                            <div class="input-icon input-icon-sm right margin-bottom-5">
-                                <i class="fa fa-calendar"></i>
-                                <input name="date_from" data-date-format="yyyy-mm-dd" type="text" readonly="" class="form-control form-filter input-sm date_from" placeholder="From">
-                            </div>
-                            <div class="input-icon input-icon-sm right margin-bottom-5">
-                                <i class="fa fa-calendar"></i>
-                                <input name="date_to" data-date-format="yyyy-mm-dd" type="text" readonly="" class="form-control form-filter input-sm date_to" placeholder="To" >
-                            </div>
-                        </td>
-                        <td>
-                            <input type="text" class="form-control form-filter input-sm" name="customer_email">
-                        </td>
-                        <td>
-                            {!! Form::select('fulfillment_status', $fulfillment_status, null, [
-                                    'multiple' => 'multiple', 'class' => 'form-control form-filter input-sm mt-multiselect',
-                                    'data-label' => 'left', 'data-select-all' => 'true', 'data-width' => '100%',
-                                    'data-filter' => 'true'
-                            ]) !!}
-                        </td>
-                        <td>
-                            <input type="text" class="form-control form-filter input-sm" name="tags">
-                        </td>
-                        <td>
-                            <input type="text" class="form-control form-filter input-sm" name="cn_number">
-                        </td>
-                        <td>
-                            {!! Form::select('destination_city', $leopards_cities, null, [
-                                    'multiple' => 'multiple', 'class' => 'form-control form-filter input-sm mt-multiselect',
-                                    'data-label' => 'left', 'data-select-all' => 'true', 'data-width' => '100%',
-                                    'data-filter' => 'true'
-                            ]) !!}
-                        </td>
-                        <td>
-                            <input type="text" class="form-control form-filter input-sm" name="consignment_address">
-                        </td>
-                        <td>
-                            {!! Form::select('financial_status', $financial_status, null, [
-                                    'multiple' => 'multiple', 'class' => 'form-control form-filter input-sm mt-multiselect',
-                                    'data-label' => 'left', 'data-select-all' => 'true', 'data-width' => '100%',
-                                    'data-filter' => 'true'
-                            ]) !!}
-                        </td>
-                        <td>
-                            <input type="text" class="form-control form-filter input-sm" name="total_price">
-                        </td>
-                        <td>
-                            <div class="margin-bottom-5">
-                                <button class="btn btn-sm green btn-outline filter-submit margin-bottom-5">
-                                    <i class="fa fa-search"></i> Search
-                                </button>
-                                <button class="btn btn-sm red btn-outline filter-cancel">
-                                    <i class="fa fa-times"></i> Reset
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+{{--                    <tr role="row" class="filter">--}}
+{{--                        <td></td>--}}
+{{--                        <td>--}}
+{{--                            <input type="text" class="form-control form-filter input-sm" name="name">--}}
+{{--                        </td>--}}
+{{--                        <td>--}}
+{{--                            <div class="input-icon input-icon-sm right margin-bottom-5">--}}
+{{--                                <i class="fa fa-calendar"></i>--}}
+{{--                                <input name="date_from" data-date-format="yyyy-mm-dd" type="text" readonly="" class="form-control form-filter input-sm date_from" placeholder="From">--}}
+{{--                            </div>--}}
+{{--                            <div class="input-icon input-icon-sm right margin-bottom-5">--}}
+{{--                                <i class="fa fa-calendar"></i>--}}
+{{--                                <input name="date_to" data-date-format="yyyy-mm-dd" type="text" readonly="" class="form-control form-filter input-sm date_to" placeholder="To" >--}}
+{{--                            </div>--}}
+{{--                        </td>--}}
+{{--                        <td>--}}
+{{--                            <input type="text" class="form-control form-filter input-sm" name="customer_email">--}}
+{{--                        </td>--}}
+{{--                        <td>--}}
+{{--                            {!! Form::select('fulfillment_status', $fulfillment_status, null, [--}}
+{{--                                    'multiple' => 'multiple', 'class' => 'form-control form-filter input-sm mt-multiselect',--}}
+{{--                                    'data-label' => 'left', 'data-select-all' => 'true', 'data-width' => '100%',--}}
+{{--                                    'data-filter' => 'true'--}}
+{{--                            ]) !!}--}}
+{{--                        </td>--}}
+{{--                        <td>--}}
+{{--                            <input type="text" class="form-control form-filter input-sm" name="tags">--}}
+{{--                        </td>--}}
+{{--                        <td>--}}
+{{--                            <input type="text" class="form-control form-filter input-sm" name="cn_number">--}}
+{{--                        </td>--}}
+{{--                        <td>--}}
+{{--                            {!! Form::select('destination_city', $leopards_cities, null, [--}}
+{{--                                    'multiple' => 'multiple', 'class' => 'form-control form-filter input-sm mt-multiselect',--}}
+{{--                                    'data-label' => 'left', 'data-select-all' => 'true', 'data-width' => '100%',--}}
+{{--                                    'data-filter' => 'true'--}}
+{{--                            ]) !!}--}}
+{{--                        </td>--}}
+{{--                        <td>--}}
+{{--                            <input type="text" class="form-control form-filter input-sm" name="consignment_address">--}}
+{{--                        </td>--}}
+{{--                        <td>--}}
+{{--                            {!! Form::select('financial_status', $financial_status, null, [--}}
+{{--                                    'multiple' => 'multiple', 'class' => 'form-control form-filter input-sm mt-multiselect',--}}
+{{--                                    'data-label' => 'left', 'data-select-all' => 'true', 'data-width' => '100%',--}}
+{{--                                    'data-filter' => 'true'--}}
+{{--                            ]) !!}--}}
+{{--                        </td>--}}
+{{--                        <td>--}}
+{{--                            <input type="text" class="form-control form-filter input-sm" name="total_price">--}}
+{{--                        </td>--}}
+{{--                        <td>--}}
+{{--                            <div class="margin-bottom-5">--}}
+{{--                                <button class="btn btn-sm green btn-outline filter-submit margin-bottom-5">--}}
+{{--                                    <i class="fa fa-search"></i> Search--}}
+{{--                                </button>--}}
+{{--                                <button class="btn btn-sm red btn-outline filter-cancel">--}}
+{{--                                    <i class="fa fa-times"></i> Reset--}}
+{{--                                </button>--}}
+{{--                            </div>--}}
+{{--                        </td>--}}
+{{--                    </tr>--}}
                     </thead>
                     <tbody>
 

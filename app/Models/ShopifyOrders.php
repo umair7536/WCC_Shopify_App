@@ -110,11 +110,11 @@ class ShopifyOrders extends BaseModal
         }
 
         if ($request->get('date_from') && $request->get('date_from') != '') {
-            $query->where('created_at', '>=', $request->get('date_from'));
+            $query->where('created_at', '>=', $request->get('date_from') . ' 00:00:00');
         }
 
         if ($request->get('date_to') && $request->get('date_to') != '') {
-            $query->where('created_at', '>=', $request->get('date_to'));
+            $query->where('created_at', '<=', $request->get('date_to') . ' 23:59:59');
         }
 
         if ($request->get('fulfillment_status') && $request->get('fulfillment_status') != '') {
@@ -228,11 +228,14 @@ class ShopifyOrders extends BaseModal
         $orderBy = 'name';
         $order = 'desc';
 
-        if ($request->get('order')[0]['dir']) {
-            $orderColumn = $request->get('order')[0]['column'];
-            $orderBy = $request->get('columns')[$orderColumn]['data'];
-            $order = $request->get('order')[0]['dir'];
-        }
+//        if ($request->get('order')[0]['dir']) {
+//            $orderColumn = $request->get('order')[0]['column'];
+//            $orderBy = $request->get('columns')[$orderColumn]['data'];
+//            $order = $request->get('order')[0]['dir'];
+//        }
+
+        $orderBy = 'created_at';
+        $order = 'desc';
 
         $query = self::where('account_id', '=', $account_id);
 
@@ -241,11 +244,11 @@ class ShopifyOrders extends BaseModal
         }
 
         if ($request->get('date_from') && $request->get('date_from') != '') {
-            $query->where('created_at', '>=', $request->get('date_from'));
+            $query->where('created_at', '>=', $request->get('date_from') . ' 00:00:00');
         }
 
         if ($request->get('date_to') && $request->get('date_to') != '') {
-            $query->where('created_at', '>=', $request->get('date_to'));
+            $query->where('created_at', '<=', $request->get('date_to') . ' 23:59:59');
         }
 
         if ($request->get('fulfillment_status') && $request->get('fulfillment_status') != '') {

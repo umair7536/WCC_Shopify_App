@@ -9,12 +9,14 @@ var TableDatatablesAjax = function () {
             $(".mt-multiselect").multiselect("clearSelection");
             $('.mt-multiselect').multiselect('destroy');
             // Reset Multiselect
-            ms();
+            fs();
+            ct();
+            ps();
         });
     };
 
-    var ms = function() {
-        $('.mt-multiselect').each(function(){
+    var fs = function() {
+        $('#fulfillment_status').each(function(){
             var btn_class = $(this).attr('class');
             var clickable_groups = ($(this).data('clickable-groups')) ? $(this).data('clickable-groups') : false ;
             var collapse_groups = ($(this).data('collapse-groups')) ? $(this).data('collapse-groups') : false ;
@@ -57,6 +59,119 @@ var TableDatatablesAjax = function () {
                 enableCaseInsensitiveFiltering: true,
                 disableIfEmpty: true,
                 enableFiltering: filter,
+                nonSelectedText: 'Fulfillment',
+                includeSelectAllOption: select_all,
+                dropRight: drop_right,
+                buttonWidth: width,
+                maxHeight: height,
+                onDropdownShow: dropdownshow,
+                onDropdownHide: dropdownhide,
+                buttonClass: btn_class,
+            });
+        });
+    }
+
+    var ct = function() {
+        $('#destination_city').each(function(){
+            var btn_class = $(this).attr('class');
+            var clickable_groups = ($(this).data('clickable-groups')) ? $(this).data('clickable-groups') : false ;
+            var collapse_groups = ($(this).data('collapse-groups')) ? $(this).data('collapse-groups') : false ;
+            var drop_right = ($(this).data('drop-right')) ? $(this).data('drop-right') : false ;
+            var drop_up = ($(this).data('drop-up')) ? $(this).data('drop-up') : false ;
+            var select_all = ($(this).data('select-all')) ? $(this).data('select-all') : false ;
+            var width = ($(this).data('width')) ? $(this).data('width') : '' ;
+            var height = ($(this).data('height')) ? $(this).data('height') : '' ;
+            var filter = ($(this).data('filter')) ? $(this).data('filter') : false ;
+
+            // advanced functions
+            var onchange_function = function(option, checked, select) {
+                alert('Changed option ' + $(option).val() + '.');
+            }
+            var dropdownshow_function = function(event) {
+                alert('Dropdown shown.');
+            }
+            var dropdownhide_function = function(event) {
+                alert('Dropdown Hidden.');
+            }
+
+            // init advanced functions
+            var onchange = ($(this).data('action-onchange') == true) ? onchange_function : '';
+            var dropdownshow = ($(this).data('action-dropdownshow') == true) ? dropdownshow_function : '';
+            var dropdownhide = ($(this).data('action-dropdownhide') == true) ? dropdownhide_function : '';
+
+            // template functions
+            // init variables
+            var li_template;
+            if ($(this).attr('multiple')){
+                li_template = '<li class="mt-checkbox-list"><a href="javascript:void(0);"><label class="mt-checkbox"> <span></span></label></a></li>';
+            } else {
+                li_template = '<li><a href="javascript:void(0);"><label></label></a></li>';
+            }
+
+            // init multiselect
+            $(this).multiselect({
+                enableClickableOptGroups: clickable_groups,
+                enableCollapsibleOptGroups: collapse_groups,
+                enableCaseInsensitiveFiltering: true,
+                disableIfEmpty: true,
+                nonSelectedText: 'City',
+                enableFiltering: filter,
+                includeSelectAllOption: select_all,
+                dropRight: drop_right,
+                buttonWidth: width,
+                maxHeight: height,
+                onDropdownShow: dropdownshow,
+                onDropdownHide: dropdownhide,
+                buttonClass: btn_class,
+            });
+        });
+    }
+
+    var ps = function() {
+        $('#financial_status').each(function(){
+            var btn_class = $(this).attr('class');
+            var clickable_groups = ($(this).data('clickable-groups')) ? $(this).data('clickable-groups') : false ;
+            var collapse_groups = ($(this).data('collapse-groups')) ? $(this).data('collapse-groups') : false ;
+            var drop_right = ($(this).data('drop-right')) ? $(this).data('drop-right') : false ;
+            var drop_up = ($(this).data('drop-up')) ? $(this).data('drop-up') : false ;
+            var select_all = ($(this).data('select-all')) ? $(this).data('select-all') : false ;
+            var width = ($(this).data('width')) ? $(this).data('width') : '' ;
+            var height = ($(this).data('height')) ? $(this).data('height') : '' ;
+            var filter = ($(this).data('filter')) ? $(this).data('filter') : false ;
+
+            // advanced functions
+            var onchange_function = function(option, checked, select) {
+                alert('Changed option ' + $(option).val() + '.');
+            }
+            var dropdownshow_function = function(event) {
+                alert('Dropdown shown.');
+            }
+            var dropdownhide_function = function(event) {
+                alert('Dropdown Hidden.');
+            }
+
+            // init advanced functions
+            var onchange = ($(this).data('action-onchange') == true) ? onchange_function : '';
+            var dropdownshow = ($(this).data('action-dropdownshow') == true) ? dropdownshow_function : '';
+            var dropdownhide = ($(this).data('action-dropdownhide') == true) ? dropdownhide_function : '';
+
+            // template functions
+            // init variables
+            var li_template;
+            if ($(this).attr('multiple')){
+                li_template = '<li class="mt-checkbox-list"><a href="javascript:void(0);"><label class="mt-checkbox"> <span></span></label></a></li>';
+            } else {
+                li_template = '<li><a href="javascript:void(0);"><label></label></a></li>';
+            }
+
+            // init multiselect
+            $(this).multiselect({
+                enableClickableOptGroups: clickable_groups,
+                enableCollapsibleOptGroups: collapse_groups,
+                enableCaseInsensitiveFiltering: true,
+                disableIfEmpty: true,
+                nonSelectedText: 'Payment',
+                enableFiltering: filter,
                 includeSelectAllOption: select_all,
                 dropRight: drop_right,
                 buttonWidth: width,
@@ -93,7 +208,7 @@ var TableDatatablesAjax = function () {
                 "columns": [
                     { "data": "id","bSortable": false },
                     { "data": "name" },
-                    { "data": "closed_at" },
+                    // { "data": "closed_at" },
                     { "data": "customer_email" },
                     { "data": "fulfillment_status" },
                     { "data": "tags" },
@@ -111,7 +226,7 @@ var TableDatatablesAjax = function () {
                         request.setRequestHeader("X-CSRF-TOKEN", $('meta[name="csrf-token"]').attr('content'));
                     }
                 },
-                ordering: !0,
+                ordering: !1,
                 "fnDrawCallback" : function(e) {},
                 order: [[1, "desc"]]
             }
@@ -136,7 +251,10 @@ var TableDatatablesAjax = function () {
 
     return {
         init: function () {
-            a(), e(), ms();
+            a(), e();
+            fs();
+            ct();
+            ps();
         }
     }
 }();

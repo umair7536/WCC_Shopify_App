@@ -499,6 +499,7 @@ class BookedPackets extends BaseModal
             'status' => true,
             'test_mode' => ($leopards_setting->data) ? 1 : 0,
             'record_id' => $record->id,
+            'record' => $record,
             'error_msg' => null
         ];
     }
