@@ -65,6 +65,9 @@ class ShopifyOrdersController extends Controller
         $records["data"] = array();
 
         if ($request->get('customActionType') && $request->get('customActionType') == "group_action") {
+            $data = $request->all();
+            $data['skip_packet_checking'] = '0'; //
+            $request->replace($data);
             $response = $this->bulkActions($request);
             $records["customActionStatus"] = $response['status']; // pass custom message(useful for getting status of group actions)
             $records["customActionMessage"] = $response['message']; // pass custom message(useful for getting status of group actions)
@@ -284,8 +287,15 @@ class ShopifyOrdersController extends Controller
                      */
                     if($booked_packets->count()) {
                         if($request->get('skip_packet_checking') != '1') {
-                            if(isset($booked_packets[$order->order_number])) {
-                                $message .= '<li>Order <b>' . $order->name . '</b> is already booked with <b>' . $booked_packets[$order->order_number]->cn_number . '</b>. To book again <b><a target="_blank" href="' . route('admin.booked_packets.create',['order_id' => $order->order_id]) . '">Click Here</a></b>.</li>';
+                            if(
+                                    isset($booked_packets[$order->order_number])
+                                ||  isset($booked_packets[$order->name])
+                            ) {
+                                if(isset($booked_packets[$order->order_number])) {
+                                    $message .= '<li>Order <b>' . $order->name . '</b> is already booked with <b>' . $booked_packets[$order->order_number]->cn_number . '</b>. To book again <b><a target="_blank" href="' . route('admin.booked_packets.create',['order_id' => $order->order_id]) . '">Click Here</a></b>.</li>';
+                                } else {
+                                    $message .= '<li>Order <b>' . $order->name . '</b> is already booked with <b>' . $booked_packets[$order->name]->cn_number . '</b>. To book again <b><a target="_blank" href="' . route('admin.booked_packets.create',['order_id' => $order->order_id]) . '">Click Here</a></b>.</li>';
+                                }
                                 continue;
                             }
                         }

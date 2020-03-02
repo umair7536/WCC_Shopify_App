@@ -484,7 +484,7 @@ class BookedPacketsController extends Controller
         } else {
             return response()->json(array(
                 'status' => 0,
-                'message' => $result['error_msg'],
+                'message' => [$result['error_msg']],
             ));
         }
     }
