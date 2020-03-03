@@ -1103,6 +1103,17 @@ class BookedPackets extends BaseModal
 
                 if(count($shipping_address)) {
                     foreach($fill_fields as $key => $value) {
+                        if($key == 'consignee_email') {
+                            if(count($customer) && isset($customer['email'])) {
+                                if($customer['email']) {
+                                    $booked_packet[$key] = $customer['email'];
+                                } else {
+                                    $booked_packet[$key] = 'no@email.com';
+                                }
+                            } else {
+                                $booked_packet[$key] = 'no@email.com';
+                            }
+                        }
                         if($key != 'consignee_name' && $value == 'name') {
                             continue;
                         }
