@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Events\Leopards\BookedPackets\FullSyncPacketStatusFire;
+use App\Events\Shopify\Orders\SingleOrderFulfillmentFire;
 use App\Helpers\ShopifyHelper;
 use App\Models\Accounts;
 use App\Models\BookedPackets;
@@ -474,6 +475,20 @@ class BookedPacketsController extends Controller
                 flash('Test Packet is booked successfully.')->success()->important();
             } else {
                 flash('Packet is booked successfully.')->success()->important();
+            }
+
+            $order = ShopifyOrders::where([
+                'account_id' => Auth::User()->account_id,
+                'order_number' => $result['record']->order_number
+            ])->first();
+
+            if($order) {
+                /**
+                 * Dispatch to check if Auto Fulfillment is 'true' or 'false'
+                 * if 'true' then order will be fulfilled automatically
+                 * if 'false' then order will not be fulfilled
+                 */
+                event(new SingleOrderFulfillmentFire($order->toArray(), $result['record']->cn_number));
             }
 
             return response()->json(array(
