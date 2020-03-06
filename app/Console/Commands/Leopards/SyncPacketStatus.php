@@ -2,22 +2,12 @@
 
 namespace App\Console\Commands\Leopards;
 
-use App\Helpers\ShopifyHelper;
 use App\Models\BookedPackets;
 use App\Models\ShopifyJobs;
-use App\Models\ShopifyOrders;
-use App\Models\ShopifyProductImages;
-use App\Models\ShopifyProductOptions;
-use App\Models\ShopifyProducts;
-use App\Models\ShopifyProductTags;
-use App\Models\ShopifyProductVariants;
-use App\Models\ShopifyShops;
-use App\Models\ShopifyTags;
 use Carbon\Carbon;
 use Developifynet\LeopardsCOD\LeopardsCODClient;
 use Illuminate\Console\Command;
 use Config;
-use ZfrShopify\ShopifyClient;
 
 class SyncPacketStatus extends Command
 {
@@ -104,11 +94,14 @@ class SyncPacketStatus extends Command
 
         $status_sync = Config::get('constants.status_sync');
         $status = Config::get('constants.status');
+        $status_delivered = Config::get('constants.status_delivered');
 
         $booked_packets = BookedPackets::where([
             'account_id' => $account_id,
-            'booking_type' => 2 /** '1' for Test, '2' for Live Packets */
+            'booking_type' => 2, /** '1' for Test, '2' for Live Packets */
+            'marked_paid' => 0
         ])
+            ->where('status_check_count', '<=', 5)
             ->whereIn('status', $status_sync)
             ->limit($records_per_page)
             ->offset($offset)
@@ -118,6 +111,12 @@ class SyncPacketStatus extends Command
         try {
 
             if($booked_packets->count()) {
+
+                foreach($booked_packets as $id => $track_number) {
+                    BookedPackets::where([
+                        'id' => $id,
+                    ])->increment('status_check_count');
+                }
 
                 $leopards = new LeopardsCODClient();
 
@@ -152,101 +151,32 @@ class SyncPacketStatus extends Command
                                     'invoice_date' => $booked_packet['invoice_date']
                                 ));
 
-
-                                /**
-                                 * Mark as Paid
-                                 */
                                 if(
-                                    (
-                                            $booked_packet['invoice_date']
-                                        &&  $booked_packet['invoice_number']
-                                    )
-                                        &&
-                                    (
-                                            array_key_exists('aut_mark_paid', $lcs)
-                                        &&  $lcs['aut_mark_paid'] == '1'
-                                    )
+                                        $booked_packet['invoice_date']
+                                    &&  $booked_packet['invoice_number']
+                                    &&  ($status_delivered == $status_id)
                                 ) {
                                     /**
-                                     * Grab Packet information
+                                     * Packet is delivered, this is time to mark payment as paid
                                      */
-                                    $packet = BookedPackets::where([
-                                        'track_number' => $booked_packet['track_number']
-                                    ])
-                                        ->select('order_number', 'account_id')
-                                        ->first();
-                                    if($packet) {
+                                    if($status_delivered == $status_id) {
                                         /**
-                                         * Grab Order from Online Store
+                                         * Put Change Paid Status into Jobs
                                          */
-                                        $order = ShopifyOrders::where([
-                                            'account_id' => $packet['account_id'],
-                                            'order_number' => $packet['order_number'],
-                                        ])->first();
-                                        if($order) {
-                                            try {
-                                                $shop = ShopifyShops::where([
-                                                    'account_id' => $packet['account_id']
-                                                ])->first();
+                                        $payload = array(
+                                            'invoice_date' => $booked_packet['invoice_date'],
+                                            'invoice_number' => $booked_packet['invoice_number'],
+                                            'track_number' => $booked_packet['track_number'],
+                                            'booked_packet_status' => $booked_packet['booked_packet_status'],
+                                        );
 
-                                                $shopifyClient = new ShopifyClient([
-                                                    'private_app' => false,
-                                                    'api_key' => env('SHOPIFY_APP_API_KEY'), // In public app, this is the app ID
-                                                    'version' => env('SHOPIFY_API_VERSION'), // Put API Version
-                                                    'access_token' => $shop->access_token,
-                                                    'shop' => $shop->myshopify_domain
-                                                ]);
-
-                                                /**
-                                                 * Retrieve Order from Shopify
-                                                 */
-                                                $shopifyOrder = $shopifyClient->getOrder([
-                                                    'id' => (int) $order->order_id
-                                                ]);
-                                                $shopifyOrder['order_id'] = $shopifyOrder['id'];
-                                                $shopifyOrder['account_id'] = $order->account_id;
-
-                                                if(
-                                                        $shopifyOrder['processing_method'] == 'manual'
-                                                    &&  $shopifyOrder['financial_status'] == 'pending'
-                                                ) {
-                                                    $transactions = $shopifyClient->getTransactions([
-                                                        'order_id' => (int) $shopifyOrder['order_id']
-                                                    ]);
-
-                                                    if(count($transactions)) {
-                                                        foreach ($transactions as $transaction) {
-                                                            if(
-                                                                    $transaction['kind'] == 'sale'
-                                                                &&  $transaction['status'] == 'pending'
-                                                            ) {
-                                                                /**
-                                                                 * Update Transaction
-                                                                 */
-                                                                $shopifyClient->createTransaction([
-                                                                    'order_id' => (int) $transaction['order_id'],
-                                                                    'kind' => 'capture',
-                                                                    'gateway' => $transaction['gateway'],
-                                                                    'amount' => $transaction['amount'],
-                                                                    'parent_id' => (int) $transaction['id'],
-                                                                    'status' => 'success',
-                                                                    'currency' => $transaction['currency'],
-                                                                ]);
-
-                                                                /**
-                                                                 * Sync Single Order into system
-                                                                 */
-                                                                $shopifyOrder = $shopifyClient->getOrder([
-                                                                    'id' => (int) $order['order_id']
-                                                                ]);
-                                                                $shopifyOrder['order_id'] = $shopifyOrder['id'];
-                                                                ShopifyHelper::syncSingleOrder($shopifyOrder, $shop->toArray());
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            } catch (\Exception $exception) {}
-                                        }
+                                        ShopifyJobs::insert(array(
+                                            'payload' => json_encode($payload),
+                                            'type' => 'mark-order-status',
+                                            'created_at' => Carbon::now()->toDateTimeString(),
+                                            'available_at' => Carbon::now()->toDateTimeString(),
+                                            'account_id' => $account_id,
+                                        ));
                                     }
                                 }
                             } else {

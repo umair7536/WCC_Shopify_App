@@ -47,8 +47,10 @@ class FullSyncPacketStatusListener implements ShouldQueue
 
                 $total_records = BookedPackets::where([
                     'account_id' => $event->account->id,
-                    'booking_type' => 2 /** '1' for Test, '2' for Live Packets */
+                    'booking_type' => 2, /** '1' for Test, '2' for Live Packets */
+                    'marked_paid' => 0
                 ])
+                    ->where('status_check_count', '<=', 5)
                     ->whereIn('status', $status_sync)
                     ->count();
 

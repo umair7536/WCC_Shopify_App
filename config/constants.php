@@ -90,6 +90,7 @@ return [
     'status_sync' => array(
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 14, 16, 17
     ),
+    'status_delivered' => 12,
     'shipment_mode' => array(
 //        'self' => 'Use Shipper info from LCS Account',
         'other' => 'Provide Custom Shipper Information'

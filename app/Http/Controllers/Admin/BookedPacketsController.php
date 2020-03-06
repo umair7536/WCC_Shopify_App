@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Events\Leopards\BookedPackets\FullSyncPacketStatusFire;
 use App\Events\Shopify\Orders\SingleOrderFulfillmentFire;
+use App\Helpers\LeopardsHelper;
 use App\Helpers\ShopifyHelper;
 use App\Models\Accounts;
 use App\Models\BookedPackets;
 use App\Models\LeopardsCities;
 use App\Models\LeopardsSettings;
 use App\Models\Shippers;
+use App\Models\ShopifyJobs;
 use App\Models\ShopifyLocations;
 use App\Models\ShopifyOrders;
 use App\Models\ShopifyShops;
@@ -810,6 +812,7 @@ class BookedPacketsController extends Controller
                      * Update Packet Status
                      */
                     $status = Config::get('constants.status');
+                    $status_delivered = Config::get('constants.status_delivered');
                     $status_id = 0;
 
                     foreach ($status as $key => $value) {
@@ -829,6 +832,32 @@ class BookedPacketsController extends Controller
                             'invoice_number' => $packet['invoice_number'],
                             'invoice_date' => $packet['invoice_date']
                         ));
+
+                        if(
+                                $packet['invoice_date']
+                            &&  $packet['invoice_number']
+                            &&  ($status_delivered == $status_id)
+                        ) {
+
+                            /**
+                             * Put Change Paid Status into Jobs
+                             */
+                            $payload = array(
+                                'invoice_date' => $packet['invoice_date'],
+                                'invoice_number' => $packet['invoice_number'],
+                                'track_number' => $packet['track_number'],
+                                'booked_packet_status' => $packet['booked_packet_status'],
+                            );
+
+                            ShopifyJobs::insert(array(
+                                'payload' => json_encode($payload),
+                                'type' => 'mark-order-status',
+                                'created_at' => Carbon::now()->toDateTimeString(),
+                                'available_at' => Carbon::now()->toDateTimeString(),
+                                'account_id' => Auth::User()->account_id,
+                            ));
+                        }
+
                     } else {
                         BookedPackets::where([
                             'track_number' => $packet['track_number']

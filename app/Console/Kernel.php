@@ -27,6 +27,7 @@ class Kernel extends ConsoleKernel
 //        '\App\Console\Commands\Shopify\SyncCustomCollections',
 //        '\App\Console\Commands\Shopify\SyncCollects',
         '\App\Console\Commands\Shopify\SyncOrders',
+        '\App\Console\Commands\Shopify\MarkOrderAsPaid',
     ];
 
     /**
@@ -45,11 +46,11 @@ class Kernel extends ConsoleKernel
          */
 
         /*
-         * Sync Products from Shopify
+         * Mark Paid Orders
          */
-//        $schedule->command('shopify:sync-products')
-//            ->withoutOverlapping()
-//            ->everyMinute();
+        $schedule->command('shopify:mark-orders-paid')
+            ->withoutOverlapping()
+            ->everyMinute();
 
         /*
          * Sync Products from Shopify

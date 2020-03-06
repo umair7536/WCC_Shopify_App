@@ -20,7 +20,7 @@ class BookedPackets extends BaseModal
         'booked_packet_id', 'shipment_type_id', 'booking_date', 'packet_pieces', 'net_weight', 'collect_amount', 'order_id', 'order_number',
         'vol_weight_w', 'vol_weight_h', 'vol_weight_l', 'shipper_id', 'shipper_name', 'shipper_email', 'shipper_phone', 'shipper_address',
         'consignee_id', 'consignee_name', 'consignee_email', 'consignee_phone', 'consignee_phone_2', 'consignee_phone_3', 'consignee_address',
-        'comments', 'track_number', 'slip_link', 'status', 'history', 'origin_city', 'destination_city', 'cn_number', 'booking_type',
+        'comments', 'track_number', 'slip_link', 'status', 'history', 'origin_city', 'destination_city', 'cn_number', 'booking_type', 'marked_paid', 'status_check_count',
         'created_at', 'updated_at', 'created_by', 'updated_by', 'account_id'
     ];
 
@@ -30,7 +30,7 @@ class BookedPackets extends BaseModal
         'booked_packet_id', 'shipment_type_id', 'booking_date', 'packet_pieces', 'net_weight', 'collect_amount', 'order_id', 'order_number',
         'vol_weight_w', 'vol_weight_h', 'vol_weight_l', 'shipper_id', 'shipper_name', 'shipper_email', 'shipper_phone', 'shipper_address',
         'consignee_id', 'consignee_name', 'consignee_email', 'consignee_phone', 'consignee_phone_2', 'consignee_phone_3', 'consignee_address',
-        'comments', 'track_number', 'slip_link', 'status', 'history', 'origin_city', 'destination_city', 'cn_number', 'booking_type',
+        'comments', 'track_number', 'slip_link', 'status', 'history', 'origin_city', 'destination_city', 'cn_number', 'booking_type', 'marked_paid', 'status_check_count',
     ];
 
     protected $table = 'booked_packets';
