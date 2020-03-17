@@ -4,12 +4,13 @@
         'account_id' => Auth::User()->account_id,
     ])->count()
 )
-@php(
-    $syncCustomers = \App\Models\ShopifyJobs::where([
-        'type' => 'sync-customers',
-        'account_id' => Auth::User()->account_id,
-    ])->count()
-)
+{{--@php(--}}
+{{--    $syncCustomers = \App\Models\ShopifyJobs::where([--}}
+{{--        'type' => 'sync-customers',--}}
+{{--        'account_id' => Auth::User()->account_id,--}}
+{{--    ])->count()--}}
+{{--)--}}
+@php( $syncCustomers = 0)
 @php(
     $uploadVariants = \App\Models\ShopifyJobs::where([
         'type' => 'upload-variants',
