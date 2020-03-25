@@ -101,7 +101,7 @@ class SyncPacketStatus extends Command
             'booking_type' => 2, /** '1' for Test, '2' for Live Packets */
             'marked_paid' => 0
         ])
-            ->where('status_check_count', '<=', 5)
+            ->where('status_check_count', '<=', 50)
             ->whereIn('status', $status_sync)
             ->limit($records_per_page)
             ->offset($offset)
