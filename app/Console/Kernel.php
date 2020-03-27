@@ -48,9 +48,9 @@ class Kernel extends ConsoleKernel
         /*
          * Mark Paid Orders
          */
-        $schedule->command('shopify:mark-orders-paid')
-            ->withoutOverlapping()
-            ->everyMinute();
+//        $schedule->command('shopify:mark-orders-paid')
+//            ->withoutOverlapping()
+//            ->everyMinute();
 
         /*
          * Sync Products from Shopify
