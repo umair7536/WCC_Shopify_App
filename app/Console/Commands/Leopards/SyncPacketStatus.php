@@ -170,13 +170,13 @@ class SyncPacketStatus extends Command
                                             'booked_packet_status' => $booked_packet['booked_packet_status'],
                                         );
 
-                                        ShopifyJobs::insert(array(
-                                            'payload' => json_encode($payload),
-                                            'type' => 'mark-order-status',
-                                            'created_at' => Carbon::now()->toDateTimeString(),
-                                            'available_at' => Carbon::now()->toDateTimeString(),
-                                            'account_id' => $account_id,
-                                        ));
+//                                        ShopifyJobs::insert(array(
+//                                            'payload' => json_encode($payload),
+//                                            'type' => 'mark-order-status',
+//                                            'created_at' => Carbon::now()->toDateTimeString(),
+//                                            'available_at' => Carbon::now()->toDateTimeString(),
+//                                            'account_id' => $account_id,
+//                                        ));
                                     }
                                 }
                             } else {
