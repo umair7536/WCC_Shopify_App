@@ -61,7 +61,7 @@ $booked_packets_test = \App\Models\BookedPackets::where([
                         <div class="timeline-item">
                             <div class="timeline-badge">
                                 <div class="timeline-icon">
-                                    @if($leopards_settings['username']->data && $leopards_settings['api-password']->data)
+                                    @if($leopards_settings['api-key']->data && $leopards_settings['api-password']->data)
                                         <i class="icon-check font-green-haze"></i>
                                     @else
                                         <i class="icon-close font-red-intense"></i>
@@ -72,7 +72,7 @@ $booked_packets_test = \App\Models\BookedPackets::where([
                                 <div class="timeline-body-arrow"> </div>
                                 <div class="timeline-body-head">
                                     <div class="timeline-body-head-caption">
-                                        @if($leopards_settings['username']->data && $leopards_settings['api-password']->data)
+                                        @if($leopards_settings['api-key']->data && $leopards_settings['api-password']->data)
                                             <span class="timeline-body-alerttitle font-green-haze">@lang('global.leopards_settings.title')</span>
                                         @else
                                             <span class="timeline-body-alerttitle font-red-intense">@lang('global.leopards_settings.title')</span>
