@@ -336,6 +336,107 @@ class BookedPacketsController extends Controller
             }
         }
 
+        if (
+            $request->get('customActionType') == "group_action"
+            && $request->get('customActionName') == "fulfill"
+        ) {
+            $ids = $request->get('id');
+
+            $booked_packets = BookedPackets::where([
+                'account_id' => $account_id
+            ])
+                ->whereIn('id', $ids)
+                ->select('id', 'cn_number', 'account_id', 'order_id', 'order_number')
+                ->orderBy('id', 'desc')
+                ->get();
+
+            if($booked_packets->count()) {
+
+                /**
+                 * Fulfill this order
+                 */
+                $shop = ShopifyShops::where([
+                    'account_id' => $account_id
+                ])->first();
+
+                /**
+                 * Fetch default Inventory Location ID
+                 */
+                $inventory_location = LeopardsSettings::getDefaultInventoryLocation($account_id);
+
+                /**
+                 * Variable to track if any response was successful
+                 */
+                $any_success = false;
+
+                // Build Success Message
+                $message = 'Below are your results:<br/>';
+                $message .= '<ul>';
+
+                foreach ($booked_packets as $booked_packet) {
+
+                    $order = ShopifyOrders::where([
+                        'account_id' => $booked_packet->account_id,
+                        'order_number' => $booked_packet->order_number,
+                    ])
+                        ->select('id', 'order_id', 'account_id', 'order_number')
+                        ->first();
+
+                    if($shop && $inventory_location && $order) {
+
+                        $shopifyClient = new ShopifyClient([
+                            'private_app' => false,
+                            'api_key' => env('SHOPIFY_APP_API_KEY'), // In public app, this is the app ID
+                            'version' => env('SHOPIFY_API_VERSION'), // Put API Version
+                            'access_token' => $shop->access_token,
+                            'shop' => $shop->myshopify_domain
+                        ]);
+
+                        try {
+                            $fullfilments = array();
+
+                            $fullfilments = $shopifyClient->getFulfillments([
+                                'order_id' => (int) $order['order_id']
+                            ]);
+
+                            if(count($fullfilments)) {
+                                $message .= '<li><b>Order: ' . $booked_packet->order_id . ' CN #: ' . $booked_packet->cn_number . '</b> is already fulfilled.';
+                            } else {
+                                try {
+                                    $fulfillment = $shopifyClient->createFulfillment(array(
+                                        'order_id' => (int) $order['order_id'],
+                                        'location_id' => $inventory_location,
+                                        'tracking_number' => $booked_packet->cn_number,
+                                        'tracking_company' => 'Leopards Courier Services',
+                                        'notify_customer' => false,
+                                        'tracking_urls' => array(
+                                            route('track', $booked_packet->cn_number)
+                                        ),
+                                    ));
+
+                                    // Packet has been fulfilled
+                                    $message .= '<li><b>Order: ' . $booked_packet->order_id . ' CN #: ' . $booked_packet->cn_number . '</b> marked as fulfilled.';
+
+                                    $any_success = true;
+                                } catch (\Exception $exception) {
+                                    $message .= '<li><b>Order: ' . $booked_packet->order_id . ' CN #: ' . $booked_packet->cn_number . '</b> has warehouse issue.';
+                                }
+                            }
+                        } catch (\Exception $exception) {}
+                    } else {
+                        $message .= '<li><b>Order: ' . $booked_packet->order_id . ' CN #: ' . $booked_packet->cn_number . '</b> can not be fulfilled.';
+                    }
+                }
+
+                $message .= '</ul>';
+
+                return [
+                    'status' => ($any_success) ? 'OK' : 'NO',
+                    'message' => $message
+                ];
+            }
+        }
+
         return [
             'status' => 'NO',
             'message' => 'Something went wrong, please try again later'

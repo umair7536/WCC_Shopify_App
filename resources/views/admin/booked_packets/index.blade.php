@@ -44,6 +44,7 @@
                     <select class="table-group-action-input form-control input-inline input-small input-sm">
                         <option value="">Bulk Action</option>
                         <option value="cancel">Cancel Booked Packets</option>
+                        <option value="fulfill">Mark Fulfill Packets</option>
                     </select>
                     <button class="btn btn-sm red table-group-action-submit">
                         <i class="fa fa-check"></i> Submit
