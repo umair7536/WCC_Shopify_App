@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Events\Shopify\Orders\SingleOrderFire;
+use App\Helpers\ShopifyHelper;
 use App\Http\Controllers\Controller;
 use App\Models\BillingAddresses;
 use App\Models\BookedPackets;
@@ -136,7 +137,11 @@ class WebhooksController extends Controller
                                 /**
                                  * Dispatch Sync Leopards Cities Event and Delte existing records
                                  */
-                                event(new SingleOrderFire($order, $shop));
+//                                event(new SingleOrderFire($order, $shop));
+                                /**
+                                 * Sync Single Order into system
+                                 */
+                                ShopifyHelper::syncSingleOrder($order, $shop);
                                 break;
                         }
                     }
