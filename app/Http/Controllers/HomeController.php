@@ -133,7 +133,7 @@ class HomeController extends Controller
             if($accounts) {
                 foreach ($accounts as $account) {
                     event(new CreateWebhooksFire($account));
-                    event(new SyncOrdersFire($account));
+//                    event(new SyncOrdersFire($account));
                 }
             }
 
