@@ -36,12 +36,12 @@ var TableDatatablesAjax = function () {
                     { "data": "order_id","bSortable": true },
                     { "data": "shipment_type_id","bSortable": true },
                     { "data": "cn_number","bSortable": true },
-                    { "data": "origin_city","bSortable": true },
+                    // { "data": "origin_city","bSortable": true },
                     { "data": "destination_city","bSortable": true },
-                    { "data": "shipper_name","bSortable": true },
-                    { "data": "consignee_name","bSortable": true },
+                    // { "data": "shipper_name","bSortable": true },
+                    // { "data": "consignee_name","bSortable": true },
                     { "data": "consignee_phone","bSortable": true },
-                    { "data": "consignee_email","bSortable": true },
+                    // { "data": "consignee_email","bSortable": true },
                     { "data": "booking_date","bSortable": true },
                     { "data": "invoice_number","bSortable": true },
                     { "data": "invoice_date","bSortable": true },
@@ -55,7 +55,7 @@ var TableDatatablesAjax = function () {
                         request.setRequestHeader("X-CSRF-TOKEN", $('meta[name="csrf-token"]').attr('content'));
                     }
                 },
-                ordering: !0,
+                ordering: !1,
                 order: [[11, "desc"]]
             }
         }), a.getTableWrapper().on("click", ".table-group-action-submit", function (e) {

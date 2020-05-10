@@ -137,11 +137,11 @@ class WebhooksController extends Controller
                                 /**
                                  * Dispatch Sync Leopards Cities Event and Delte existing records
                                  */
-//                                event(new SingleOrderFire($order, $shop));
+                                event(new SingleOrderFire($order, $shop));
                                 /**
                                  * Sync Single Order into system
                                  */
-                                ShopifyHelper::syncSingleOrder($order, $shop);
+//                                ShopifyHelper::syncSingleOrder($order, $shop);
                                 break;
                         }
                     }

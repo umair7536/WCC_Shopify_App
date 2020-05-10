@@ -63,12 +63,12 @@
                         <th>@lang('global.booked_packets.fields.order_id')</th>
                         <th>@lang('global.booked_packets.fields.shipment_type_id')</th>
                         <th>@lang('global.booked_packets.fields.cn_number')</th>
-                        <th>@lang('global.booked_packets.fields.origin_city')</th>
+{{--                        <th>@lang('global.booked_packets.fields.origin_city')</th>--}}
                         <th>@lang('global.booked_packets.fields.destination_city')</th>
-                        <th>@lang('global.booked_packets.fields.shipper_name')</th>
-                        <th>@lang('global.booked_packets.fields.consignee_name')</th>
+{{--                        <th>@lang('global.booked_packets.fields.shipper_name')</th>--}}
+{{--                        <th>@lang('global.booked_packets.fields.consignee_name')</th>--}}
                         <th>@lang('global.booked_packets.fields.consignee_phone')</th>
-                        <th>@lang('global.booked_packets.fields.consignee_email')</th>
+{{--                        <th>@lang('global.booked_packets.fields.consignee_email')</th>--}}
                         <th>@lang('global.booked_packets.fields.booking_date')</th>
                         <th>@lang('global.booked_packets.fields.invoice_number')</th>
                         <th>@lang('global.booked_packets.fields.invoice_date')</th>
@@ -89,24 +89,24 @@
                         <td>
                             {!! Form::text('cn_number', null, ['class' => 'form-control form-filter input-sm']) !!}
                         </td>
-                        <td>
-                            {!! Form::select('origin_city', $leopards_cities, null, ['class' => 'form-control form-filter input-sm', 'placeholder' => 'Select a Shipment Type']) !!}
-                        </td>
+{{--                        <td>--}}
+{{--                            {!! Form::select('origin_city', $leopards_cities, null, ['class' => 'form-control form-filter input-sm', 'placeholder' => 'Select a Shipment Type']) !!}--}}
+{{--                        </td>--}}
                         <td>
                             {!! Form::select('destination_city', $leopards_cities, null, ['class' => 'form-control form-filter input-sm', 'placeholder' => 'Select a Shipment Type']) !!}
                         </td>
-                        <td>
-                            {!! Form::text('shipper_name', null, ['class' => 'form-control form-filter input-sm']) !!}
-                        </td>
-                        <td>
-                            {!! Form::text('consignee_name', null, ['class' => 'form-control form-filter input-sm']) !!}
-                        </td>
+{{--                        <td>--}}
+{{--                            {!! Form::text('shipper_name', null, ['class' => 'form-control form-filter input-sm']) !!}--}}
+{{--                        </td>--}}
+{{--                        <td>--}}
+{{--                            {!! Form::text('consignee_name', null, ['class' => 'form-control form-filter input-sm']) !!}--}}
+{{--                        </td>--}}
                         <td>
                             {!! Form::text('consignee_phone', null, ['class' => 'form-control form-filter input-sm']) !!}
                         </td>
-                        <td>
-                            {!! Form::text('consignee_email', null, ['class' => 'form-control form-filter input-sm']) !!}
-                        </td>
+{{--                        <td>--}}
+{{--                            {!! Form::text('consignee_email', null, ['class' => 'form-control form-filter input-sm']) !!}--}}
+{{--                        </td>--}}
                         <td>
                             <div class="input-icon input-icon-sm right margin-bottom-5">
                                 <i class="fa fa-calendar"></i>

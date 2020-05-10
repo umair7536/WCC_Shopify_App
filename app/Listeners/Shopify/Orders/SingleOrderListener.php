@@ -9,6 +9,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class SingleOrderListener implements ShouldQueue
 {
+    public $queue = 'single';
+
     /**
      * Create the event listener.
      *

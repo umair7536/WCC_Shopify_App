@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\Leopards\BookedPackets\SingleOrderBookFire;
 use App\Events\Shopify\Orders\SingleOrderFulfillmentFire;
 use App\Events\Shopify\Orders\SyncOrdersFire;
 use App\Helpers\ShopifyHelper;
@@ -9,6 +10,7 @@ use App\Models\Accounts;
 use App\Models\BookedPackets;
 use App\Models\LeopardsCities;
 use App\Models\LeopardsSettings;
+use App\Models\OrderLogs;
 use App\Models\ShippingAddresses;
 use App\Models\ShopifyCustomers;
 use App\Models\ShopifyOrders;
@@ -302,57 +304,64 @@ class ShopifyOrdersController extends Controller
                     }
 
                     /**
-                     * If Order ID is provided then prepare data to automatically be filled
+                     * Dispatch Order Book in LCS
                      */
-                    $prepared_packet = BookedPackets::prepareBooking($order->order_id, $request->get('customActionName'), $account_id);
-                    if($prepared_packet['status']) {
-                        $booking_packet_request = new Request();
-                        $booking_packet_request->replace($prepared_packet['packet']);
+                    event(new SingleOrderBookFire($order->toArray(), $request->get('customActionName'), $account_id));
 
-                        /**
-                         * Verify Fields before send
-                         */
-                        $validator = $this->verifyPacketFields($booking_packet_request);
-                        if ($validator->fails()) {
-                            $message .= '<li>Order <b>' . $order->name . '</b> has some issues. [' . implode(', ', $validator->messages()->all()) . ']';
-                            continue;
-                        }
+                    $message .= '<li>Order <b>' . $order->name . '</b> has been queued. It will take a few minutes to book packet in LCS.';
 
-                        $result = BookedPackets::createRecord($booking_packet_request, $account_id);
-
-                        /**
-                         * Add Booking information into Order
-                         */
-                        if($result['status']) {
-                            $booked_packet = BookedPackets::where([
-                                'account_id' => $account_id,
-                                'id' => $result['record_id'],
-                            ])->first();
-
-                            ShopifyOrders::where([
-                                'order_id' => $order->order_id,
-                                'account_id' => $account_id,
-                            ])->update(array(
-                                'booking_id' => $booked_packet->id,
-                                'cn_number' => $booked_packet->cn_number
-                            ));
-
-                            $message .= '<li>Order <b>' . $order->name . '</b> has been booked. Assigned CN # is ' . $booked_packet->cn_number;
-
-                            /**
-                             * Dispatch to check if Auto Fulfillment is 'true' or 'false'
-                             * if 'true' then order will be fulfilled automatically
-                             * if 'false' then order will not be fulfilled
-                             */
-                            event(new SingleOrderFulfillmentFire($order->toArray(), $booked_packet->cn_number));
-                        } else {
-                            $message .= '<li>Order <b>' . $order->name . '</b> has some issues. [' . $result['error_msg'] . ']';
-                            continue;
-                        }
-                    } else {
-                        $message .= '<li>Order <b>' . $order->name . '</b> has consignee city / shipper information issue. Please select proper city or check shipper information from settings for this packet to book.';
-                        continue;
-                    }
+//                    /**
+//                     * If Order ID is provided then prepare data to automatically be filled
+//                     */
+//                    $prepared_packet = BookedPackets::prepareBooking($order->order_id, $request->get('customActionName'), $account_id);
+//                    if($prepared_packet['status']) {
+//                        $booking_packet_request = new Request();
+//                        $booking_packet_request->replace($prepared_packet['packet']);
+//
+//                        /**
+//                         * Verify Fields before send
+//                         */
+//                        $validator = $this->verifyPacketFields($booking_packet_request);
+//                        if ($validator->fails()) {
+//                            $message .= '<li>Order <b>' . $order->name . '</b> has some issues. [' . implode(', ', $validator->messages()->all()) . ']';
+//                            continue;
+//                        }
+//
+//                        $result = BookedPackets::createRecord($booking_packet_request, $account_id);
+//
+//                        /**
+//                         * Add Booking information into Order
+//                         */
+//                        if($result['status']) {
+//                            $booked_packet = BookedPackets::where([
+//                                'account_id' => $account_id,
+//                                'id' => $result['record_id'],
+//                            ])->first();
+//
+//                            ShopifyOrders::where([
+//                                'order_id' => $order->order_id,
+//                                'account_id' => $account_id,
+//                            ])->update(array(
+//                                'booking_id' => $booked_packet->id,
+//                                'cn_number' => $booked_packet->cn_number
+//                            ));
+//
+//                            $message .= '<li>Order <b>' . $order->name . '</b> has been booked. Assigned CN # is ' . $booked_packet->cn_number;
+//
+//                            /**
+//                             * Dispatch to check if Auto Fulfillment is 'true' or 'false'
+//                             * if 'true' then order will be fulfilled automatically
+//                             * if 'false' then order will not be fulfilled
+//                             */
+//                            event(new SingleOrderFulfillmentFire($order->toArray(), $booked_packet->cn_number));
+//                        } else {
+//                            $message .= '<li>Order <b>' . $order->name . '</b> has some issues. [' . $result['error_msg'] . ']';
+//                            continue;
+//                        }
+//                    } else {
+//                        $message .= '<li>Order <b>' . $order->name . '</b> has consignee city / shipper information issue. Please select proper city or check shipper information from settings for this packet to book.';
+//                        continue;
+//                    }
                 }
 
                 $message .= '</ul>';
@@ -1064,6 +1073,31 @@ class ShopifyOrdersController extends Controller
 
         flash('Incoming request is not valid.')->error()->important();
         return redirect()->route('admin.shopify_orders.index');
+    }
+
+    /**
+     * Show Lead detail.
+     *
+     * @param  int $id
+     * @return \Illuminate\Http\Response
+     */
+    public function errorLog($id)
+    {
+        $shopify_order = ShopifyOrders::where([
+            'account_id' => Auth::User()->account_id,
+            'order_id' => $id,
+        ])->first();
+
+        if(!$shopify_order) {
+            return view('error');
+        }
+
+        $order_logs = OrderLogs::where([
+            'account_id' => Auth::User()->account_id,
+            'order_id' => $shopify_order->order_id
+        ])->get();
+
+        return view('admin.shopify_orders.error_logs', compact('shopify_order', 'order_logs'));
     }
 
 }

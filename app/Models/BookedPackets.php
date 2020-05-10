@@ -218,7 +218,7 @@ class BookedPackets extends BaseModal
     {
         $where = array();
 
-        $orderBy = 'booking_date';
+        $orderBy = 'created_at';
         $order = 'desc';
 
         if ($request->get('order')[0]['dir']) {
@@ -471,7 +471,7 @@ class BookedPackets extends BaseModal
          * '2' as Production Mode
          */
         $leopards_setting = LeopardsSettings::where([
-            'account_id' => Auth::User()->account_id,
+            'account_id' => $account_id,
             'slug' => 'mode'
         ])
             ->select('slug', 'data')
@@ -493,7 +493,7 @@ class BookedPackets extends BaseModal
             ));
         }
 
-        AuditTrails::addEventLogger(self::$_table, 'create', $data, self::$_fillable, $record);
+//        AuditTrails::addEventLogger(self::$_table, 'create', $data, self::$_fillable, $record);
 
         return [
             'status' => true,
@@ -1239,7 +1239,7 @@ class BookedPackets extends BaseModal
          * Adjust Shipper Information as per LCS Settings
          */
         $leopards_settings = LeopardsSettings::where([
-            'account_id' => Auth::User()->account_id
+            'account_id' => $account_id
         ])
             ->select('slug', 'data')
             ->orderBy('id', 'asc')
@@ -1360,7 +1360,7 @@ class BookedPackets extends BaseModal
 
         try {
             $leopards_settings = LeopardsSettings::where([
-                'account_id' => Auth::User()->account_id
+                'account_id' => $account_id
             ])
                 ->select('slug', 'data')
                 ->orderBy('id', 'asc')

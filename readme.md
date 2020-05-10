@@ -62,7 +62,7 @@ stdout_logfile=/path/to/laravel/project/storage/logs/supervisor/queue.log
 ```
 [program:queue-default]
 process_name=%(program_name)s_%(process_num)02d
-command=php /path/to/laravel/project/artisan queue:work redis --sleep=3 --tries=3 --daemon --queue=default
+command=php /path/to/laravel/project/artisan queue:work database --sleep=3 --tries=3 --daemon --queue=high,default,low
 autostart=true
 autorestart=true
 user=root
@@ -71,12 +71,41 @@ redirect_stderr=true
 stdout_logfile=/path/to/laravel/project/storage/logs/supervisor/queue-default.log
 ```
 
-###### 'shopify' queue
+###### Single Order Sync Queue
 
 ```
 [program:queue-shopify]
 process_name=%(program_name)s_%(process_num)02d
-command=php /path/to/laravel/project/artisan queue:work redis --sleep=3 --tries=3 --daemon --queue=shopify
+command=php /path/to/laravel/project/artisan queue:work database --sleep=3 --tries=3 --daemon --queue=single
+autostart=true
+autorestart=true
+user=root
+numprocs=1
+redirect_stderr=true
+stdout_logfile=/path/to/laravel/project/storage/logs/supervisor/queue-shopify.log
+```
+
+###### Order Fulfillment Queue
+
+```
+[program:queue-shopify]
+process_name=%(program_name)s_%(process_num)02d
+command=php /path/to/laravel/project/artisan queue:work database --sleep=3 --tries=3 --daemon --queue=fulfillment
+autostart=true
+autorestart=true
+user=root
+numprocs=1
+redirect_stderr=true
+stdout_logfile=/path/to/laravel/project/storage/logs/supervisor/queue-shopify.log
+```
+
+
+###### Single Order Book
+
+```
+[program:queue-shopify]
+process_name=%(program_name)s_%(process_num)02d
+command=php /path/to/laravel/project/artisan queue:work database --sleep=3 --tries=3 --daemon --queue=bookpacket
 autostart=true
 autorestart=true
 user=root

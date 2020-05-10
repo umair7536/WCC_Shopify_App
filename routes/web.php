@@ -182,6 +182,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     // GeneralSettings Routes end
 
     // Shopify Orders Routes start
+    Route::get('shopify_orders/error-log/{id}', ['uses' => 'Admin\ShopifyOrdersController@errorLog', 'as' => 'shopify_orders.error_log']);
     Route::get('shopify_orders/book-packet', ['uses' => 'Admin\ShopifyOrdersController@bookPacket', 'as' => 'shopify_orders.book_packet']);
     Route::get('shopify_orders/book', ['uses' => 'Admin\ShopifyOrdersController@book', 'as' => 'shopify_orders.book']);
     Route::get('shopify_orders/book-manual', ['uses' => 'Admin\ShopifyOrdersController@manualBook', 'as' => 'shopify_orders.book_manual']);

@@ -12,6 +12,8 @@ use ZfrShopify\ShopifyClient;
 
 class SingleOrderFulfillmentListener implements ShouldQueue
 {
+    public $queue = 'fulfillment';
+
     /**
      * Create the event listener.
      *

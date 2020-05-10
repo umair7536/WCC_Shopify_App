@@ -49,6 +49,9 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\Leopards\BookedPackets\FullSyncPacketStatusFire' => [
             'App\Listeners\Leopards\BookedPackets\FullSyncPacketStatusListener',
         ],
+        'App\Events\Leopards\BookedPackets\SingleOrderBookFire' => [
+            'App\Listeners\Leopards\BookedPackets\SingleOrderBookListener',
+        ],
     ];
 
     /**
