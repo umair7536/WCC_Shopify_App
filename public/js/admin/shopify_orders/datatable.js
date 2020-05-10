@@ -203,7 +203,7 @@ var TableDatatablesAjax = function () {
                         e[a.attr("name")] && a.val(e[a.attr("name")])
                     }), !0
                 },
-                lengthMenu: [[15, 25], [15, 25]],
+                lengthMenu: [[15, 25, 50, 75, 100], [15, 25, 50, 75, 100]],
                 pageLength: 15,
                 "columns": [
                     { "data": "id","bSortable": false },
