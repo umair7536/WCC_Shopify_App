@@ -4,6 +4,7 @@ namespace App\Console\Commands\Shopify;
 
 use App\Helpers\ShopifyHelper;
 use App\Models\ShopifyJobs;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use ZfrShopify\ShopifyClient;
 
@@ -111,8 +112,12 @@ class SyncOrders extends Command
                 'shop' => $shop['myshopify_domain']
             ]);
 
+//            $orders = $shopifyClient->getOrdersIterator([
+//                'since_id' => 0
+//            ]);
+
             $orders = $shopifyClient->getOrdersIterator([
-                'since_id' => 0
+                'created_at_min' => Carbon::now()->subDays(14)->format('Y-m-d') . ' 00:00:00'
             ]);
 
             foreach ($orders as $order) {
