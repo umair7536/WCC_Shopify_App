@@ -45,6 +45,7 @@
                         <option value="">Bulk Action</option>
                         <option value="cancel">Cancel Booked Packets</option>
                         <option value="fulfill">Mark Fulfill Packets</option>
+                        <option value="loadsheet">Generate Load Sheet</option>
                     </select>
                     <button class="btn btn-sm red table-group-action-submit">
                         <i class="fa fa-check"></i> Submit

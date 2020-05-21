@@ -10,6 +10,7 @@ use App\Models\Accounts;
 use App\Models\BookedPackets;
 use App\Models\LeopardsCities;
 use App\Models\LeopardsSettings;
+use App\Models\LoadSheets;
 use App\Models\Shippers;
 use App\Models\ShopifyJobs;
 use App\Models\ShopifyLocations;
@@ -425,6 +426,90 @@ class BookedPacketsController extends Controller
                         } catch (\Exception $exception) {}
                     } else {
                         $message .= '<li><b>Order: ' . $booked_packet->order_id . ' CN #: ' . $booked_packet->cn_number . '</b> can not be fulfilled.';
+                    }
+                }
+
+                $message .= '</ul>';
+
+                return [
+                    'status' => ($any_success) ? 'OK' : 'NO',
+                    'message' => $message
+                ];
+            }
+        }
+
+
+        if (
+            $request->get('customActionType') == "group_action"
+            && $request->get('customActionName') == "loadsheet"
+        ) {
+            $ids = $request->get('id');
+
+            $status = Config::get('constants.status');
+
+            $booked_packets = BookedPackets::where([
+                'account_id' => $account_id
+            ])
+                ->whereIn('id', $ids)
+                ->select('id', 'cn_number', 'status', 'account_id', 'order_id')
+                ->orderBy('id', 'desc')
+                ->get();
+
+            if($booked_packets->count()) {
+
+                /**
+                 * Variable to track if any response was successful
+                 */
+                $any_success = false;
+
+                // Build Success Message
+                $message = 'Below are your results:<br/>';
+                $message .= '<ul>';
+
+                $cn_numbers = [];
+                $packets = [];
+
+                foreach ($booked_packets as $booked_packet) {
+                    if($booked_packet['status'] == '0') {
+                        $cn_numbers[] = $booked_packet['cn_number'];
+                        $packets[] = $booked_packet;
+                    } else {
+                        $message .= '<li>CN # <b>' . $booked_packet->cn_number . '</b> must have in ' . $status[0] . ' state.';
+                    }
+                }
+
+                if(count($cn_numbers)) {
+                    $response = BookedPackets::generateLoadSheet($cn_numbers, $booked_packet->account_id);
+//                    $response = array(
+//                        'status' => true,
+//                        'error' => '',
+//                        'load_sheet_id' => '855083',
+//                    );
+                    if($response['status']) {
+                        // Any of the packets get success
+                        $any_success = true;
+
+                        $message .= '<li>Load Sheet is generated successfully.</li>';
+
+
+                        /**
+                         * Create Load Sheet Data
+                         */
+                        LoadSheets::createLoadSheet($response['load_sheet_id'], $packets, $account_id);
+
+                        /**
+                         * Change Packet Status to 'Pickup Request Sent'
+                         */
+                        BookedPackets::where([
+                            'account_id' => $account_id
+                        ])
+                            ->whereIn('cn_number', $cn_numbers)
+                            ->update([
+                                'status' => Config::get('constants.status_pickup_request_sent')
+                            ]);
+
+                    } else {
+                        $message .= '<li>System failed to generate Load Sheet, Please try again later.</li>';
                     }
                 }
 

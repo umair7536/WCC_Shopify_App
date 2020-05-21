@@ -1,11 +1,7 @@
 var TableDatatablesAjax = function () {
     var a = function () {
-        $(".date-picker").datepicker({rtl: App.isRTL(), autoclose: !0});
-        $(".booking_date_from").datepicker({rtl: App.isRTL(), autoclose: !0});
-        $(".booking_date_to").datepicker({rtl: App.isRTL(), autoclose: !0});
-        $(".invoice_date_from").datepicker({rtl: App.isRTL(), autoclose: !0});
-        $(".invoice_date_to").datepicker({rtl: App.isRTL(), autoclose: !0});
-        $('.select2').select2({ width: '100%' });
+        $(".created_at_from").datepicker({rtl: App.isRTL(), autoclose: !0});
+        $(".created_at_to").datepicker({rtl: App.isRTL(), autoclose: !0});
     };
 
     e = function () {
@@ -15,8 +11,8 @@ var TableDatatablesAjax = function () {
             }, onError: function (a) {
             }, onDataLoad: function (a) {
             }, loadingMessage: "Loading...", dataTable: {
-                bStateSave: !1,
-                cache: !1,
+                bStateSave: !0,
+                cache: !0,
                 fnStateSaveParams: function (a, e) {
                     return $("#datatable_ajax tr.filter .form-control").each(function () {
                         e[$(this).attr("name")] = $(this).val()
@@ -28,35 +24,23 @@ var TableDatatablesAjax = function () {
                         e[a.attr("name")] && a.val(e[a.attr("name")])
                     }), !0
                 },
-                lengthMenu: [[15, 25, 50, 100, 500], [15, 25, 50, 100, 500]],
-                pageLength: 15,
+                lengthMenu: [[25, 50, 100], [25, 50, 100]],
+                pageLength: 25,
                 "columns": [
-                    { "data": "id","bSortable": false },
-                    { "data": "status","bSortable": true },
-                    { "data": "order_id","bSortable": true },
-                    { "data": "shipment_type_id","bSortable": true },
-                    { "data": "cn_number","bSortable": true },
-                    // { "data": "origin_city","bSortable": true },
-                    { "data": "destination_city","bSortable": true },
-                    // { "data": "shipper_name","bSortable": true },
-                    // { "data": "consignee_name","bSortable": true },
-                    { "data": "consignee_phone","bSortable": true },
-                    // { "data": "consignee_email","bSortable": true },
-                    { "data": "booking_date","bSortable": true },
-                    { "data": "invoice_number","bSortable": true },
-                    { "data": "invoice_date","bSortable": true },
-                    { "data": "collect_amount","bSortable": true },
+                    { "data": "load_sheet_id" },
+                    { "data": "total_packets" },
+                    { "data": "created_at" },
                     { "data": "actions","bSortable": false }
                 ],
                 ajax: {
                     // url: "../demo/table_ajax.php",
-                    url: route('admin.booked_packets.datatable'),
+                    url: route('admin.load_sheets.datatable'),
                     'beforeSend': function (request) {
                         request.setRequestHeader("X-CSRF-TOKEN", $('meta[name="csrf-token"]').attr('content'));
                     }
                 },
                 ordering: !1,
-                order: [[11, "desc"]]
+                order: [[1, "asc"]]
             }
         }), a.getTableWrapper().on("click", ".table-group-action-submit", function (e) {
             e.preventDefault();
@@ -77,19 +61,10 @@ var TableDatatablesAjax = function () {
         })
     };
 
-    var setLoader = function (targetId) {
-        $('#' + targetId).html('<div class="modal-content">\n' +
-            '            <div class="modal-body">\n' +
-            '                <span> &nbsp;&nbsp;Loading... </span>\n' +
-            '            </div>\n' +
-            '        </div>');
-    };
-
     return {
         init: function () {
             a(), e();
-        },
-        setLoader: setLoader
+        }
     }
 }();
 jQuery(document).ready(function () {

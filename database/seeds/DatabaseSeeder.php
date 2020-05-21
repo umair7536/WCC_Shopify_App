@@ -76,5 +76,8 @@ class DatabaseSeeder extends Seeder
 
         // Booked Packets Seeder
         $this->call(BookedPacketsSeed::class);
+
+        // Booked Packets Seeder
+        $this->call(LoadSheetsSeed::class);
     }
 }

@@ -155,35 +155,53 @@
                 </li>
             @endif
 
-            @if(
-                    Gate::allows('booked_packets_manage')
-                )
-                <li class="nav-item start @if(
-                    $request->segment(2) == 'booked_packets'
-                ) active open @endif">
-                    <a href="javascript:;" class="nav-link nav-toggle">
+            @if(Gate::allows('booked_packets_manage'))
+                <li class="nav-item start {{ $request->segment(2) == 'booked_packets' ? 'active active-sub' : '' }}">
+                    <a href="{{ route('admin.booked_packets.index') }}">
                         <i class="icon-bag"></i>
                         <span class="title">@lang('global.booked_packets.title')</span>
-                        <span class="arrow"></span>
                     </a>
-                    <ul class="sub-menu">
-                        @if(Gate::allows('booked_packets_manage'))
-                            <li class="nav-item start {{ ($request->segment(2) == 'booked_packets' && $request->segment(3) != 'api') ? 'active active-sub' : '' }}">
-                                <a href="{{ route('admin.booked_packets.index') }}">
-                                    <span class="title">@lang('global.booked_packets.title')</span>
-                                </a>
-                            </li>
-                        @endif
-                        @if(Gate::allows('booked_packets_manage'))
-                            <li class="nav-item start {{ ($request->segment(2) == 'booked_packets' && $request->segment(3) == 'api') ? 'active active-sub' : '' }}">
-                                <a href="{{ route('admin.booked_packets.api') }}">
-                                    <span class="title">@lang('global.booked_packets.api_title')</span>
-                                </a>
-                            </li>
-                        @endif
-                    </ul>
                 </li>
             @endif
+
+            @if(Gate::allows('load_sheets_manage'))
+                <li class="nav-item start {{ $request->segment(2) == 'load_sheets' ? 'active active-sub' : '' }}">
+                    <a href="{{ route('admin.load_sheets.index') }}">
+                        <i class="icon-bar-chart"></i>
+                        <span class="title">@lang('global.load_sheets.title')</span>
+                    </a>
+                </li>
+            @endif
+
+{{--            @if(--}}
+{{--                    Gate::allows('booked_packets_manage')--}}
+{{--                )--}}
+{{--                <li class="nav-item start @if(--}}
+{{--                    $request->segment(2) == 'booked_packets'--}}
+{{--                ) active open @endif">--}}
+{{--                    <a href="javascript:;" class="nav-link nav-toggle">--}}
+{{--                        <i class="icon-bag"></i>--}}
+{{--                        <span class="title">@lang('global.booked_packets.title')</span>--}}
+{{--                        <span class="arrow"></span>--}}
+{{--                    </a>--}}
+{{--                    <ul class="sub-menu">--}}
+{{--                        @if(Gate::allows('booked_packets_manage'))--}}
+{{--                            <li class="nav-item start {{ ($request->segment(2) == 'booked_packets' && $request->segment(3) != 'api') ? 'active active-sub' : '' }}">--}}
+{{--                                <a href="{{ route('admin.booked_packets.index') }}">--}}
+{{--                                    <span class="title">@lang('global.booked_packets.title')</span>--}}
+{{--                                </a>--}}
+{{--                            </li>--}}
+{{--                        @endif--}}
+{{--                        @if(Gate::allows('booked_packets_manage'))--}}
+{{--                            <li class="nav-item start {{ ($request->segment(2) == 'booked_packets' && $request->segment(3) == 'api') ? 'active active-sub' : '' }}">--}}
+{{--                                <a href="{{ route('admin.booked_packets.api') }}">--}}
+{{--                                    <span class="title">@lang('global.booked_packets.api_title')</span>--}}
+{{--                                </a>--}}
+{{--                            </li>--}}
+{{--                        @endif--}}
+{{--                    </ul>--}}
+{{--                </li>--}}
+{{--            @endif--}}
 
             @if(Gate::allows('leopards_settings_manage'))
                 <li class="nav-item start {{ $request->segment(2) == 'leopards_settings' ? 'active active-sub' : '' }}">

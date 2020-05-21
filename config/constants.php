@@ -96,6 +96,7 @@ return [
         'other' => 'Provide Custom Shipper Information'
     ),
     'status_cancel' => 3,
+    'status_pickup_request_sent' => 2,
     'request_sent' => 0,
     'financial_status' => [
         'pending' => 'Pending',

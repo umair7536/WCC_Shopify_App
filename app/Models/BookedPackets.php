@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
 use Auth;
 use Config;
+use Storage;
 use Illuminate\Support\Facades\Schema;
 
 
@@ -65,7 +66,7 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if($request->get('status')) {
+        if($request->get('status') != '') {
             $where[] = array(
                 'status',
                 '=',
@@ -243,7 +244,7 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if($request->get('status')) {
+        if($request->get('status') != '') {
             $where[] = array(
                 'status',
                 '=',
@@ -1386,6 +1387,117 @@ class BookedPackets extends BaseModal
                 'slip_link' => '',
                 'error_msg' => $exception->getMessage(),
             );
+        }
+    }
+
+
+    /**
+     * Funtion used to create Load Sheet in LCS
+     *
+     * @param $cn_numbers
+     * @param $account_id
+     * @return array
+     */
+    static public function generateLoadSheet($cn_numbers, $account_id) {
+        try {
+
+            $leopards_settings = LeopardsSettings::where([
+                'account_id' => $account_id
+            ])
+                ->select('slug', 'data')
+                ->orderBy('id', 'asc')
+                ->get()->keyBy('slug');
+
+            /**
+             * Merge Booked Packet with LCS Credentials
+             */
+            $cn_data = array_merge(array(
+                'api_key' => $leopards_settings['api-key']->data,              // API Key provided by LCS
+                'api_password' => $leopards_settings['api-password']->data,    // API Password provided by LCS
+            ), [
+                'cn_numbers' => $cn_numbers,
+                'courier_name' => env('LCS_COURIER_NAME'),
+                'courier_code' => env('LCS_COURIER_CODE')
+            ]);
+
+            $client = new Client();
+            $response = $client->post(env('LCS_URL') . 'webservice/generateLoadSheet/format/json/ ', array(
+                'form_params' => $cn_data
+            ));
+
+            if($response->getStatusCode() == 200) {
+                if($response->getBody()) {
+
+                    $result = json_decode($response->getBody(), true);
+
+                    if($result['status']) {
+                        return array(
+                            'status' => $result['status'],
+                            'message' => $result['error'],
+                            'load_sheet_id' => $result['load_sheet_id'],
+                        );
+                    } else {
+                        return array(
+                            'status' => $result['status'],
+                            'message' => $result['error'],
+                            'load_sheet_id' => $result['load_sheet_id'],
+                        );
+                    }
+                }
+            }
+        } catch (\Exception $exception) {}
+
+        return array(
+            'status' => false,
+            'message' => 'Something went wrong.',
+            'load_sheet_id' => null,
+        );
+    }
+
+
+    /**
+     * Funtion used to create Load Sheet in LCS
+     *
+     * @param $load_sheet_id
+     * @param $account_id
+     * @return array
+     */
+    static public function downloadLoadSheet($load_sheet_id, $account_id) {
+        try {
+
+            $leopards_settings = LeopardsSettings::where([
+                'account_id' => $account_id
+            ])
+                ->select('slug', 'data')
+                ->orderBy('id', 'asc')
+                ->get()->keyBy('slug');
+
+            /**
+             * Merge Booked Packet with LCS Credentials
+             */
+            $cn_data = array_merge(array(
+                'api_key' => $leopards_settings['api-key']->data,              // API Key provided by LCS
+                'api_password' => $leopards_settings['api-password']->data,    // API Password provided by LCS
+            ), [
+                'load_sheet_id' => $load_sheet_id,
+                'response_type' => 'pdf'
+            ]);
+
+            $client = new Client();
+            $response = $client->post(env('LCS_URL') . 'webservice/downloadLoadSheet/format/json/ ', array(
+                'form_params' => $cn_data
+            ));
+
+            if($response->getStatusCode() == 200) {
+                $filename = $load_sheet_id. "-loadsheet.pdf";
+                file_put_contents($filename, $response->getBody());
+                // $response is the API Response
+                header('Content-Type: application/pdf');
+                header('Content-Disposition: attachment; filename="' . basename($filename) . '"');
+                readfile($filename);
+            }
+        } catch (\Exception $exception) {
+            die('Unable to download file');
         }
     }
 }

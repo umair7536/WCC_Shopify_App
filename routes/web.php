@@ -242,5 +242,11 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::post('booked_packets/datatable', ['uses' => 'Admin\BookedPacketsController@datatable', 'as' => 'booked_packets.datatable']);
     Route::resource('booked_packets', 'Admin\BookedPacketsController');
     // Booked Packets end
+
+    // Load Sheets
+    Route::get('load_sheets/detail/{id}', ['uses' => 'Admin\LoadSheetsController@detail', 'as' => 'load_sheets.detail']);
+    Route::get('load_sheets/download/{id}', ['uses' => 'Admin\LoadSheetsController@download', 'as' => 'load_sheets.download']);
+    Route::post('load_sheets/datatable', ['uses' => 'Admin\LoadSheetsController@datatable', 'as' => 'load_sheets.datatable']);
+    Route::resource('load_sheets', 'Admin\LoadSheetsController');
 });
 
