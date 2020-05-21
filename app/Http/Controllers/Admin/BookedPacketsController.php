@@ -500,7 +500,7 @@ class BookedPacketsController extends Controller
                                 'status' => Config::get('constants.status_pickup_request_sent')
                             ]);
 
-                        $message .= '<li>Load Sheet # ' . $load_sheet->load_sheet_id . ' is generated successfully. ' . '<a href="' . route('admin.load_sheets.download',[$load_sheet->id]) . '">Click here</a>' . ' to download it or visit ' . '<a href="' . route('admin.load_sheets.index') . '">Load Sheets</a>' . ' menu to visit all sheets.</li>';
+                        $message .= '<li>Load Sheet # <b>' . $load_sheet->load_sheet_id . '</b> is generated successfully. ' . '<a href="' . route('admin.load_sheets.download',[$load_sheet->id]) . '"><b>Click here</b></a>' . ' to download it or visit ' . '<a href="' . route('admin.load_sheets.index') . '"><b>Load Sheets</b></a>' . ' menu to visit all sheets.</li>';
                     } else {
                         $message .= '<li>System failed to generate Load Sheet, Please try again later.</li>';
                     }

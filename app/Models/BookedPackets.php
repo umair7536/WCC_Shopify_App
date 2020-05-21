@@ -1497,6 +1497,7 @@ class BookedPackets extends BaseModal
                 readfile($filename);
             }
         } catch (\Exception $exception) {
+            echo $exception->getFile() . ' - ' . $exception->getMessage();
             die('Unable to download file');
         }
     }
