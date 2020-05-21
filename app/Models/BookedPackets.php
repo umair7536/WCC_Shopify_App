@@ -1502,7 +1502,6 @@ class BookedPackets extends BaseModal
                 exit;
             }
         } catch (\Exception $exception) {
-            echo $exception->getFile() . ' - ' . $exception->getMessage();
             die('Unable to download file');
         }
     }
