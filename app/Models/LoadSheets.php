@@ -156,5 +156,6 @@ class LoadSheets extends BaseModal
 
         LoadSheetPackets::insert($load_sheet_packets);
 
+        return $load_sheet;
     }
 }

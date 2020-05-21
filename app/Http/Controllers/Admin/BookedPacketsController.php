@@ -480,22 +480,14 @@ class BookedPacketsController extends Controller
 
                 if(count($cn_numbers)) {
                     $response = BookedPackets::generateLoadSheet($cn_numbers, $booked_packet->account_id);
-//                    $response = array(
-//                        'status' => true,
-//                        'error' => '',
-//                        'load_sheet_id' => '855083',
-//                    );
                     if($response['status']) {
                         // Any of the packets get success
                         $any_success = true;
 
-                        $message .= '<li>Load Sheet is generated successfully.</li>';
-
-
                         /**
                          * Create Load Sheet Data
                          */
-                        LoadSheets::createLoadSheet($response['load_sheet_id'], $packets, $account_id);
+                        $load_sheet = LoadSheets::createLoadSheet($response['load_sheet_id'], $packets, $account_id);
 
                         /**
                          * Change Packet Status to 'Pickup Request Sent'
@@ -508,6 +500,7 @@ class BookedPacketsController extends Controller
                                 'status' => Config::get('constants.status_pickup_request_sent')
                             ]);
 
+                        $message .= '<li>Load Sheet # ' . $load_sheet->load_sheet_id . ' is generated successfully. ' . '<a href="' . route('admin.load_sheets.download',[$load_sheet->id]) . '">Click here</a>' . ' to download it or visit ' . '<a href="' . route('admin.load_sheets.index') . '">Load Sheets</a>' . ' menu to visit all sheets.</li>';
                     } else {
                         $message .= '<li>System failed to generate Load Sheet, Please try again later.</li>';
                     }
