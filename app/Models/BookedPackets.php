@@ -1491,10 +1491,15 @@ class BookedPackets extends BaseModal
             if($response->getStatusCode() == 200) {
                 $filename = $load_sheet_id. "-loadsheet.pdf";
                 file_put_contents($filename, $response->getBody());
+                //Set the Content-Length header.
+                header('Content-Length: ' . filesize($filename));
+                //Set the Content-Transfer-Encoding to "Binary"
+                header('Content-Transfer-Encoding: Binary');
                 // $response is the API Response
                 header('Content-Type: application/pdf');
                 header('Content-Disposition: attachment; filename="' . basename($filename) . '"');
                 readfile($filename);
+                exit;
             }
         } catch (\Exception $exception) {
             echo $exception->getFile() . ' - ' . $exception->getMessage();
