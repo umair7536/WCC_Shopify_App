@@ -85,8 +85,8 @@ class SingleOrderFulfillmentListener implements ShouldQueue
                                 'order_id' => (int) $event->order['order_id'],
                                 'location_id' => $inventory_location,
                                 'tracking_number' => $event->cn_number,
-                                'tracking_company' => 'Leopards Courier Services',
-                                'notify_customer' => false,
+                                'tracking_company' => 'Leopards',
+                                'notify_customer' => true,
                                 'tracking_urls' => array(
                                     route('track', $event->cn_number)
                                 ),

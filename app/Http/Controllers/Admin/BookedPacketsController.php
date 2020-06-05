@@ -408,8 +408,8 @@ class BookedPacketsController extends Controller
                                         'order_id' => (int) $order['order_id'],
                                         'location_id' => $inventory_location,
                                         'tracking_number' => $booked_packet->cn_number,
-                                        'tracking_company' => 'Leopards Courier Services',
-                                        'notify_customer' => false,
+                                        'tracking_company' => 'Leopards',
+                                        'notify_customer' => true,
                                         'tracking_urls' => array(
                                             route('track', $booked_packet->cn_number)
                                         ),
@@ -884,7 +884,7 @@ class BookedPacketsController extends Controller
                     'order_id' => (int) $request->get('order_id'),
                     'location_id' => $request->get('location_id'),
                     'tracking_number' => $request->get('track_number'),
-                    'tracking_company' => 'Leopards Courier Services',
+                    'tracking_company' => 'Leopards',
                     'notify_customer' => ($request->get('notify_customer') == '1') ? true : false,
                     'tracking_urls' => array(
                         $request->get('tracking_url')
