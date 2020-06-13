@@ -297,7 +297,9 @@ class UsersController extends Controller
             return abort(401);
         }
 
-        $user = User::getData($id);
+        $user = User::where([
+            'id' => $id
+        ])->first();
         if ($user == null) {
             return view('error');
         } else {
