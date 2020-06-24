@@ -52,6 +52,9 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\Leopards\BookedPackets\SingleOrderBookFire' => [
             'App\Listeners\Leopards\BookedPackets\SingleOrderBookListener',
         ],
+        'App\Events\Shopify\Customers\SingleCustomerFire' => [
+            'App\Listeners\Shopify\Customers\SingleCustomerListener',
+        ],
     ];
 
     /**

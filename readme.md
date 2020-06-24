@@ -74,7 +74,7 @@ stdout_logfile=/path/to/laravel/project/storage/logs/supervisor/queue-default.lo
 ###### Single Order Sync Queue
 
 ```
-[program:queue-shopify]
+[program:single]
 process_name=%(program_name)s_%(process_num)02d
 command=php /path/to/laravel/project/artisan queue:work database --sleep=3 --tries=3 --daemon --queue=single
 autostart=true
@@ -82,13 +82,27 @@ autorestart=true
 user=root
 numprocs=1
 redirect_stderr=true
-stdout_logfile=/path/to/laravel/project/storage/logs/supervisor/queue-shopify.log
+stdout_logfile=/path/to/laravel/project/storage/logs/supervisor/single.log
+```
+
+###### Single Customer Sync Queue
+
+```
+[program:customer]
+process_name=%(program_name)s_%(process_num)02d
+command=php /path/to/laravel/project/artisan queue:work database --sleep=3 --tries=3 --daemon --queue=customer
+autostart=true
+autorestart=true
+user=root
+numprocs=1
+redirect_stderr=true
+stdout_logfile=/path/to/laravel/project/storage/logs/supervisor/customer.log
 ```
 
 ###### Order Fulfillment Queue
 
 ```
-[program:queue-shopify]
+[program:fulfillment]
 process_name=%(program_name)s_%(process_num)02d
 command=php /path/to/laravel/project/artisan queue:work database --sleep=3 --tries=3 --daemon --queue=fulfillment
 autostart=true
@@ -96,14 +110,14 @@ autorestart=true
 user=root
 numprocs=1
 redirect_stderr=true
-stdout_logfile=/path/to/laravel/project/storage/logs/supervisor/queue-shopify.log
+stdout_logfile=/path/to/laravel/project/storage/logs/supervisor/fulfillment.log
 ```
 
 
 ###### Single Order Book
 
 ```
-[program:queue-shopify]
+[program:bookpacket]
 process_name=%(program_name)s_%(process_num)02d
 command=php /path/to/laravel/project/artisan queue:work database --sleep=3 --tries=3 --daemon --queue=bookpacket
 autostart=true
@@ -111,5 +125,5 @@ autorestart=true
 user=root
 numprocs=1
 redirect_stderr=true
-stdout_logfile=/path/to/laravel/project/storage/logs/supervisor/queue-shopify.log
+stdout_logfile=/path/to/laravel/project/storage/logs/supervisor/bookpacket.log
 ```

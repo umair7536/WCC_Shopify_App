@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\Shopify\Customers\SingleCustomerFire;
 use App\Events\Shopify\Orders\SingleOrderFire;
 use App\Helpers\ShopifyHelper;
 use App\Http\Controllers\Controller;
@@ -201,50 +202,11 @@ class WebhooksController extends Controller
 
                                 break;
                             default:
+
                                 /**
-                                 * Sync Order Customer
+                                 * Dispatch Sync Single Customer Event
                                  */
-                                if(isset($customer['id']) && count($customer)) {
-                                    /*
-                                    * Prepare record before insert
-                                    */
-                                    $customer['customer_id'] = $customer['id'];
-                                    unset($customer['id']);
-
-                                    if(isset($customer['default_address']) && count($customer['default_address'])) {
-                                        $default_address = $customer['default_address'];
-                                        unset($default_address['id']);
-                                        unset($default_address['customer_id']);
-                                        $customer = array_merge($customer, $default_address);
-                                        $customer['default_address'] = json_encode($customer['default_address']);
-                                    }
-
-                                    /**
-                                     * Set Address based on array provided
-                                     */
-                                    if(isset($customer['addresses']) && count($customer['addresses'])) {
-                                        $customer['addresses'] = json_encode($customer['addresses']);
-                                    }
-
-                                    $customer_processed = ShopifyCustomers::prepareRecord($customer);
-                                    $customer_processed['account_id'] = $shop['account_id'];
-
-                                    $customer_record = ShopifyCustomers::where([
-                                        'customer_id' => $customer_processed['customer_id'],
-                                        'account_id' => $customer_processed['account_id'],
-                                    ])->select('id')->first();
-
-                                    if($customer_record) {
-                                        ShopifyCustomers::where([
-                                            'customer_id' => $customer_processed['customer_id'],
-                                            'account_id' => $customer_processed['account_id'],
-                                        ])->update($customer_processed);
-                                    } else {
-                                        ShopifyCustomers::create($customer_processed);
-                                    }
-
-                                }
-
+                                event(new SingleCustomerFire($customer, $shop));
                                 break;
                         }
                     }
