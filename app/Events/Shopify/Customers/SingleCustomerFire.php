@@ -31,9 +31,9 @@ class SingleCustomerFire
      *
      * @return void
      */
-    public function __construct(array $order, array $shop)
+    public function __construct(array $customer, array $shop)
     {
-        $this->order = $order;
+        $this->customer = $customer;
         $this->shop = $shop;
     }
 
