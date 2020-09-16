@@ -303,6 +303,11 @@ class ShopifyOrdersController extends Controller
                         }
                     }
 
+                    if($order->cancelled_at) {
+                        $message .= '<li>Cancelled Order <b>' . $order->name . '</b> is not allowed to book using bulk action. To book anyway please <b><a target="_blank" href="' . route('admin.booked_packets.create',['order_id' => $order->order_id]) . '">Click Here</a></b>.</li>';
+                        continue;
+                    }
+
                     /**
                      * Dispatch Order Book in LCS
                      */
