@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Events\Shopify\Customers\SingleCustomerFire;
+use App\Events\Shopify\Orders\SingleOrderCreateFire;
 use App\Events\Shopify\Orders\SingleOrderFire;
 use App\Helpers\ShopifyHelper;
 use App\Http\Controllers\Controller;
@@ -101,6 +102,7 @@ class WebhooksController extends Controller
 
                         $shop = $shop->toArray();
                         $order = json_decode($request->getBody(), true);
+                        $order['order_id'] = $order['id'];
 
                         switch ($shopify_topic) {
                             case 'orders/delete':
@@ -132,6 +134,13 @@ class WebhooksController extends Controller
                                     'order_id' => $order['id'],
                                     'account_id' => $shop['account_id'],
                                 ))->forceDelete();
+
+                                break;
+                            case 'orders/create':
+                                /**
+                                 * Dispatch Sync Leopards Cities Event and Delte existing records
+                                 */
+                                event(new SingleOrderCreateFire($order, $shop));
 
                                 break;
                             default:

@@ -85,6 +85,62 @@ redirect_stderr=true
 stdout_logfile=/path/to/laravel/project/storage/logs/supervisor/single.log
 ```
 
+###### Single Order Create Queue
+
+```
+[program:singlecreate]
+process_name=%(program_name)s_%(process_num)02d
+command=php /path/to/laravel/project/artisan queue:work database --sleep=3 --tries=3 --daemon --queue=singlecreate
+autostart=true
+autorestart=true
+user=root
+numprocs=1
+redirect_stderr=true
+stdout_logfile=/path/to/laravel/project/storage/logs/supervisor/singlecreate.log
+```
+
+###### Single Order - Sync Customer Part
+
+```
+[program:singlecustomer]
+process_name=%(program_name)s_%(process_num)02d
+command=php /path/to/laravel/project/artisan queue:work database --sleep=3 --tries=3 --daemon --queue=singlecustomer
+autostart=true
+autorestart=true
+user=root
+numprocs=1
+redirect_stderr=true
+stdout_logfile=/path/to/laravel/project/storage/logs/supervisor/singlecustomer.log
+```
+
+###### Single Order - Sync Items Part
+
+```
+[program:singleitems]
+process_name=%(program_name)s_%(process_num)02d
+command=php /path/to/laravel/project/artisan queue:work database --sleep=3 --tries=3 --daemon --queue=singleitems
+autostart=true
+autorestart=true
+user=root
+numprocs=1
+redirect_stderr=true
+stdout_logfile=/path/to/laravel/project/storage/logs/supervisor/singleitems.log
+```
+
+###### Single Order - Sync Addresses Part
+
+```
+[program:singleaddress]
+process_name=%(program_name)s_%(process_num)02d
+command=php /path/to/laravel/project/artisan queue:work database --sleep=3 --tries=3 --daemon --queue=singleaddress
+autostart=true
+autorestart=true
+user=root
+numprocs=1
+redirect_stderr=true
+stdout_logfile=/path/to/laravel/project/storage/logs/supervisor/singleaddress.log
+```
+
 ###### Single Customer Sync Queue
 
 ```
