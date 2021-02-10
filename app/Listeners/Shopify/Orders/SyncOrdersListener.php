@@ -13,6 +13,8 @@ use dispatch;
 
 class SyncOrdersListener implements ShouldQueue
 {
+    public $queue = 'high';
+
     /**
      * Create the event listener.
      *

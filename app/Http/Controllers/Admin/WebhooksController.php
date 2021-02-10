@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Events\Shopify\Customers\SingleCustomerFire;
+use App\Events\Shopify\Orders\SingleOrderCancelledFire;
 use App\Events\Shopify\Orders\SingleOrderCreateFire;
 use App\Events\Shopify\Orders\SingleOrderFire;
+use App\Events\Shopify\Orders\SingleOrderFulfilledFire;
+use App\Events\Shopify\Orders\SingleOrderUpdatedFire;
 use App\Helpers\ShopifyHelper;
 use App\Http\Controllers\Controller;
 use App\Models\BillingAddresses;
@@ -137,11 +140,16 @@ class WebhooksController extends Controller
 
                                 break;
                             case 'orders/create':
-                                /**
-                                 * Dispatch Sync Leopards Cities Event and Delte existing records
-                                 */
                                 event(new SingleOrderCreateFire($order, $shop));
-
+                                break;
+                            case 'orders/fulfilled':
+                                event(new SingleOrderFulfilledFire($order, $shop));
+                                break;
+                            case 'orders/cancelled':
+                                event(new SingleOrderCancelledFire($order, $shop));
+                                break;
+                            case 'orders/updated':
+                                event(new SingleOrderUpdatedFire($order, $shop));
                                 break;
                             default:
                                 /**

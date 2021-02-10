@@ -43,6 +43,15 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\Shopify\Orders\SingleOrderCreateFire' => [
             'App\Listeners\Shopify\Orders\SingleOrderCreateListener',
         ],
+        'App\Events\Shopify\Orders\SingleOrderFulfilledFire' => [
+            'App\Listeners\Shopify\Orders\SingleOrderFulfilledListener',
+        ],
+        'App\Events\Shopify\Orders\SingleOrderCancelledFire' => [
+            'App\Listeners\Shopify\Orders\SingleOrderCancelledListener',
+        ],
+        'App\Events\Shopify\Orders\SingleOrderUpdatedFire' => [
+            'App\Listeners\Shopify\Orders\SingleOrderUpdatedListener',
+        ],
         'App\Events\Shopify\Orders\UpdateOrderFire' => [
             'App\Listeners\Shopify\Orders\UpdateOrderListener',
         ],

@@ -94,9 +94,51 @@ command=php /path/to/laravel/project/artisan queue:work database --sleep=3 --tri
 autostart=true
 autorestart=true
 user=root
-numprocs=1
+numprocs=5
 redirect_stderr=true
 stdout_logfile=/path/to/laravel/project/storage/logs/supervisor/singlecreate.log
+```
+
+###### Single Order Fulfilled Queue
+
+```
+[program:singlefulfilled]
+process_name=%(program_name)s_%(process_num)02d
+command=php /path/to/laravel/project/artisan queue:work database --sleep=3 --tries=3 --daemon --queue=singlefulfilled
+autostart=true
+autorestart=true
+user=root
+numprocs=5
+redirect_stderr=true
+stdout_logfile=/path/to/laravel/project/storage/logs/supervisor/singlefulfilled.log
+```
+
+###### Single Order Cancelled Queue
+
+```
+[program:singlecancelled]
+process_name=%(program_name)s_%(process_num)02d
+command=php /path/to/laravel/project/artisan queue:work database --sleep=3 --tries=3 --daemon --queue=singlecancelled
+autostart=true
+autorestart=true
+user=root
+numprocs=5
+redirect_stderr=true
+stdout_logfile=/path/to/laravel/project/storage/logs/supervisor/singlecancelled.log
+```
+
+###### Single Order Updated Queue
+
+```
+[program:singleupdated]
+process_name=%(program_name)s_%(process_num)02d
+command=php /path/to/laravel/project/artisan queue:work database --sleep=3 --tries=3 --daemon --queue=singleupdated
+autostart=true
+autorestart=true
+user=root
+numprocs=5
+redirect_stderr=true
+stdout_logfile=/path/to/laravel/project/storage/logs/supervisor/singleupdated.log
 ```
 
 ###### Single Order - Sync Customer Part

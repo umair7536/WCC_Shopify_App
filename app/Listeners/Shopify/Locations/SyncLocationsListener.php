@@ -12,6 +12,8 @@ use dispatch;
 
 class SyncLocationsListener implements ShouldQueue
 {
+    public $queue = 'high';
+
     /**
      * Create the event listener.
      *

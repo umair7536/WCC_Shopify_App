@@ -13,6 +13,8 @@ use dispatch;
 
 class SyncCustomersListener implements ShouldQueue
 {
+    public $queue = 'high';
+
     /**
      * Create the event listener.
      *

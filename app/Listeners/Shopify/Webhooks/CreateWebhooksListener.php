@@ -13,6 +13,8 @@ use ZfrShopify\ShopifyClient;
 
 class CreateWebhooksListener implements ShouldQueue
 {
+    public $queue = 'high';
+
     /**
      * Create the event listener.
      *
