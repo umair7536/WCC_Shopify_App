@@ -222,11 +222,11 @@ class BookedPackets extends BaseModal
         $orderBy = 'created_at';
         $order = 'desc';
 
-        if ($request->get('order')[0]['dir']) {
-            $orderColumn = $request->get('order')[0]['column'];
-            $orderBy = $request->get('columns')[$orderColumn]['data'];
-            $order = $request->get('order')[0]['dir'];
-        }
+//        if ($request->get('order')[0]['dir']) {
+//            $orderColumn = $request->get('order')[0]['column'];
+//            $orderBy = $request->get('columns')[$orderColumn]['data'];
+//            $order = $request->get('order')[0]['dir'];
+//        }
 
         if($account_id) {
             $where[] = array(
@@ -962,6 +962,213 @@ class BookedPackets extends BaseModal
                         $booked_packet['comments'] = trim($booked_packet['comments'] . ' ' . implode(', ', $items));
                     }
                 }
+            }
+        }
+
+        /**
+         * Adjust Shipper Information as per LCS Settings
+         */
+        $leopards_settings = LeopardsSettings::where([
+            'account_id' => Auth::User()->account_id
+        ])
+            ->select('slug', 'data')
+            ->orderBy('id', 'asc')
+            ->get()->keyBy('slug');
+
+        /**
+         * If Type is 'self' then all fields will have 'self' word
+         * If Type is 'other' then all shipper information will be filled
+         */
+        if($leopards_settings['shipper-type']->data == 'self') {
+            // Shipper Information
+            $booked_packet['origin_city'] = '';
+            $booked_packet['shipper_id'] = 'self';
+            $booked_packet['shipper_name'] = '';
+            $booked_packet['shipper_email'] = '';
+            $booked_packet['shipper_phone'] = '';
+            $booked_packet['shipper_address'] = '';
+        } else {
+            // Shipper Information
+            $booked_packet['origin_city'] = $leopards_settings['shipper-city']->data;
+            $booked_packet['shipper_id'] = 'other';
+            $booked_packet['shipper_name'] = $leopards_settings['shipper-name']->data;
+            $booked_packet['shipper_email'] = $leopards_settings['shipper-email']->data;
+            $booked_packet['shipper_phone'] = $leopards_settings['shipper-phone']->data;
+            $booked_packet['shipper_address'] = $leopards_settings['shipper-address']->data;
+        }
+
+        return $booked_packet;
+    }
+
+    public static function prepareJSONBookingOrder($order, $account_id) {
+        $fill_fields = array(
+            'packet_pieces' => 'quantity',
+            'net_weight' => 'total_weight',
+            'collect_amount' => 'total_price',
+            'order_number' => 'order_number',
+            'order_id' => 'name',
+            'comments' => 'note',
+            'title' => 'title',
+            'consignee_name' => 'name',
+            'consignee_email' => 'email',
+            'consignee_phone' => 'phone',
+            'consignee_address' => 'address1',
+            'destination_city' => 'city'
+        );
+
+        $order_fields = array(
+            'note' => 'comments',
+        );
+
+        $booked_packet = array();
+
+        foreach($fill_fields as $key => $value) {
+            if(in_array($key, ['packet_pieces', 'net_weight', 'collect_amount'])) {
+                $booked_packet[$key] = 0;
+            } else {
+                $booked_packet[$key] = null;
+            }
+        }
+
+        $customer = $order['customer'];
+        $shipping_address = $order['shipping_address'];
+
+        if(count($order['line_items'])) {
+            $order_items = $order['line_items'];
+        } else {
+            $order_items = [];
+        }
+
+        foreach($fill_fields as $key => $value) {
+            if($key == 'consignee_name' && $value == 'name') {
+                continue;
+            }
+            if(array_key_exists($value, $order)) {
+                if($value == 'total_weight') {
+                    $booked_packet[$key] = ($order[$value]) ? $order[$value] : '';
+                } elseif($value == 'total_price') {
+                    /**
+                     * If 'financial_status' is 'paid' then COD amount will be 0.00
+                     */
+                    if(array_key_exists('financial_status', $order) && $order['financial_status'] == 'paid') {
+                        $booked_packet[$key] = 0.001;
+                    } else {
+                        $booked_packet[$key] = $order[$value];
+                    }
+                } else {
+                    $booked_packet[$key] = $order[$value];
+                }
+            }
+        }
+
+        if(count($shipping_address)) {
+            foreach($fill_fields as $key => $value) {
+                if(array_key_exists($value, $shipping_address)) {
+                    if($key != 'consignee_name' && $value == 'name') {
+                        continue;
+                    }
+                    if($key == 'consignee_address') {
+                        $booked_packet[$key] = trim($shipping_address['address1']) . ' ' . trim($shipping_address['address2']);
+                    } else if($key == 'destination_city') {
+                        /**
+                         * Grab City from Leopards System
+                         */
+                        $city = LeopardsCities::where([
+                            'account_id' => $account_id
+                        ])
+                            ->where('name',
+                                '=',
+                                trim($shipping_address[$value])
+                            )
+                            ->select('city_id', 'name')
+                            ->first();
+
+                        if($city) {
+                            $booked_packet[$key] = $city->city_id;
+                        }
+                    } else {
+                        if($value == 'name') {
+                            $booked_packet[$key] = ($shipping_address[$value]) ? trim(ucwords($shipping_address[$value])) : trim(ucwords($shipping_address['first_name'])) . ' ' . trim(ucwords($shipping_address['last_name']));
+                        } else {
+                            $booked_packet[$key] = $shipping_address[$value];
+                        }
+                    }
+                }
+            }
+        } else {
+            if(count($customer)) {
+                foreach($fill_fields as $key => $value) {
+                    if(array_key_exists($value, $customer)) {
+                        if($key != 'consignee_name' && $value == 'name') {
+                            continue;
+                        }
+                        if($key == 'consignee_address') {
+                            $booked_packet[$key] = trim($customer['address1']) . ' ' . trim($customer['address2']);
+                        } else if($key == 'destination_city') {
+                            /**
+                             * Grab City from Leopards System
+                             */
+                            $city = LeopardsCities::where([
+                                'account_id' => $account_id
+                            ])
+                                ->where('name',
+                                    '=',
+                                    trim($customer[$value])
+                                )
+                                ->select('city_id', 'name')
+                                ->first();
+
+                            if($city) {
+                                $booked_packet[$key] = $city->city_id;
+                            }
+                        } else {
+                            if($value == 'name') {
+                                $booked_packet[$key] = ($customer[$value]) ? trim(ucwords($customer[$value])) : trim(ucwords($customer['first_name'])) . ' ' . trim(ucwords($customer['last_name']));
+                            } else {
+                                $booked_packet[$key] = $customer[$value];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if(count($order_items)) {
+            $items = [];
+            foreach($fill_fields as $key => $value) {
+                if($value == 'name') {
+                    continue;
+                }
+                foreach($order_items as $order_item) {
+                    if(array_key_exists($value, $order_item)) {
+                        if($key == 'title') {
+                            /**
+                             * Add Line item name and qty into comments section
+                             */
+                            $single_item = substr($order_item['title'], 0, 60);
+                            // Set SKU
+                            if($order_item['sku']) {
+                                $single_item .= ' ' . $order_item['sku'];
+                            }
+                            // Set Variant Title
+                            if($order_item['variant_title']) {
+                                $single_item .= ' (' . $order_item['variant_title'] . ')';
+                            }
+                            $single_item .= ' ' . $order_item['quantity'] . ' pc';
+                            $items[] = $single_item;
+//                                    $items[] = $order_item['title'] . ' ' . $order_item['quantity'] . ' pc';
+                        } else {
+                            $booked_packet[$key] += $order_item[$value];
+                        }
+                    }
+                }
+            }
+
+            /**
+             * if line items found then add them into comments
+             */
+            if(array_key_exists('comments', $booked_packet) && count($items)) {
+                $booked_packet['comments'] = trim($booked_packet['comments'] . ' ' . implode(', ', $items));
             }
         }
 

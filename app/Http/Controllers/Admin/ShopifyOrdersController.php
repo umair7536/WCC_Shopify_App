@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Events\Leopards\BookedPackets\SingleOrderBookFire;
 use App\Events\Shopify\Orders\SingleOrderFulfillmentFire;
+use App\Events\Shopify\Orders\SingleOrderUpdatedFire;
 use App\Events\Shopify\Orders\SyncOrdersFire;
 use App\Helpers\ShopifyHelper;
 use App\Models\Accounts;
@@ -1066,11 +1067,15 @@ class ShopifyOrdersController extends Controller
                     $order = $shopifyClient->getOrder([
                         'id' => (int) $request->get('id')
                     ]);
+                    $order['order_id'] = $order['id'];
+                    $order['account_id'] = $shop->account_id;
 
-                    $id = ShopifyHelper::syncSingleOrder($order, $shop->toArray());
+                    event(new SingleOrderUpdatedFire($order, $shop->toArray()));
+
+//                    $id = ShopifyHelper::syncSingleOrder($order, $shop->toArray());
 
 //                    return redirect()->route('admin.shopify_orders.book_packet',['id' => $id]);
-                    return redirect()->route('admin.booked_packets.create',['order_id' => $request->get('id')]);
+                    return redirect()->route('admin.booked_packets.create',['order_id' => $request->get('id'), 'json_order' => base64_encode(json_encode($order))]);
 
                 } catch (\Exception $exception) {}
             }

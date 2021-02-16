@@ -588,9 +588,35 @@ class BookedPacketsController extends Controller
         }
 
         /**
-         * If Order ID is provided then prepare data to automatically be filled
+         * If Json Based Order is present, make process faster
          */
-        $data['booked_packet'] = BookedPackets::prepareBookingOrder($request->get('order_id'), Auth::User()->account_id);
+        if($request->get('json_order') != '') {
+            try {
+                $order = json_decode(base64_decode($request->get('json_order')), true);
+                if(
+                    (
+                        isset($order['id']) && isset($order['customer'])
+                    ) && count($order['customer'])
+                ) {
+                    /**
+                     * If Order ID is provided then prepare data to automatically be filled
+                     */
+                    $data['booked_packet'] = BookedPackets::prepareJSONBookingOrder($order, Auth::User()->account_id);
+                } else {
+                    throw new \Exception('Order ID Not found');
+                }
+            } catch (\Exception $exception) {
+                /**
+                 * If Order ID is provided then prepare data to automatically be filled
+                 */
+                $data['booked_packet'] = BookedPackets::prepareBookingOrder($request->get('order_id'), Auth::User()->account_id);
+            }
+        } else {
+            /**
+             * If Order ID is provided then prepare data to automatically be filled
+             */
+            $data['booked_packet'] = BookedPackets::prepareBookingOrder($request->get('order_id'), Auth::User()->account_id);
+        }
 
         $booking_date = Carbon::now()->format('Y-m-d');
 
@@ -624,7 +650,7 @@ class BookedPacketsController extends Controller
         $consignee_id = 'other';
         $consignees = ['other' => 'Other'];
 
-        return view('admin.booked_packets.create',compact('booking_date', 'default_shipment_type', 'shipment_type', 'volumetric_dimensions_calculated', 'leopards_cities', 'shippers', 'consignees', 'shipper_id', 'consignee_id', 'data'));
+        return view('admin.booked_packets.create',compact('booking_date', 'default_shipment_type', 'shipment_type', 'volumetric_dimensions_calculated', 'leopards_cities', 'shippers', 'consignees', 'consignee_id', 'data'));
     }
 
 
