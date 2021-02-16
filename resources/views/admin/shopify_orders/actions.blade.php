@@ -36,7 +36,7 @@
     <a class="btn btn-xs btn-success margin-bottom-5" href="{{ route('admin.shopify_orders.book_packet',['id' => $shopify_order->id]) }}">
         <i class="fa fa-truck"></i>&nbsp;Auto Book
     </a>
-    <a class="btn btn-xs btn-info margin-bottom-5" href="{{ route('admin.booked_packets.create',['order_id' => $shopify_order->order_id]) }}" target="_blank">
+    <a class="btn btn-xs btn-info margin-bottom-5" href="{{ route('admin.shopify_orders.book_manual',['id' => $shopify_order->order_id, 'shop' => $shop->myshopify_domain]) }}" target="_blank">
         <i class="fa fa-gears"></i>&nbsp;Manual Book
     </a>
     <a class="btn btn-xs btn-danger margin-bottom-5" href="{{ route('admin.shopify_orders.error_log',[$shopify_order->order_id]) }}" data-target="#ajax_error_logs" data-toggle="modal">

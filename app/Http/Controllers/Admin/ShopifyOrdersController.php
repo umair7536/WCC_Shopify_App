@@ -156,7 +156,7 @@ class ShopifyOrdersController extends Controller
                     'consignment_address' => "<div id=\"consignment_address-" . $shopify_order->id . "\">" . $consignment_address . "</div>",
                     'total_price' => number_format($shopify_order->total_price),
                     'financial_status' => "<span class=\"label label-default\"> " . ucfirst($shopify_order->financial_status) . " </span>",
-                    'actions' => view('admin.shopify_orders.actions', compact('shopify_order', 'shipping_addresses'))->render(),
+                    'actions' => view('admin.shopify_orders.actions', compact('shopify_order', 'shipping_addresses', 'shop'))->render(),
                 );
             }
         }
