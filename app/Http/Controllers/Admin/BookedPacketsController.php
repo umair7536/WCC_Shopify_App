@@ -8,6 +8,7 @@ use App\Helpers\LeopardsHelper;
 use App\Helpers\ShopifyHelper;
 use App\Models\Accounts;
 use App\Models\BookedPackets;
+use App\Models\JsonOrders;
 use App\Models\LeopardsCities;
 use App\Models\LeopardsSettings;
 use App\Models\LoadSheets;
@@ -592,7 +593,18 @@ class BookedPacketsController extends Controller
          */
         if($request->get('json_order') != '') {
             try {
-                $order = json_decode(base64_decode($request->get('json_order')), true);
+                /**
+                 * Store Data in JSON Data table
+                 */
+                $json_order = JsonOrders::where([
+                    'account_id' => Auth::User()->account_id,
+                    'id' => base64_decode($request->get('json_order'))
+                ])->first();
+                if(!$json_order) {
+                    throw new \Exception('Order ID Not found');
+                } else {
+                    $order = json_decode($json_order->json_data, true);
+                }
                 if(
                     (
                         isset($order['id']) && isset($order['customer'])

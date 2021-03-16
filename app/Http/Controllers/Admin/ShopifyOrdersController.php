@@ -9,6 +9,7 @@ use App\Events\Shopify\Orders\SyncOrdersFire;
 use App\Helpers\ShopifyHelper;
 use App\Models\Accounts;
 use App\Models\BookedPackets;
+use App\Models\JsonOrders;
 use App\Models\LeopardsCities;
 use App\Models\LeopardsSettings;
 use App\Models\OrderLogs;
@@ -1074,8 +1075,17 @@ class ShopifyOrdersController extends Controller
 
 //                    $id = ShopifyHelper::syncSingleOrder($order, $shop->toArray());
 
+                    /**
+                     * Store Data in JSON Data table
+                     */
+                    $json_order = JsonOrders::create([
+                        'account_id' => $shop->account_id,
+                        'json_data' => json_encode($order),
+                        'created_at' => Carbon::now()->toDateTimeString()
+                    ]);
+
 //                    return redirect()->route('admin.shopify_orders.book_packet',['id' => $id]);
-                    return redirect()->route('admin.booked_packets.create',['order_id' => $request->get('id'), 'json_order' => base64_encode(json_encode($order))]);
+                    return redirect()->route('admin.booked_packets.create',['order_id' => $request->get('id'), 'json_order' => base64_encode($json_order->id)]);
 
                 } catch (\Exception $exception) {}
             }

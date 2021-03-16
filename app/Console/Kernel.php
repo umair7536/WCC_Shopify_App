@@ -28,6 +28,7 @@ class Kernel extends ConsoleKernel
 //        '\App\Console\Commands\Shopify\SyncCollects',
         '\App\Console\Commands\Shopify\SyncOrders',
         '\App\Console\Commands\Shopify\MarkOrderAsPaid',
+        '\App\Console\Commands\System\CleanJsonOrders',
     ];
 
     /**
@@ -91,6 +92,13 @@ class Kernel extends ConsoleKernel
          */
         $schedule->command('shopify:sync-orders')
             ->everyMinute();
+
+        /*
+         * Deliver SMS on time of booking
+         */
+        $schedule->command('lcs:clean-jsonorders`')
+            ->withoutOverlapping()
+            ->twiceDaily();
 
         /*
          * Sync Products from Shopify
