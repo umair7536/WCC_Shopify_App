@@ -18,6 +18,7 @@ This is not a package - it's a full Laravel project that you should use as a sta
     - `* * * * * php /path-to-your-project/artisan schedule:run >> /dev/null 2>&1`
     - `* * * * * php /path-to-your-project/artisan shopify:handle-heavy-lifting >> /dev/null 2>&1`
     - `* * * * * php /path-to-your-project/artisan lcs:sync-packet-status >> /dev/null 2>&1`
+    - `0 0 * * * php /path-to-your-project/artisan lcs:clean-jsonorders >> /dev/null 2>&1`
 - If you are setting up redis queue don't forgot to create `storage/logs/supervisor` folder and assign permissions appropriately.
 
 ##### Setup Redis Server for Queue

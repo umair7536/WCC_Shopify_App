@@ -94,13 +94,6 @@ class Kernel extends ConsoleKernel
             ->everyMinute();
 
         /*
-         * Deliver SMS on time of booking
-         */
-        $schedule->command('lcs:clean-jsonorders`')
-            ->withoutOverlapping()
-            ->twiceDaily();
-
-        /*
          * Sync Products from Shopify
          */
 //        $schedule->command('shopify:upload-variants')
