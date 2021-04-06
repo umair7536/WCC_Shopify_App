@@ -184,6 +184,34 @@ redirect_stderr=true
 stdout_logfile=/path/to/laravel/project/storage/logs/supervisor/singleaddress.log
 ```
 
+###### Single Order - Sync Shipping Address Part
+
+```
+[program:singleshippingaddress]
+process_name=%(program_name)s_%(process_num)02d
+command=php /path/to/laravel/project/artisan queue:work database --sleep=3 --tries=3 --daemon --queue=singleshippingaddress
+autostart=true
+autorestart=true
+user=root
+numprocs=1
+redirect_stderr=true
+stdout_logfile=/path/to/laravel/project/storage/logs/supervisor/singleshippingaddress.log
+```
+
+###### Single Order - Sync Billing Address Part
+
+```
+[program:singlebillingaddress]
+process_name=%(program_name)s_%(process_num)02d
+command=php /path/to/laravel/project/artisan queue:work database --sleep=3 --tries=3 --daemon --queue=singlebillingaddress
+autostart=true
+autorestart=true
+user=root
+numprocs=1
+redirect_stderr=true
+stdout_logfile=/path/to/laravel/project/storage/logs/supervisor/singlebillingaddress.log
+```
+
 ###### Single Customer Sync Queue
 
 ```
