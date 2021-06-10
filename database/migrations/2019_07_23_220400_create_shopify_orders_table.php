@@ -16,7 +16,7 @@ class CreateShopifyOrdersTable extends Migration
         Schema::create('shopify_orders', function (Blueprint $table) {
             $table->increments('id');
 
-            $table->string('order_id');
+            $table->bigInteger('order_id');
             $table->string('email')->nullable();
             $table->string('name')->nullable();
             $table->string('number')->nullable();
@@ -92,6 +92,7 @@ class CreateShopifyOrdersTable extends Migration
             $table->unsignedInteger('account_id')->nullable();
             // Manage Foreign Key Relationships
             $table->foreign('account_id')->references('id')->on('accounts');
+            $table->index('order_id');
 
             $table->dateTime('processed_at')->nullable();
             $table->dateTime('closed_at')->nullable();

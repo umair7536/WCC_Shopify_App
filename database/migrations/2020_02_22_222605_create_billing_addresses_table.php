@@ -16,7 +16,7 @@ class CreateBillingAddressesTable extends Migration
         Schema::create('billing_addresses', function (Blueprint $table) {
             $table->increments('id');
 
-            $table->string('order_id')->nullable();
+            $table->bigInteger('order_id')->nullable();
 
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
@@ -39,6 +39,7 @@ class CreateBillingAddressesTable extends Migration
             $table->unsignedInteger('account_id')->nullable();
             // Manage Foreign Key Relationships
             $table->foreign('account_id')->references('id')->on('accounts');
+            $table->index('order_id');
 
             $table->timestamps();
             $table->softDeletes();

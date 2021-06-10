@@ -16,10 +16,10 @@ class CreateShopifyOrderItemsTable extends Migration
         Schema::create('shopify_order_items', function (Blueprint $table) {
             $table->increments('id');
 
-            $table->string('order_id');
-            $table->string('item_id');
-            $table->string('variant_id')->nullable();
-            $table->string('product_id')->nullable();
+            $table->bigInteger('order_id');
+            $table->bigInteger('item_id');
+            $table->bigInteger('variant_id')->nullable();
+            $table->bigInteger('product_id')->nullable();
             $table->string('admin_graphql_api_id');
             $table->string('title')->nullable();
             $table->unsignedInteger('quantity');
@@ -50,6 +50,7 @@ class CreateShopifyOrderItemsTable extends Migration
             $table->unsignedInteger('account_id')->nullable();
             // Manage Foreign Key Relationships
             $table->foreign('account_id')->references('id')->on('accounts');
+            $table->index('order_id');
         });
     }
 

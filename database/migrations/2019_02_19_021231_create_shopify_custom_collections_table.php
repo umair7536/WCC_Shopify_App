@@ -16,7 +16,7 @@ class CreateShopifyCustomCollectionsTable extends Migration
         Schema::create('shopify_custom_collections', function (Blueprint $table) {
             $table->increments('id');
 
-            $table->unsignedInteger('collection_id')->nullable();
+            $table->bigInteger('collection_id')->nullable();
             $table->string('title')->nullable();
             $table->text('body_html')->nullable();
             $table->string('handle')->nullable();
@@ -38,6 +38,7 @@ class CreateShopifyCustomCollectionsTable extends Migration
             $table->foreign('account_id')->references('id')->on('accounts');
             $table->foreign('created_by')->references('id')->on('users');
             $table->foreign('updated_by')->references('id')->on('users');
+            $table->index('collection_id');
 
             $table->softDeletes();
         });

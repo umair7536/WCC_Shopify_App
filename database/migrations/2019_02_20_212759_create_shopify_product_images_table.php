@@ -16,9 +16,9 @@ class CreateShopifyProductImagesTable extends Migration
         Schema::create('shopify_product_images', function (Blueprint $table) {
             $table->increments('id');
 
-            $table->string('image_id')->nullable();
+            $table->bigInteger('image_id')->nullable();
             $table->unsignedInteger('position')->nullable();
-            $table->string('product_id')->nullable();
+            $table->bigInteger('product_id')->nullable();
             $table->text('variant_ids')->nullable();
             $table->text('src')->nullable();
             $table->string('alt')->nullable();
@@ -30,6 +30,8 @@ class CreateShopifyProductImagesTable extends Migration
             // Manage Foreign Key Relationships
             $table->foreign('product_id')->references('product_id')->on('shopify_products');
             $table->foreign('account_id')->references('id')->on('accounts');
+            $table->index('product_id');
+            $table->index('image_id');
 
             $table->timestamps();
         });

@@ -19,7 +19,7 @@ class CreateShopifyShopsTable extends Migration
         Schema::create('shopify_shops', function (Blueprint $table) {
             $table->increments('id');
             $table->mediumText('access_token');
-            $table->unsignedInteger('store_id');
+            $table->bigInteger('store_id');
             $table->string('name', 255)->nullable();
             $table->string('domain', 255)->nullable();
             $table->string('myshopify_domain', 255)->nullable();

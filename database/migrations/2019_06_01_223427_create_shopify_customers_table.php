@@ -15,7 +15,7 @@ class CreateShopifyCustomersTable extends Migration
     {
         Schema::create('shopify_customers', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('customer_id');
+            $table->bigInteger('customer_id');
             $table->string('admin_graphql_api_id');
 
             $table->string('email')->nullable();
@@ -51,6 +51,7 @@ class CreateShopifyCustomersTable extends Migration
             $table->unsignedInteger('account_id')->nullable();
             // Manage Foreign Key Relationships
             $table->foreign('account_id', 'shopify_customers_account')->references('id')->on('accounts');
+            $table->index('customer_id');
 
             $table->timestamps();
             $table->softDeletes();

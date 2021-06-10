@@ -16,7 +16,7 @@ class CreateShopifyProductsTable extends Migration
         Schema::create('shopify_products', function (Blueprint $table) {
             $table->increments('id');
 
-            $table->string('product_id')->unique()->nullable();
+            $table->bigInteger('product_id')->unique()->nullable();
             $table->string('title')->nullable();
             $table->text('body_html')->nullable();
             $table->string('handle')->nullable();
@@ -35,6 +35,7 @@ class CreateShopifyProductsTable extends Migration
             $table->unsignedInteger('account_id')->nullable();
             // Manage Foreign Key Relationships
             $table->foreign('account_id')->references('id')->on('accounts');
+            $table->index('product_id');
 
             $table->timestamps();
             $table->softDeletes();

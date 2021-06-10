@@ -17,12 +17,13 @@ class CreateShopifyProductTagsTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('account_id')->nullable();
             $table->unsignedInteger('tag_id')->nullable();
-            $table->string('product_id')->nullable();
+            $table->bigInteger('product_id')->nullable();
 
             // Manage Foreign Key Relationships
             $table->foreign('account_id')->references('id')->on('accounts');
             $table->foreign('tag_id')->references('id')->on('shopify_tags');
             $table->foreign('product_id')->references('product_id')->on('shopify_products');
+            $table->index('product_id');
 
             $table->timestamps();
         });

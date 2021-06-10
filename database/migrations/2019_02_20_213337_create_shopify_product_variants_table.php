@@ -16,7 +16,7 @@ class CreateShopifyProductVariantsTable extends Migration
         Schema::create('shopify_product_variants', function (Blueprint $table) {
             $table->increments('id');
 
-            $table->string('variant_id')->nullable();
+            $table->bigInteger('variant_id')->nullable();
             $table->string('admin_graphql_api_id')->nullable();
             $table->string('title')->nullable();
             $table->string('barcode')->nullable();
@@ -43,12 +43,14 @@ class CreateShopifyProductVariantsTable extends Migration
             $table->string('tax_code')->nullable();
             $table->string('weight')->nullable();
             $table->string('weight_unit')->nullable();
-            $table->string('product_id')->nullable();
+            $table->bigInteger('product_id')->nullable();
             $table->unsignedInteger('account_id')->nullable();
 
             // Manage Foreign Key Relationships
             $table->foreign('product_id')->references('product_id')->on('shopify_products');
             $table->foreign('account_id')->references('id')->on('accounts');
+            $table->index('product_id');
+            $table->index('variant_id');
 
             $table->timestamps();
         });
