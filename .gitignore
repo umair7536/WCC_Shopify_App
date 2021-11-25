@@ -16,3 +16,5 @@ npm-debug.log
 /composer.lock
 /package-lock.json
 /public/appointment_image
+/database/backups/*
+!/database/backups/index.html

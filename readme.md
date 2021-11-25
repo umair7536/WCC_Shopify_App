@@ -13,6 +13,8 @@ This is not a package - it's a full Laravel project that you should use as a sta
 - Run `composer install`
 - Run `php artisan key:generate`
 - Run `php artisan migrate --seed` (it has some seeded data - see below)
+- Run `sudo chmod -R 777 storage/` on root folder
+- Run `sudo chmod -R 777 backups/` in database folder
 - That's it: launch the main URL and login with default credentials `admin@admin.com` - `password`
 - Two cron jobs are provided with this system. You need to add the following Cron entries to your server.
     - `* * * * * php /path-to-your-project/artisan schedule:run >> /dev/null 2>&1`

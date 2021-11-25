@@ -29,6 +29,11 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\Shopify\SyncOrders',
         '\App\Console\Commands\Shopify\MarkOrderAsPaid',
         '\App\Console\Commands\System\CleanJsonOrders',
+        /*
+         * MySQL daily backup command
+         */
+        '\App\Console\Commands\MySQLDump',
+        '\App\Console\Commands\MySQLDumpRemover',
     ];
 
     /**
@@ -114,6 +119,18 @@ class Kernel extends ConsoleKernel
          * Process Leopards Requests
          * =========================
          */
+
+        /*
+         * Run daily backup command
+         */
+        $schedule->command('db:backup')
+            ->daily()->withoutOverlapping();
+
+        /*
+         * Run old daily backup remover command
+         */
+        $schedule->command('db:backup-old-remove')
+            ->daily()->withoutOverlapping();
 
     }
 
