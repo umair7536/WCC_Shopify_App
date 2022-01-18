@@ -9,6 +9,7 @@ $products = \App\Models\ShopifyProducts::where([
     'account_id' => \Illuminate\Support\Facades\Auth::User()->account_id
 ])->count()
 )
+
 @php(
 $customers = \App\Models\ShopifyCustomers::where([
     'account_id' => \Illuminate\Support\Facades\Auth::User()->account_id

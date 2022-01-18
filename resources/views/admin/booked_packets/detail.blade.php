@@ -3,6 +3,7 @@
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
         <h4 class="modal-title">@lang('global.app_detail')</h4>
     </div>
+    <div>{{$booked_packet}}</div>
     <table class="table table-striped">
         <tbody>
             <tr>
@@ -39,15 +40,11 @@
             <tr>
                 <th colspan="4" style="text-align: center;">Shipper Informaton</th>
             </tr>
+            <!-- ISSUE IN THIS PART   START -->            
             <tr>
                 <th>Origin</th>
-                <td>
-                    @if(isset($booked_packet->origin_city, $leopards_cities))
-                        {{ $leopards_cities[$booked_packet->origin_city]->name }}
-                    @else
-                        N/A
-                    @endif
-                </td>
+
+                <td>{{$wcc_cities}}</td>
                 <th>Shipper Name</th>
                 <td>{{ $booked_packet->shipper_name }}</td>
             </tr>
@@ -66,13 +63,8 @@
             </tr>
             <tr>
                 <th>Destination</th>
-                <td>
-                    @if(isset($booked_packet->destination_city, $leopards_cities))
-                        {{ $leopards_cities[$booked_packet->destination_city]->name }}
-                    @else
-                        N/A
-                    @endif
-                </td>
+
+                <td>{{$wcc_cities}}</td>
                 <th>Shipper Name</th>
                 <td>{{ $booked_packet->consignee_name }}</td>
             </tr>
@@ -92,6 +84,8 @@
                 <th>Address</th>
                 <td colspan="3">{{ $booked_packet->consignee_address }}</td>
             </tr>
+
+            <!-- ISSUE IN THIS PART   END -->
         </tbody>
     </table>
 </div>

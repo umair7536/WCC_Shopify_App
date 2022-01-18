@@ -32,17 +32,17 @@
             </div>
             <div class="actions">
                 @if(Gate::allows('leopards_settings_edit'))
-                    <a class="btn btn-success" href="{{ route('admin.leopards_settings.create') }}">@lang('global.app_edit')</a>
+                    <a class="btn btn-success" href="{{ route('admin.wcc_settings.create') }}">@lang('global.app_edit')</a>
                 @endif
             </div>
         </div>
         <div class="portlet-body">
             <div class="note note-info">
-                <h4 class="block">Integrate Leopards COD Account</h4>
-                <p>To simply integrate Leopads COD account follow the steps below. </p>
+                <h4 class="block">Integrate WCC COD Account</h4>
+                <p>To simply integrate WCC COD account follow the steps below. </p>
                 <ul>
-                    <li><a target="_blank" href="http://new.leopardscod.com/login">Login</a> to Leopards COD system.</li>
-                    <li>Go to API Settings from menu (If you didn't see this menu contact Leopards COD support to enable this feature).</li>
+                    <li><a target="_blank" href="http://cod.wcc.com.pk/frmmain.wgx">Login</a> to WCC COD system.</li>
+                    <li>Go to API Settings from menu (If you didn't see this menu contact WCC COD support to enable this feature).</li>
                     <li>Go to API Management menu.</li>
                     <li>Copy API Key and API Password (If API Key section is an empty, click on 'Generate Key' button to got API key).</li>
                     <li>Put API Key and API Passwords in this system via editing each setting.</li>

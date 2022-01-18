@@ -87,7 +87,7 @@ class WebhooksController extends Controller
             $shopify_hmac_sha256 = $request->getHeaderLine('X-Shopify-Hmac-Sha256');
             $shopify_shop_domain = $request->getHeaderLine('X-Shopify-Shop-Domain');
             $shopify_order_id = $request->getHeaderLine('X-Shopify-Order-ID');
-
+ 
             /**
              * Check if packet is coming from test mode
              */
@@ -140,7 +140,7 @@ class WebhooksController extends Controller
 
                                 break;
                             case 'orders/create':
-                                event(new SingleOrderCreateFire($order, $shop));
+                                event(new SingleOrderUpdatedFire($order, $shop));
                                 break;
                             case 'orders/fulfilled':
                                 event(new SingleOrderFulfilledFire($order, $shop));

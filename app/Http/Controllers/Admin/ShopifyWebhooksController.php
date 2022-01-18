@@ -215,7 +215,9 @@ class ShopifyWebhooksController extends Controller
          * Dispatch Events
          */
         $account = Accounts::find(Auth::User()->account_id);
+
         event(new CreateWebhooksFire($account));
+        
 
         flash('Refresh Webhooks event is fired successfully.')->success()->important();
         return redirect()->route('admin.shopify_webhooks.index');

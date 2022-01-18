@@ -2,23 +2,22 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Events\Leopards\SyncLeopardsCitiesFire;
 use App\Helpers\Leopards;
 use App\Models\Accounts;
-use App\Models\LeopardsCities;
 use App\Models\WccCities;
 use App\Models\LeopardsSettings;
 use App\Models\ShopifyLocations;
-use Developifynet\LeopardsCOD\LeopardsCODClient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use App\Http\Controllers\Controller;
 use DB;
 use Auth;
 use Config;
 use Validator;
 
-class LeopardsSettingsController extends Controller
+
+class WccSettingsController extends Controller
 {
     /**
      * Display a listing of Permission.
@@ -48,7 +47,7 @@ class LeopardsSettingsController extends Controller
 
 
 
-        $leopards_settings = LeopardsSettings::where([
+        $wcc_settings = LeopardsSettings::where([
             'account_id' => Auth::User()->account_id
         ])
             ->orderBy('id', 'asc')
@@ -57,21 +56,13 @@ class LeopardsSettingsController extends Controller
 
         // Orignal Code it get shiper city based on account_id present in WccCities DB
 
-/*
-        if($leopards_settings['shipper-type']->data == 'other') {
-            $wcc_cities = WccCities::where([
-                'account_id' => Auth::User()->account_id,
-            ])->whereIn('city_id', [$leopards_settings['shipper-city']->data])
-                ->select('city_id', 'name')
-                ->get();
-*/
 
 
         // this code copy of above but in which i have set account_id 3 because in wcccities DB only account_id 3 present
-        if($leopards_settings['shipper-type']->data == 'other') {
+        if($wcc_settings['shipper-type']->data == 'other') {
             $wcc_cities = WccCities::where([
                 'account_id' => Auth::User()->account_id,    // Bydeafult set 3
-            ])->whereIn('city_id', [$leopards_settings['shipper-city']->data])
+            ])->whereIn('city_id', [$wcc_settings['shipper-city']->data])
                 ->select('city_id', 'name')
                 ->get();
 
@@ -84,7 +75,7 @@ class LeopardsSettingsController extends Controller
             $wcc_cities = [];
         }
 
-        return view('admin.wcc_settings.company', compact('leopards_settings', 'shopify_locations', 'wcc_cities'));
+        return view('admin.wcc_settings.company', compact('wcc_settings', 'shopify_locations', 'wcc_cities'));
     }
 
     /**
@@ -113,7 +104,7 @@ class LeopardsSettingsController extends Controller
         }
 
 
-        $leopards_settings = LeopardsSettings::where([
+        $wcc_settings = LeopardsSettings::where([
             'account_id' => $account_id
         ])
             ->orderBy('id', 'asc')
@@ -137,6 +128,7 @@ class LeopardsSettingsController extends Controller
         $wcc_cities = WccCities::where([
             'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
             'account_id' => Auth::User()->account_id,
+            'city_id'=>'KHI',
         ])
             ->orderBy('name', 'asc')
             ->get();
@@ -146,7 +138,7 @@ class LeopardsSettingsController extends Controller
             $wcc_cities = [];
         }
 
-        return view('admin.wcc_settings.create',compact('leopards_settings', 'shopify_locations', 'inventory_location', 'fulfillment_status', 'mark_status', 'wcc_cities'));
+        return view('admin.wcc_settings.create',compact('wcc_settings', 'shopify_locations', 'inventory_location', 'fulfillment_status', 'mark_status', 'wcc_cities'));
     }
 
     /**
@@ -240,7 +232,7 @@ class LeopardsSettingsController extends Controller
         );
 
         /**
-         * Grab Cities List
+         * Account verification of Wcc User
          */
 
         try {
@@ -260,31 +252,6 @@ class LeopardsSettingsController extends Controller
             return $data;
 
         }
-
-
-        // Leopard Verification
-
-/*
-        $leopard_client = new LeopardsCODClient();
-        $cities = $leopard_client->getAllCities(array(
-            'api_key' => $request->get('api-key'),
-            'api_password' => $request->get('api-password'),
-            'enable_test_mode' => false
-        ));
-        if(!$cities['status']) {
-            $data['status'] = false;
-            $data['message'] = 'Your API Key and API Passwords are incorrect.';
-
-            return $data;
-        }
-
-
-        // * Dispatch Sync Leopards Cities Event and Delte existing records
-
-        event(new SyncLeopardsCitiesFire(Accounts::find($account_id)));
-
-        return $data;
- */
 
 
     }

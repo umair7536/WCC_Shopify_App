@@ -19,7 +19,6 @@ $booked_packets_test = \App\Models\BookedPackets::where([
     <!-- BEGIN PAGE TITLE-->
     <h1 class="page-title"> Setup Instructions</h1>
     <!-- END PAGE TITLE-->
-
     <div class="row">
 
         <div class="col-md-12">
@@ -82,7 +81,7 @@ $booked_packets_test = \App\Models\BookedPackets::where([
                                 <div class="timeline-body-content">
                                     <span class="font-grey-cascade">
                                         <ol>
-                                            <li>Click on <a href="{{ route('admin.leopards_settings.index') }}"><span class="title">@lang('global.leopards_settings.title')</span></a> in left dropdown menu of Leopards management.</li>
+                                            <li>Click on <a href="{{ route('admin.wcc_settings.index') }}"><span class="title">@lang('global.leopards_settings.title')</span></a> in left dropdown menu of WCC management.</li>
                                             <li>Click on Edit button.</li>
                                             <li>Fill all information by reading instruction provided on that page.</li>
                                             <li>Click on save button.</li>
@@ -119,7 +118,7 @@ $booked_packets_test = \App\Models\BookedPackets::where([
                                         <ol>
                                             <li>Click on <a href="{{ route('admin.shopify_orders.index') }}">@lang('global.shopify_orders.title')</a> in left menu.</li>
                                             <li>[Optional] Search order that you want to book by using search filters.</li>
-                                            <li>In the actions column there will be dropdown named "Book", Click on it then choose "Book in Leopards COD".</li>
+                                            <li>In the actions column there will be dropdown named "Book", Click on it then choose "Book in WCC COD".</li>
                                             <li>It will open book a packet form with filled Order Information</li>
                                             <li>[Optional[ Adjust values in fields as per your needs.</li>
                                             <li>click on "Save" button to book this packet. After successful booking of packet you will be redirected back to <a href="{{ route('admin.booked_packets.index') }}">@lang('global.booked_packets.title')</a>.</li>

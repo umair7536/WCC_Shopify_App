@@ -159,7 +159,68 @@ return [
             'slug' => 'auto-mark-paid',
         ]
     ),
-
+    'wcc_settings' => array(
+        [
+            'name' => 'Mode',
+            'slug' => 'mode',
+        ],
+        [
+            'name' => 'Company ID',
+            'slug' => 'company-id',
+        ],
+        [
+            'name' => 'User ID',
+            'slug' => 'username',
+        ],
+        [
+            'name' => 'Password',
+            'slug' => 'password',
+        ],
+        [
+            'name' => 'API Key',
+            'slug' => 'api-key',
+        ],
+        [
+            'name' => 'API Password',
+            'slug' => 'api-password',
+        ],
+        [
+            'name' => 'Auto Fulfillment',
+            'slug' => 'auto-fulfillment',
+        ],
+        [
+            'name' => 'Default Inventory Location',
+            'slug' => 'inventory-location',
+        ],
+        [
+            'name' => 'Shipment Mode',
+            'slug' => 'shipper-type',
+        ],
+        [
+            'name' => 'Shipper Name',
+            'slug' => 'shipper-name',
+        ],
+        [
+            'name' => 'Shipper Phone',
+            'slug' => 'shipper-phone',
+        ],
+        [
+            'name' => 'Shipper Email',
+            'slug' => 'shipper-email',
+        ],
+        [
+            'name' => 'Shipper Address',
+            'slug' => 'shipper-address',
+        ],
+        [
+            'name' => 'Shipper City',
+            'slug' => 'shipper-city',
+        ],
+        [
+            'name' => 'Auto Mark Order as Paid',
+            'slug' => 'auto-mark-paid',
+        ]
+    ),
     /*
     |--------------------------------------------------------------------------
     | Default Product Types Array

@@ -7,6 +7,8 @@ Route::get('/', 'Admin\ShopifyController@verifyShopify')->name('shopify.verify_i
 Auth::routes();
 
 
+
+
 // Authentication Routes...
 
 $this->get('register', 'Auth\RegisterController@index')->name('auth.register');
@@ -195,6 +197,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::resource('shopify_orders', 'Admin\ShopifyOrdersController');
     // Shopify Orders Routes end
 
+    /*
     // Leopards Settings Routes start
     Route::post('leopards_settings/datatable', ['uses' => 'Admin\LeopardsSettingsController@datatable', 'as' => 'leopards_settings.datatable']);
     Route::patch('leopards_settings/active/{id}', ['uses' => 'Admin\LeopardsSettingsController@active', 'as' => 'leopards_settings.active']);
@@ -203,6 +206,17 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::get('leopards_settings/sort-save', ['uses' => 'Admin\LeopardsSettingsController@sortorder_save', 'as' => 'leopards_settings.sort_save']);
     Route::resource('leopards_settings', 'Admin\LeopardsSettingsController');
     // Leopards Settings Routes end
+    */
+
+    // Wcc Settings Routes Start
+    Route::post('wcc_settings/datatable', ['uses' => 'Admin\WccSettingsController@datatable', 'as' => 'leopards_settings.datatable']);
+    Route::patch('wcc_settings/active/{id}', ['uses' => 'Admin\WccSettingsController@active', 'as' => 'leopards_settings.active']);
+    Route::patch('wcc_settings/inactive/{id}', ['uses' => 'Admin\WccSettingsController@inactive', 'as' => 'leopards_settings.inactive']);
+    Route::get('wcc_settings/sort', ['uses' => 'Admin\WccSettingsController@sortorder', 'as' => 'leopards_settings.sort']);
+    Route::get('wcc_settings/sort-save', ['uses' => 'Admin\WccSettingsController@sortorder_save', 'as' => 'leopards_settings.sort_save']);
+    Route::resource('wcc_settings', 'Admin\WccSettingsController');
+    // Wcc Setting Routes end
+
 
     // Leopards Cities Routes start
     Route::post('leopards_cities/datatable', ['uses' => 'Admin\LeopardsCitiesController@datatable', 'as' => 'leopards_cities.datatable']);

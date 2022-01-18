@@ -16,7 +16,7 @@ class AccountSeeder extends Seeder
     {
         Accounts::insert([
             1 => array(
-                'id' => 1,
+//                'id' => 1,
                 'name' => 'Lead Apparel',
                 'email'=>' hello@leadapparel.com',
                 'contact'=>'+1000000000',

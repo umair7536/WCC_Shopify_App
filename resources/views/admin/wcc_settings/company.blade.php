@@ -32,7 +32,7 @@
             </div>
             <div class="actions">
                 @if(Gate::allows('leopards_settings_edit'))
-                    <a class="btn btn-success" href="{{ route('admin.leopards_settings.create') }}">@lang('global.app_edit')</a>
+                    <a class="btn btn-success" href="{{ route('admin.wcc_settings.create') }}">@lang('global.app_edit')</a>
                 @endif
             </div>
         </div>
@@ -41,11 +41,15 @@
                 <h4 class="block">Integrate WCC COD Account</h4>
                 <p>To simply integrate WCC COD account follow the steps below. </p>
                 <ul>
-                    <li><a target="_blank" href="http://cod.wcc.com.pk/frmmain.wgx">Login</a> to WCC COD system.</li>
+                    <!-- <li><a target="_blank" href="http://cod.wcc.com.pk/frmmain.wgx">Login</a> to WCC COD system.</li>
                     <li>Go to API Settings from menu (If you didn't see this menu contact WCC COD support to enable this feature).</li>
                     <li>Go to API Management menu.</li>
                     <li>Copy API Key and API Password (If API Key section is an empty, click on 'Generate Key' button to got API key).</li>
-                    <li>Put API Key and API Passwords in this system via editing each setting.</li>
+                    <li>Put API Key and Passwords in this system via editing each setting.</li> -->
+                    <li><a target="_blank" href="http://cod.wcc.com.pk/frmmain.wgx">Login</a> to WCC COD system.</li>
+                    <li>Contact to WCC Admin to get the Username & Password.</li>
+                    <li>After getting the Credentials. Copy Username and Password.</li>
+                    <li>Put Username and Passwords in this system via editing each setting.</li>
                 </ul>
             </div>
             <div class="table-scrollable">
@@ -57,47 +61,47 @@
                         <th> Value </th>
                     </tr>
                     </thead>
-                    @if($leopards_settings)
+                    @if($wcc_settings)
                         @php($sr = 1)
                         @php($shipper_type = 'self')
                         <tbody>
-                            @foreach($leopards_settings as $leopards_setting)
-                                @if($leopards_setting->slug == 'shipper-type')
-                                    @php($shipper_type = $leopards_setting->data)
+                            @foreach($wcc_settings as $wcc_setting)
+                                @if($wcc_setting->slug == 'shipper-type')
+                                    @php($shipper_type = $wcc_setting->data)
                                 @endif
                                 @if(
-                                    in_array($leopards_setting->slug, [
-                                        'username', 'password', 'company-id', 'shipper-type'
+                                    in_array($wcc_setting->slug, [
+                                        'api-key', 'api-password', 'company-id', 'shipper-type'
                                     ]))
                                     @continue
                                 @endif
                                 <tr>
                                     <td>{{ $sr }}</td>
-                                    <td>{{ $leopards_setting->name }}</td>
-                                    @if($leopards_setting->slug == 'password' && $leopards_setting->data)
+                                    <td>{{ $wcc_setting->name }}</td>
+                                    @if($wcc_setting->slug == 'password' && $wcc_setting->data)
                                         <td>{{ '****************' }}</td>
-                                    @elseif($leopards_setting->slug == 'api-password' && $leopards_setting->data)
+                                    @elseif($wcc_setting->slug == 'api-password' && $wcc_setting->data)
                                             <td>{{ '****************' }}</td>
                                     @elseif(
-                                                $leopards_setting->slug == 'auto-fulfillment'
-                                            ||  $leopards_setting->slug == 'auto-mark-paid'
+                                                $wcc_setting->slug == 'auto-fulfillment'
+                                            ||  $wcc_setting->slug == 'auto-mark-paid'
                                     )
-                                        <td>{{ ($leopards_setting->data == '1') ? 'Yes' : 'No' }}</td>
-                                    @elseif($leopards_setting->slug == 'inventory-location')
-                                        <td>{{ ($leopards_setting->data && array_key_exists($leopards_setting->data, $shopify_locations)) ? $shopify_locations[$leopards_setting->data]['name'] : 'NA' }}</td>
-                                    @elseif($leopards_setting->slug == 'shipper-type')
-                                        <td>{{ ($leopards_setting->data && array_key_exists($leopards_setting->data, Config::get('constants.shipment_mode'))) ? Config::get('constants.shipment_mode')[$leopards_setting->data] : Config::get('constants.shipment_mode')['self'] }}</td>
+                                        <td>{{ ($wcc_setting->data == '1') ? 'Yes' : 'No' }}</td>
+                                    @elseif($wcc_setting->slug == 'inventory-location')
+                                        <td>{{ ($wcc_setting->data && array_key_exists($wcc_setting->data, $shopify_locations)) ? $shopify_locations[$wcc_setting->data]['name'] : 'NA' }}</td>
+                                    @elseif($wcc_setting->slug == 'shipper-type')
+                                        <td>{{ ($wcc_setting->data && array_key_exists($wcc_setting->data, Config::get('constants.shipment_mode'))) ? Config::get('constants.shipment_mode')[$wcc_setting->data] : Config::get('constants.shipment_mode')['self'] }}</td>
                                     @elseif(
-                                        $leopards_setting->slug == 'shipper-name' ||
-                                        $leopards_setting->slug == 'shipper-email' ||
-                                        $leopards_setting->slug == 'shipper-phone' ||
-                                        $leopards_setting->slug == 'shipper-address'
+                                        $wcc_setting->slug == 'shipper-name' ||
+                                        $wcc_setting->slug == 'shipper-email' ||
+                                        $wcc_setting->slug == 'shipper-phone' ||
+                                        $wcc_setting->slug == 'shipper-address'
                                     )
-                                        <td>{{ ($shipper_type == 'self') ? 'Not Availabe' : $leopards_setting->data }}</td>
-                                    @elseif($leopards_setting->slug == 'shipper-city')
-                                        <td>{{ ($shipper_type == 'self') ? 'Not Availabe' : (array_key_exists($leopards_setting->data, $leopards_cities) ? $leopards_cities[$leopards_setting->data]['name'] : 'N/A') }}</td>
+                                        <td>{{ ($shipper_type == 'self') ? 'Not Availabe' : $wcc_setting->data }}</td>
+                                    @elseif($wcc_setting->slug == 'shipper-city')
+                                        <td>{{ ($shipper_type == 'self') ? 'Not Availabe' : (array_key_exists($wcc_setting->data, $wcc_cities) ? $wcc_cities[$wcc_setting->data]['name'] : 'N/A') }}</td>
                                     @else
-                                        <td>{{ ($leopards_setting->slug == 'mode') ? ($leopards_setting->data ? 'Test Mode' : 'Production') : $leopards_setting->data }}</td>
+                                        <td>{{ ($wcc_setting->slug == 'mode') ? ($wcc_setting->data ? 'Test Mode' : 'Production') : $wcc_setting->data }}</td>
                                     @endif
                                 </tr>
                                 @php($sr++)

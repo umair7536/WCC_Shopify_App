@@ -5,13 +5,14 @@
     </div>
     <div class="portlet-body form">
         <div class="form-group">
-            {!! Form::model($leopards_setting, ['method' => 'PUT', 'id' => 'form-validation', 'route' => ['admin.leopards_settings.update', $leopards_setting->id]]) !!}
+
+            {!! Form::model($leopards_setting, ['method' => 'PUT', 'id' => 'form-validation', 'route' => ['admin.wcc_settings.update', $leopards_setting->id]]) !!}
             <div class="form-body">
                 <!-- Starts Form Validation Messages -->
                 @include('partials.messages')
                 <!-- Ends Form Validation Messages -->
 
-                @include('admin.leopards_settings.edit_fields')
+                @include('admin.wcc_settings.edit_fields')
             </div>
             <div>
                 {!! Form::submit(trans('global.app_update'), ['class' => 'btn btn-success']) !!}

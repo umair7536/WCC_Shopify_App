@@ -114,49 +114,65 @@ class ShopifyController extends Controller
     {
         if ($request->get('shop')) {
 
+
             $redirectionUri = env('APP_URL') . '/redirect';
+
 
             $response = new AuthorizationRedirectResponse(self::$APP_API_KEY, ($request->get('shop')) ? $request->get('shop') : self::$APP_DEFAULT_STORE, explode(',', self::$APP_SCOPES), $redirectionUri, self::$APP_NONCE);
             $location = $response->getHeader('location')[0];
 
+
             return redirect($location);
         } else {
-            return redirect('/login')->withErrors(['No Shopify Store url provided.']);
-            return Redirect::back()->withErrors(['No Shopify Store url provided.']);
+//            return redirect('/login')->withErrors(['No Shopify Store url provided.']);
+            return Redirect::back()->withErrors(['No Shopify Store url provided by you.!!']);
         }
     }
 
     public function redirect(ServerRequestInterface $request)
     {
+
         try {
             /*
              * Check if Access token is already set or not
              */
-            if (!session('access_token') || !session('shopify_domain')) {
+            // Understood this part (every user come here first time for shopify verification)
+            if (!session('access_token') || !session('shopify_domain')) {    // This run when access token and shopify admin session not present
                 try {
+//                    ZfrShopify client provides an easy way to validate an incoming request to make sure it comes from Shopify through the RequestValidator object. It requires a PSR7 requests and a shared secret:
                     $validator = new RequestValidator();
                     $validator->validateRequest($request, self::$APP_SHARED_SECRET);
 
                     /*
                      * Received OAuth request response from shopify
                      */
+
                     $shopRequest = $request->getQueryParams();
 
-                    $code = (isset($shopRequest['code']) && $shopRequest['code']) ? $shopRequest['code'] : '';
+                    // isset() Check whether a variable is empty. Also check whether the variable is set/declared:
+                    $code = (isset($shopRequest['code']) && $shopRequest['code']) ? $shopRequest['code'] : '';  // it return null value if $shopRequest['code'] not present
+
+                    //$shopRequest['shop'] (it is temp. token generate by shopify ) return app name (webie-app-store.myshopify.com)
                     $shopDomain = (isset($shopRequest['shop']) && $shopRequest['shop']) ? $shopRequest['shop'] : '';
 
+                    //it execute when one or both values empty
                     if(!$code || !$shopDomain) {
                         return Redirect::to(route('auth.register'))->withErrors(['Authentication failed, Please try again.']);
                     }
 
+
                     try {
                         try {
+
                             $tokenExchanger = new TokenExchanger(new Client());
+                            // this function exchange tokens and give new token by shopify
                             $accessToken = $tokenExchanger->exchangeCodeForToken(self::$APP_API_KEY, self::$APP_SHARED_SECRET, $shopDomain, explode(',', self::$APP_SCOPES), $code);
 
+//                            check token present or not
                             if ($accessToken) {
                                 session(['access_token' => $accessToken]);
                                 session(['shopify_domain' => $shopDomain]);
+//                                if store present then it goes to 'shopify.redirect' route if not then it redirect to register page with error
                                 return redirect()->to(route('shopify.redirect'));
                             } else {
                                 return Redirect::to(route('auth.register'))->withErrors('Invalid Access Toekn, please start process again');
@@ -171,29 +187,37 @@ class ShopifyController extends Controller
                 } catch (InvalidRequestException $exception) {
                     return Redirect::to(route('auth.login'))->withErrors([$exception->getMessage()]);
                 }
-            } else {
+            }
+            // Every user come this must if new then first if ->redirect function ->else part
+            else {
+                // create an shopify
                 $shopifyClient = new ShopifyClient([
-                    'private_app' => false,
+                    'private_app' => false,    // true for private & false for public app
                     'api_key' => self::$APP_API_KEY, // In public app, this is the app ID
                     'version' => env('SHOPIFY_API_VERSION'), // Put API Version
                     'access_token' => session('access_token'),
                     'shop' => session('shopify_domain')
                 ]);
 
-                $shopDomain = $shopifyClient->getShop();
+                $shopDomain = $shopifyClient->getShop();     // this return data related to app that present on shopify
 
+                // it execute when  shopify id and store present
                 if (isset($shopDomain['id']) && isset($shopDomain['myshopify_domain'])) {
 
                     /*
                      * Register User
                      */
+
+                    // it check in database that shopify store present or not
                     $shop = ShopifyShops::where(['myshopify_domain' => $shopDomain['myshopify_domain']])->first();
+                    // if store in database then this update the access token and installed in DB
                     if($shop) {
                         // Shop found just redirect at login page for login
                         $shop->update(array(
                             'access_token' => session('access_token'),
                             'installed' => 1
                         ));
+
 
                         $this->setupAccount($shop->account_id);
 
@@ -387,7 +411,7 @@ class ShopifyController extends Controller
 
                 return redirect($location);
             } else {
-                return redirect('/login')->withErrors(['No Shopify Store url provided.']);
+                return redirect('/login')->withErrors(['No Shopify Store url provided by you!!.']);
 //                return Redirect::back()->withErrors(['No Shopify Store url provided.']);
             }
         }
@@ -411,12 +435,14 @@ class ShopifyController extends Controller
 
         ShopifyJobs::where(array(
             'account_id' => $account_id
-        ))->forceDelete();
+        ))->forceDelete();     // soft delete for temp. delete move to trash , Forcedelete permanent delete
 
         /**
          * Dispatch Events
          */
         $account = Accounts::find($account_id);
+
+
 //        event(new SyncProductsFire($account));
         event(new SyncLocationsFire($account));
         event(new SyncCustomersFire($account));
@@ -437,6 +463,9 @@ class ShopifyController extends Controller
         $statuses = TicketStatuses::where([
             'account_id' => $account_id
         ])->get();
+
+
+
 
         if(!$statuses || !$statuses->count()) {
             $global_ticket_statuses = Config::get('setup.ticket_statuses');

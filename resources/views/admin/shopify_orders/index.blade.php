@@ -34,13 +34,13 @@
                 <i class="icon-list font-dark"></i>
                 <span class="caption-subject font-dark sbold uppercase">@lang('global.app_list')</span>
             </div>
-            <div class="actions">
+            <!-- <div class="actions">
                 @if(Gate::allows('shopify_orders_create'))
                     <a class="btn btn-success" href="{{ route('admin.shopify_orders.orders') }}" data-toggle="modal">Sync @lang('global.shopify_orders.title')</a>
                     {{--<a class="btn btn-success" href="{{ route('admin.shopify_orders.create') }}"--}}
                        {{--data-target="#ajax_shopify_orders" data-toggle="modal">@lang('global.app_add_new')</a>--}}
                 @endif
-            </div>
+            </div> -->
         </div>
         <div class="portlet-body">
             <div class="table-container">

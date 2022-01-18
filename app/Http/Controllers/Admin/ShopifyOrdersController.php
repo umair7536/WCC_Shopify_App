@@ -11,6 +11,7 @@ use App\Models\Accounts;
 use App\Models\BookedPackets;
 use App\Models\JsonOrders;
 use App\Models\LeopardsCities;
+use App\Models\WccCities;
 use App\Models\LeopardsSettings;
 use App\Models\OrderLogs;
 use App\Models\ShippingAddresses;
@@ -42,11 +43,13 @@ class ShopifyOrdersController extends Controller
 
         $financial_status = Config::get('constants.financial_status');
         $fulfillment_status = Config::get('constants.fulfillment_status');
-        $shipment_types = Config::get('constants.shipment_type');
+        $shipment_types = Config::get('constants.wcc_shipment_type');
 
-        $leopards_cities = LeopardsCities::where([
+        $leopards_cities = WccCities::where([
             'account_id' => Auth::User()->account_id,
         ])->get();
+
+
 
         if($leopards_cities) {
             $leopards_cities = $leopards_cities->pluck('name', 'name');
@@ -176,16 +179,19 @@ class ShopifyOrdersController extends Controller
      * @return \Illuminate\Http\RedirectResponse
      */
     public function bookPacket(Request $request) {
+
         if($request->get('id') == '') {
             flash('Order ID is a required field.')->error()->important();
         } else {
             $data['id'] = [$request->get('id')];
-            $data['customActionName'] = Config::get('constants.shipment_type_overnight'); //
+            $data['customActionName'] = Config::get('constants.shipment_type_cod'); //
             $data['customActionType'] = 'group_action'; //
             $data['skip_packet_checking'] = '0'; //
 
             $request->replace($data);
+
             $response = $this->bulkActions($request);
+
             if($response['status'] == 'NO') {
                 flash($response['message'])->error()->important();
                 return redirect()->route('admin.shopify_orders.index');
@@ -203,14 +209,14 @@ class ShopifyOrdersController extends Controller
      * @return array
      */
     private function bulkActions(Request $request) : array {
-
+        
         $account_id = Auth::User()->account_id;
 
         /**
          * Verify if correct Shipment Type is choosed or not
          */
         $found = false;
-        $shipment_types = Config::get('constants.shipment_type');
+        $shipment_types = Config::get('constants.wcc_shipment_type');
         foreach($shipment_types as $shipment_id => $shipment_name) {
             if($request->get('customActionName') == $shipment_id) {
                 $found = true;
@@ -236,6 +242,8 @@ class ShopifyOrdersController extends Controller
             ->orderBy('id', 'asc')
             ->get()->keyBy('slug');
 
+
+
         if($leopards_settings['mode']->data == '1') {
             return [
                 'status' => 'NO',
@@ -247,12 +255,14 @@ class ShopifyOrdersController extends Controller
          * Check Booking Quota, If Quota is acceeding then stop booking
          */
         $result = $this->getCompanyData($account_id);
+
         if(!$result['status']) {
             return [
                 'status' => 'NO',
-                'message' => 'Leopards Credentials are invalid, <b><a target="_blank" href="' . route('admin.leopards_settings.index') . '">Click Here</a></b> to setup credentials again.</b>'
+                'message' => 'WCC Credentials are invalid, <b><a target="_blank" href="' . route('admin.leopards_settings.index') . '">Click Here</a></b> to setup credentials again.</b>'
             ];
         }
+
 
         if (
             $request->get('customActionType') == "group_action"
@@ -266,6 +276,7 @@ class ShopifyOrdersController extends Controller
                 ->select('order_id', 'name', 'order_number', 'customer_id', 'account_id')
                 ->get();
 
+
             if($orders) {
 
                 // Build Success Message
@@ -274,27 +285,41 @@ class ShopifyOrdersController extends Controller
 
                 $order_numbers = [];
                 foreach ($orders as $order) {
-                    $order_numbers[] = $order->order_number;
+                    $order_numbers[] = "#".$order->order_number;
                 }
+                
+                
+//                $booked_packets = BookedPackets::where([
+//                    'account_id' => $account_id
+//                ])
+//                    ->whereIn('order_number', $order_numbers)
+//                    ->select('order_id', 'order_number', 'cn_number', 'id')
+//                    ->orderBy('id', 'desc')
+//                    ->get()->keyBy('order_id');
 
                 $booked_packets = BookedPackets::where([
                     'account_id' => $account_id
                 ])
-                    ->whereIn('order_number', $order_numbers)
-                    ->select('order_id', 'order_number', 'cn_number', 'id')
+                    ->whereIn('order_id', $order_numbers)
+                    ->select('order_id', 'cn_number', 'id')
                     ->orderBy('id', 'desc')
                     ->get()->keyBy('order_id');
+
+       
 
                 foreach ($orders as $order) {
                     /**
                      * Find already booked packet to avoid re-book
                      */
+
+
                     if($booked_packets->count()) {
                         if($request->get('skip_packet_checking') != '1') {
                             if(
                                     isset($booked_packets[$order->order_number])
                                 ||  isset($booked_packets[$order->name])
                             ) {
+                                
                                 if(isset($booked_packets[$order->order_number])) {
                                     $message .= '<li>Order <b>' . $order->name . '</b> is already booked with <b>' . $booked_packets[$order->order_number]->cn_number . '</b>. To book again <b><a target="_blank" href="' . route('admin.booked_packets.create',['order_id' => $order->order_id]) . '">Click Here</a></b>.</li>';
                                 } else {
@@ -304,71 +329,74 @@ class ShopifyOrdersController extends Controller
                             }
                         }
                     }
-
+                    
                     if($order->cancelled_at) {
                         $message .= '<li>Cancelled Order <b>' . $order->name . '</b> is not allowed to book using bulk action. To book anyway please <b><a target="_blank" href="' . route('admin.booked_packets.create',['order_id' => $order->order_id]) . '">Click Here</a></b>.</li>';
                         continue;
                     }
 
                     /**
-                     * Dispatch Order Book in LCS
+                     * Dispatch Order Book in WCC
                      */
                     event(new SingleOrderBookFire($order->toArray(), $request->get('customActionName'), $account_id));
 
-                    $message .= '<li>Order <b>' . $order->name . '</b> has been queued. It will take a few minutes to book packet in LCS.';
+                    $message .= '<li>Order <b>' . $order->name . '</b> has been queued. It will take a few minutes to book packet in WCC.';
+                   /**
+                    * If Order ID is provided then prepare data to automatically be filled
+                    */
+                    
+                   $prepared_packet = BookedPackets::prepareBooking($order->order_id, $request->get('customActionName'), $account_id);
+                   
 
-//                    /**
-//                     * If Order ID is provided then prepare data to automatically be filled
-//                     */
-//                    $prepared_packet = BookedPackets::prepareBooking($order->order_id, $request->get('customActionName'), $account_id);
-//                    if($prepared_packet['status']) {
-//                        $booking_packet_request = new Request();
-//                        $booking_packet_request->replace($prepared_packet['packet']);
-//
-//                        /**
-//                         * Verify Fields before send
-//                         */
-//                        $validator = $this->verifyPacketFields($booking_packet_request);
-//                        if ($validator->fails()) {
-//                            $message .= '<li>Order <b>' . $order->name . '</b> has some issues. [' . implode(', ', $validator->messages()->all()) . ']';
-//                            continue;
-//                        }
-//
-//                        $result = BookedPackets::createRecord($booking_packet_request, $account_id);
-//
-//                        /**
-//                         * Add Booking information into Order
-//                         */
-//                        if($result['status']) {
-//                            $booked_packet = BookedPackets::where([
-//                                'account_id' => $account_id,
-//                                'id' => $result['record_id'],
-//                            ])->first();
-//
-//                            ShopifyOrders::where([
-//                                'order_id' => $order->order_id,
-//                                'account_id' => $account_id,
-//                            ])->update(array(
-//                                'booking_id' => $booked_packet->id,
-//                                'cn_number' => $booked_packet->cn_number
-//                            ));
-//
-//                            $message .= '<li>Order <b>' . $order->name . '</b> has been booked. Assigned CN # is ' . $booked_packet->cn_number;
-//
-//                            /**
-//                             * Dispatch to check if Auto Fulfillment is 'true' or 'false'
-//                             * if 'true' then order will be fulfilled automatically
-//                             * if 'false' then order will not be fulfilled
-//                             */
-//                            event(new SingleOrderFulfillmentFire($order->toArray(), $booked_packet->cn_number));
-//                        } else {
-//                            $message .= '<li>Order <b>' . $order->name . '</b> has some issues. [' . $result['error_msg'] . ']';
-//                            continue;
-//                        }
-//                    } else {
-//                        $message .= '<li>Order <b>' . $order->name . '</b> has consignee city / shipper information issue. Please select proper city or check shipper information from settings for this packet to book.';
-//                        continue;
-//                    }
+                   if($prepared_packet['status']) {
+                    
+                       $booking_packet_request = new Request();
+                       $booking_packet_request->replace($prepared_packet['packet']);
+
+                       /**
+                        * Verify Fields before send
+                        */
+                       $validator = $this->verifyPacketFields($booking_packet_request);
+                       if ($validator->fails()) {
+                           $message .= '<li>Order <b>' . $order->name . '</b> has some issues. [' . implode(', ', $validator->messages()->all()) . ']';
+                           continue;
+                       }
+
+                       $result = BookedPackets::createRecord($booking_packet_request, $account_id);
+
+                       /**
+                        * Add Booking information into Order
+                        */
+                       if($result['status']) {
+                           $booked_packet = BookedPackets::where([
+                               'account_id' => $account_id,
+                               'id' => $result['record_id'],
+                           ])->first();
+
+                           ShopifyOrders::where([
+                               'order_id' => $order->order_id,
+                               'account_id' => $account_id,
+                           ])->update(array(
+                               'booking_id' => $booked_packet->id,
+                               'cn_number' => $booked_packet->cn_number
+                           ));
+
+                           $message .= '<li>Order <b>' . $order->name . '</b> has been booked. Assigned CN # is ' . $booked_packet->cn_number;
+
+                           /**
+                            * Dispatch to check if Auto Fulfillment is 'true' or 'false'
+                            * if 'true' then order will be fulfilled automatically
+                            * if 'false' then order will not be fulfilled
+                            */
+                           event(new SingleOrderFulfillmentFire($order->toArray(), $booked_packet->cn_number));
+                       } else {
+                           $message .= '<li>Order <b>' . $order->name . '</b> has some issues. [' . $result['error_msg'] . ']';
+                           continue;
+                       }
+                   } else {
+                       $message .= '<li>Order <b>' . $order->name . '</b> has consignee city / shipper information issue. Please select proper city or check shipper information from settings for this packet to book.';
+                       continue;
+                   }
                 }
 
                 $message .= '</ul>';
@@ -445,8 +473,8 @@ class ShopifyOrdersController extends Controller
         if($leopards_settings) {
             foreach($leopards_settings as $leopards_setting) {
                 if(
-                    ($leopards_setting->slug == 'api-key' && !$leopards_setting->data)
-                    ||  ($leopards_setting->slug == 'api-password' && !$leopards_setting->data)
+                    ($leopards_setting->slug == 'username' && !$leopards_setting->data)
+                    ||  ($leopards_setting->slug == 'password' && !$leopards_setting->data)
                 ) {
                     $data['status'] = false;
                 }
@@ -620,9 +648,10 @@ class ShopifyOrdersController extends Controller
             return view('error');
         }
 
-        $leopards_cities = LeopardsCities::where([
+        $leopards_cities = WccCities::where([
             'account_id' => Auth::User()->account_id,
-        ])
+            
+        ])->where(['city_id'=>'KHI'])
             ->orderBy('name', 'asc')
             ->get();
 
@@ -977,7 +1006,7 @@ class ShopifyOrdersController extends Controller
                     $id = ShopifyHelper::syncSingleOrder($order, $shop->toArray());
 
                     $data['id'] = [$id];
-                    $data['customActionName'] = Config::get('constants.shipment_type_overnight'); //
+                    $data['customActionName'] = Config::get('constants.shipment_type_cod'); //
                     $data['customActionType'] = 'group_action'; //
                     $data['skip_packet_checking'] = '1'; //
 

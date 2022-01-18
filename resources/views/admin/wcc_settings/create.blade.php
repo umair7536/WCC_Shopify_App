@@ -17,18 +17,18 @@
                 <span class="caption-subject bold uppercase"> @lang('global.app_edit')</span>
             </div>
             <div class="actions">
-                <a href="{{ route('admin.leopards_settings.index') }}" class="btn dark pull-right">@lang('global.app_back')</a>
+                <a href="{{ route('admin.wcc_settings.index') }}" class="btn dark pull-right">@lang('global.app_back')</a>
             </div>
         </div>
         <div class="portlet-body form">
             <div class="form-group">
-                {!! Form::open(['method' => 'POST', 'id' => 'form-validation', 'route' => ['admin.leopards_settings.store']]) !!}
+                {!! Form::open(['method' => 'POST', 'id' => 'form-validation', 'route' => ['admin.wcc_settings.store']]) !!}
                 <div class="form-body">
                     <!-- Starts Form Validation Messages -->
                 @include('partials.messages')
                 <!-- Ends Form Validation Messages -->
 
-                    @include('admin.leopards_settings.fields')
+                    @include('admin.wcc_settings.fields')
                 </div>
                 <div class="form-actions">
                     {!! Form::submit(trans('global.app_save'), ['class' => 'btn btn-success']) !!}

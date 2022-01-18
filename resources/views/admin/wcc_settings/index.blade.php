@@ -32,11 +32,11 @@
             </div>
             <div class="actions">
                 @if(Gate::allows('leopards_settings_create'))
-                    <a class="btn btn-success" href="{{ route('admin.leopards_settings.create') }}"
+                    <a class="btn btn-success" href="{{ route('admin.wcc_settings.create') }}"
                        data-target="#ajax_leopards_settings" data-toggle="modal">@lang('global.app_add_new')</a>
                 @endif
                 @if(Gate::allows('leopards_settings_sort'))
-                    <a href="{{ route('admin.leopards_settings.sort') }}"
+                    <a href="{{ route('admin.wcc_settings.sort') }}"
                        class="btn btn-success">@lang('global.leopards_settings.fields.sort')</a>
                 @endif
             </div>

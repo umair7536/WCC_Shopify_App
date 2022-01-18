@@ -42,8 +42,8 @@
             <tr>
                 <th>Origin</th>
                 <td>
-                    @if($booked_packet->origin_city && isset($booked_packet->origin_city, $leopards_cities))
-                        {{ $leopards_cities[$booked_packet->origin_city]->name }}
+                    @if($booked_packet->origin_city && isset($booked_packet->origin_city, $wcc_cities))
+                        {{ $wcc_cities[$booked_packet->origin_city]->name }}
                     @else
                         N/A
                     @endif
@@ -67,8 +67,8 @@
             <tr>
                 <th>Destination</th>
                 <td>
-                    @if($booked_packet->destination_city && isset($booked_packet->destination_city, $leopards_cities))
-                        {{ $leopards_cities[$booked_packet->destination_city]->name }}
+                    @if($booked_packet->destination_city && isset($booked_packet->destination_city, $wcc_cities))
+                        {{ $wcc_cities[$booked_packet->destination_city]->name }}
                     @else
                         N/A
                     @endif

@@ -18,7 +18,9 @@
         #service span.select2-container {
             z-index: 10050;
         }
+
     </style>
+
 @stop
 
 @section('title')

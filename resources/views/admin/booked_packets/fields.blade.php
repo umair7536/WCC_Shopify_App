@@ -1,7 +1,7 @@
 <h4>Basic Information</h4>
 <div class="row">
     <div class="form-group col-md-4">
-        {!! Form::label('shipment_type_id', 'Shipment Type*', ['class' => 'control-label']) !!}
+        {!! Form::label('shipment_type_id', 'Service Type*', ['class' => 'control-label']) !!}
         {!! Form::select('shipment_type_id', $shipment_type, $default_shipment_type, ['class' => 'form-control inpt-focus', 'placeholder' => 'Select a Shipment Type', 'required' => '']) !!}
         @if($errors->has('shipment_type_id'))
             <p class="help-block">
@@ -96,7 +96,7 @@
     </div>
     <div class="form-group col-md-4">
         {!! Form::label('origin_city', 'Origin City*', ['class' => 'control-label']) !!}
-        {!! Form::select('origin_city', $leopards_cities, $data['booked_packet']['origin_city'], ['id' => 'origin_city', 'class' => 'form-control select2', 'placeholder' => 'Select Origin City', 'required' => '']) !!}
+        {!! Form::select('origin_city', $wcc_cities, $data['booked_packet']['origin_city'], ['id' => 'origin_city', 'class' => 'form-control select2', 'placeholder' => 'Select Origin City', 'required' => '']) !!}
         @if($errors->has('origin_city'))
             <p class="help-block">
                 {{ $errors->first('origin_city') }}
@@ -160,7 +160,7 @@
     </div>
     <div class="form-group col-md-4">
         {!! Form::label('destination_city', 'Destination City*', ['class' => 'control-label']) !!}
-        {!! Form::select('destination_city', $leopards_cities, $data['booked_packet']['destination_city'], ['class' => 'form-control select2', 'placeholder' => 'Select Destination City', 'required' => '']) !!}
+        {!! Form::select('destination_city', $wcc_cities, $data['booked_packet']['destination_city'], ['class' => 'form-control select2', 'placeholder' => 'Select Destination City', 'required' => '']) !!}
         @if($errors->has('destination_city'))
             <p class="help-block">
                 {{ $errors->first('destination_city') }}
@@ -180,8 +180,8 @@
         @endif
     </div>
     <div class="form-group col-md-4">
-        {!! Form::label('consignee_email', 'Consignee Email', ['class' => 'control-label']) !!}
-        {!! Form::text('consignee_email', $data['booked_packet']['consignee_email'], ['class' => 'form-control', 'placeholder' => '']) !!}
+        {!! Form::label('consignee_email', 'Consignee Email*', ['class' => 'control-label']) !!}
+        {!! Form::text('consignee_email', $data['booked_packet']['consignee_email'], ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
         @if($errors->has('consignee_email'))
             <p class="help-block">
                 {{ $errors->first('consignee_email') }}
@@ -231,12 +231,50 @@
         @endif
     </div>
 </div>
+<div class="row">
+
+    <div class="form-group col-md-4">
+        {!! Form::label('SpecialHandling', 'Special Handling', ['class' => 'control-label']) !!}
+        {!! Form::select('SpecialHandling', ['No','Yes'], 'No',['class' => 'form-control select2', 'placeholder' => 'Select Special Handling']) !!}
+        @if($errors->has('SpecialHandling'))
+            <p class="help-block">
+                {{ $errors->first('SpecialHandling') }}
+            </p>
+        @endif
+    </div>
+    <div class="form-group col-md-4">
+        {!! Form::label('InsuranceValue', 'Insurance Value', ['class' => 'control-label']) !!}
+        {!! Form::text('InsuranceValue',0, ['class' => 'form-control', 'placeholder' => '']) !!}
+        @if($errors->has('InsuranceValue'))
+            <p class="help-block">
+                {{ $errors->first('InsuranceValue') }}
+            </p>
+        @endif
+    </div>
+
+</div>
+
+
+
+
+
 <div class="clearfix"></div>
 <hr/>
 <div class="row">
     <div class="form-group col-md-12">
+        {!! Form::label('product_description', 'Product Description*', ['class' => 'control-label']) !!}
+        {!! Form::textarea('product_description',$data['booked_packet']['comments'] , ['rows' => '3', 'class' => 'form-control', 'required' => '']) !!}
+        @if($errors->has('product_description'))
+            <p class="help-block">
+                {{ $errors->first('product_description') }}
+            </p>
+        @endif
+    </div>
+</div>
+<div class="row">
+    <div class="form-group col-md-12">
         {!! Form::label('comments', 'Special Instructions*', ['class' => 'control-label']) !!}
-        {!! Form::textarea('comments', $data['booked_packet']['comments'], ['rows' => '3', 'class' => 'form-control', 'required' => '']) !!}
+        {!! Form::textarea('comments', '', ['rows' => '3', 'class' => 'form-control', 'required' => '']) !!}
         @if($errors->has('comments'))
             <p class="help-block">
                 {{ $errors->first('comments') }}

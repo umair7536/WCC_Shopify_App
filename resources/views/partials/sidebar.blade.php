@@ -10,6 +10,7 @@
                     <span></span>
                 </div>
             </li>
+
             <!-- END SIDEBAR TOGGLER BUTTON -->
             <li class="nav-item start {{ $request->segment(2) == 'home' ? 'active' : '' }}">
                 <a href="{{ route('admin.home') }}" class="nav-link ">
@@ -163,7 +164,7 @@
                     </a>
                 </li>
             @endif
-
+<!-- 
             @if(Gate::allows('load_sheets_manage'))
                 <li class="nav-item start {{ $request->segment(2) == 'load_sheets' ? 'active active-sub' : '' }}">
                     <a href="{{ route('admin.load_sheets.index') }}">
@@ -171,7 +172,7 @@
                         <span class="title">@lang('global.load_sheets.title')</span>
                     </a>
                 </li>
-            @endif
+            @endif -->
 
 {{--            @if(--}}
 {{--                    Gate::allows('booked_packets_manage')--}}
@@ -204,10 +205,20 @@
 {{--            @endif--}}
 
             @if(Gate::allows('leopards_settings_manage'))
-                <li class="nav-item start {{ $request->segment(2) == 'leopards_settings' ? 'active active-sub' : '' }}">
-                    <a href="{{ route('admin.leopards_settings.index') }}">
+                <li class="nav-item start {{ $request->segment(2) == 'wcc_settings' ? 'active active-sub' : '' }}">
+                    <a href="{{ route('admin.wcc_settings.index') }}">
                         <i class="icon icon-puzzle"></i>
                         <span class="title">@lang('global.leopards_settings.title')</span>
+                    </a>
+                </li>
+            @endif
+
+
+            @if(Gate::allows('wcc_settings_manage'))
+                <li class="nav-item start {{ $request->segment(2) == 'wcc_settings' ? 'active active-sub' : '' }}">
+                    <a href="{{ route('admin.wcc_settings.index') }}">
+                        <i class="icon icon-puzzle"></i>
+                        <span class="title">@lang('global.wcc_settings.title')</span>
                     </a>
                 </li>
             @endif

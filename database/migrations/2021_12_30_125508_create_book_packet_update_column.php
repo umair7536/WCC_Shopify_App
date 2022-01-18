@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateBookedPacketsTable extends Migration
+class CreateBookPacketUpdateColumn extends Migration
 {
     /**
      * Run the migrations.
@@ -13,6 +13,7 @@ class CreateBookedPacketsTable extends Migration
      */
     public function up()
     {
+        Schema::dropIfExists('booked_packets');
         Schema::create('booked_packets', function (Blueprint $table) {
             $table->increments('id');
 
@@ -40,7 +41,6 @@ class CreateBookedPacketsTable extends Migration
             $table->unsignedInteger('origin_city')->nullable();
 
             $table->string('special_handling');
-            $table->string('remarks');
             $table->string('product_description');
             $table->string('InsuranceValue');
 
@@ -101,3 +101,6 @@ class CreateBookedPacketsTable extends Migration
         Schema::dropIfExists('booked_packets');
     }
 }
+
+
+

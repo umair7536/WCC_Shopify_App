@@ -30,12 +30,12 @@
                 <i class="icon-list font-dark"></i>
                 <span class="caption-subject font-dark sbold uppercase">@lang('global.app_list')</span>
             </div>
-            <div class="actions">
+            <!-- <div class="actions">
                 @if(Gate::allows('booked_packets_create'))
                     <a class="btn btn-success" href="{{ route('admin.booked_packets.create') }}">@lang('global.app_add_new')</a>
                     <a class="btn btn-success" href="{{ route('admin.booked_packets.sync_status') }}" data-toggle="modal">Sync Packet Statuses</a>
                 @endif
-            </div>
+            </div> -->
         </div>
         <div class="portlet-body">
             <div class="table-container">
@@ -45,7 +45,7 @@
                         <option value="">Bulk Action</option>
                         <option value="cancel">Cancel Booked Packets</option>
                         <option value="fulfill">Mark Fulfill Packets</option>
-                        <option value="loadsheet">Generate Load Sheet</option>
+                        <!-- <option value="loadsheet">Generate Load Sheet</option> -->
                     </select>
                     <button class="btn btn-sm red table-group-action-submit">
                         <i class="fa fa-check"></i> Submit
@@ -91,10 +91,10 @@
                             {!! Form::text('cn_number', null, ['class' => 'form-control form-filter input-sm']) !!}
                         </td>
 {{--                        <td>--}}
-{{--                            {!! Form::select('origin_city', $leopards_cities, null, ['class' => 'form-control form-filter input-sm', 'placeholder' => 'Select a Shipment Type']) !!}--}}
+{{--                            {!! Form::select('origin_city', $wcc_cities, null, ['class' => 'form-control form-filter input-sm', 'placeholder' => 'Select a Shipment Type']) !!}--}}
 {{--                        </td>--}}
                         <td>
-                            {!! Form::select('destination_city', $leopards_cities, null, ['class' => 'form-control form-filter input-sm', 'placeholder' => 'Select a Shipment Type']) !!}
+                            {!! Form::select('destination_city', $wcc_cities, null, ['class' => 'form-control form-filter input-sm', 'placeholder' => 'Select a Shipment Type']) !!}
                         </td>
 {{--                        <td>--}}
 {{--                            {!! Form::text('shipper_name', null, ['class' => 'form-control form-filter input-sm']) !!}--}}

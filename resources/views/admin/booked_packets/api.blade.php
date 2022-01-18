@@ -80,10 +80,10 @@
                             {!! Form::text('cn_number', null, ['class' => 'form-control form-filter input-sm']) !!}
                         </td>
                         <td>
-                            {!! Form::select('origin_city', $leopards_cities, null, ['class' => 'form-control form-filter input-sm', 'placeholder' => 'Select a Shipment Type']) !!}
+                            {!! Form::select('origin_city', $wcc_cities, null, ['class' => 'form-control form-filter input-sm', 'placeholder' => 'Select a Shipment Type']) !!}
                         </td>
                         <td>
-                            {!! Form::select('destination_city', $leopards_cities, null, ['class' => 'form-control form-filter input-sm', 'placeholder' => 'Select a Shipment Type']) !!}
+                            {!! Form::select('destination_city', $wcc_cities, null, ['class' => 'form-control form-filter input-sm', 'placeholder' => 'Select a Shipment Type']) !!}
                         </td>
                         <td>
                             {!! Form::text('shipper_name', null, ['class' => 'form-control form-filter input-sm']) !!}

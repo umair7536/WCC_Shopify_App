@@ -1,21 +1,18 @@
 <?php
 
 namespace App\Models;
-
 use Carbon\Carbon;
-use Developifynet\LeopardsCOD\LeopardsCODClient;
 use GuzzleHttp\Client;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
 use Auth;
 use Config;
 use Storage;
-
 use Illuminate\Support\Facades\Schema;
-use function Aws\boolean_value;
 
+use Illuminate\Database\Eloquent\Model;
 
-class BookedPackets extends BaseModal
+class WccBookedPackets extends BaseModel
 {
     use SoftDeletes;
 
@@ -23,7 +20,7 @@ class BookedPackets extends BaseModal
         'booked_packet_id', 'shipment_type_id', 'booking_date', 'packet_pieces', 'net_weight', 'collect_amount', 'order_id', 'order_number',
         'vol_weight_w', 'vol_weight_h', 'vol_weight_l', 'shipper_id', 'shipper_name', 'shipper_email', 'shipper_phone', 'shipper_address',
         'consignee_id', 'consignee_name', 'consignee_email', 'consignee_phone', 'consignee_phone_2', 'consignee_phone_3', 'consignee_address',
-        'comments', 'track_number', 'slip_link', 'status', 'history', 'origin_city', 'destination_city', 'cn_number', 'booking_type', 'marked_paid', 'status_check_count',
+        'special_handling','product_description','InsuranceValue','comments', 'track_number', 'slip_link', 'status', 'history', 'origin_city', 'destination_city', 'cn_number', 'booking_type', 'marked_paid', 'status_check_count',
         'created_at', 'updated_at', 'created_by', 'updated_by', 'account_id'
     ];
 
@@ -33,12 +30,21 @@ class BookedPackets extends BaseModal
         'booked_packet_id', 'shipment_type_id', 'booking_date', 'packet_pieces', 'net_weight', 'collect_amount', 'order_id', 'order_number',
         'vol_weight_w', 'vol_weight_h', 'vol_weight_l', 'shipper_id', 'shipper_name', 'shipper_email', 'shipper_phone', 'shipper_address',
         'consignee_id', 'consignee_name', 'consignee_email', 'consignee_phone', 'consignee_phone_2', 'consignee_phone_3', 'consignee_address',
-        'comments', 'track_number', 'slip_link', 'status', 'history', 'origin_city', 'destination_city', 'cn_number', 'booking_type', 'marked_paid', 'status_check_count',
+        'special_handling','product_description','InsuranceValue','comments', 'track_number', 'slip_link', 'status', 'history', 'origin_city', 'destination_city', 'cn_number', 'booking_type', 'marked_paid', 'status_check_count',
     ];
 
     protected $table = 'booked_packets';
 
     protected static $_table = 'booked_packets';
+}
+
+
+
+
+
+class BookedPackets extends BaseModal
+{
+
 
     /**
      * Get Total Records
@@ -52,7 +58,7 @@ class BookedPackets extends BaseModal
     {
         $where = array();
 
-        if($account_id) {
+        if ($account_id) {
             $where[] = array(
                 'account_id',
                 '=',
@@ -60,7 +66,7 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if($booking_type) {
+        if ($booking_type) {
             $where[] = array(
                 'booking_type',
                 '=',
@@ -68,7 +74,7 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if($request->get('status') != '') {
+        if ($request->get('status') != '') {
             $where[] = array(
                 'status',
                 '=',
@@ -76,7 +82,7 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if($request->get('order_id')) {
+        if ($request->get('order_id')) {
             $where[] = array(
                 'order_id',
                 'like',
@@ -84,7 +90,7 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if($request->get('shipment_type_id')) {
+        if ($request->get('shipment_type_id')) {
             $where[] = array(
                 'shipment_type_id',
                 '=',
@@ -92,7 +98,7 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if($request->get('cn_number')) {
+        if ($request->get('cn_number')) {
             $where[] = array(
                 'cn_number',
                 'like',
@@ -100,7 +106,7 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if($request->get('origin_city')) {
+        if ($request->get('origin_city')) {
             $where[] = array(
                 'origin_city',
                 '=',
@@ -108,7 +114,7 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if($request->get('destination_city')) {
+        if ($request->get('destination_city')) {
             $where[] = array(
                 'destination_city',
                 '=',
@@ -116,7 +122,7 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if($request->get('shipper_name')) {
+        if ($request->get('shipper_name')) {
             $where[] = array(
                 'shipper_name',
                 'like',
@@ -124,7 +130,7 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if($request->get('consignee_name')) {
+        if ($request->get('consignee_name')) {
             $where[] = array(
                 'consignee_name',
                 'like',
@@ -132,7 +138,7 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if($request->get('consignee_phone')) {
+        if ($request->get('consignee_phone')) {
             $where[] = array(
                 'consignee_phone',
                 'like',
@@ -140,7 +146,7 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if($request->get('consignee_email')) {
+        if ($request->get('consignee_email')) {
             $where[] = array(
                 'consignee_email',
                 'like',
@@ -166,7 +172,7 @@ class BookedPackets extends BaseModal
         }
 
 
-        if($request->get('collect_amount')) {
+        if ($request->get('collect_amount')) {
             $where[] = array(
                 'collect_amount',
                 'like',
@@ -192,7 +198,7 @@ class BookedPackets extends BaseModal
         }
 
 
-        if($request->get('invoice_number')) {
+        if ($request->get('invoice_number')) {
             $where[] = array(
                 'invoice_number',
                 'like',
@@ -200,7 +206,7 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if(count($where)) {
+        if (count($where)) {
             return self::where($where)->count();
         } else {
             return self::count();
@@ -230,7 +236,7 @@ class BookedPackets extends BaseModal
 //            $order = $request->get('order')[0]['dir'];
 //        }
 
-        if($account_id) {
+        if ($account_id) {
             $where[] = array(
                 'account_id',
                 '=',
@@ -238,7 +244,7 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if($booking_type) {
+        if ($booking_type) {
             $where[] = array(
                 'booking_type',
                 '=',
@@ -246,7 +252,7 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if($request->get('status') != '') {
+        if ($request->get('status') != '') {
             $where[] = array(
                 'status',
                 '=',
@@ -254,7 +260,7 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if($request->get('order_id')) {
+        if ($request->get('order_id')) {
             $where[] = array(
                 'order_id',
                 'like',
@@ -262,7 +268,7 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if($request->get('shipment_type_id')) {
+        if ($request->get('shipment_type_id')) {
             $where[] = array(
                 'shipment_type_id',
                 '=',
@@ -270,7 +276,7 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if($request->get('cn_number')) {
+        if ($request->get('cn_number')) {
             $where[] = array(
                 'cn_number',
                 'like',
@@ -278,7 +284,7 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if($request->get('origin_city')) {
+        if ($request->get('origin_city')) {
             $where[] = array(
                 'origin_city',
                 '=',
@@ -286,7 +292,7 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if($request->get('destination_city')) {
+        if ($request->get('destination_city')) {
             $where[] = array(
                 'destination_city',
                 '=',
@@ -294,7 +300,7 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if($request->get('shipper_name')) {
+        if ($request->get('shipper_name')) {
             $where[] = array(
                 'shipper_name',
                 'like',
@@ -302,7 +308,7 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if($request->get('consignee_name')) {
+        if ($request->get('consignee_name')) {
             $where[] = array(
                 'consignee_name',
                 'like',
@@ -310,7 +316,7 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if($request->get('consignee_phone')) {
+        if ($request->get('consignee_phone')) {
             $where[] = array(
                 'consignee_phone',
                 'like',
@@ -318,7 +324,7 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if($request->get('consignee_email')) {
+        if ($request->get('consignee_email')) {
             $where[] = array(
                 'consignee_email',
                 'like',
@@ -344,7 +350,7 @@ class BookedPackets extends BaseModal
         }
 
 
-        if($request->get('collect_amount')) {
+        if ($request->get('collect_amount')) {
             $where[] = array(
                 'collect_amount',
                 'like',
@@ -369,7 +375,7 @@ class BookedPackets extends BaseModal
         }
 
 
-        if($request->get('invoice_number')) {
+        if ($request->get('invoice_number')) {
             $where[] = array(
                 'invoice_number',
                 'like',
@@ -377,10 +383,10 @@ class BookedPackets extends BaseModal
             );
         }
 
-        if(count($where)) {
-            return self::where($where)->limit($iDisplayLength)->offset($iDisplayStart)->orderBy($orderBy,$order)->get();
+        if (count($where)) {
+            return self::where($where)->limit($iDisplayLength)->offset($iDisplayStart)->orderBy($orderBy, $order)->get();
         } else {
-            return self::limit($iDisplayLength)->offset($iDisplayStart)->orderBy($orderBy,$order)->get();
+            return self::limit($iDisplayLength)->offset($iDisplayStart)->orderBy($orderBy, $order)->get();
         }
     }
 
@@ -393,13 +399,14 @@ class BookedPackets extends BaseModal
      */
     static public function createRecord($request, $account_id)
     {
-
+        echo "test";
+        exit();
         $data = $request->all();
 
         /**
          * If consignment emails is not provided, put a dummy email
          */
-        if(
+        if (
             array_key_exists('consignee_email', $data) && !$data['consignee_email']
         ) {
             $data['consignee_email'] = Config::get('constants.lcs_dummy_email');
@@ -410,28 +417,20 @@ class BookedPackets extends BaseModal
         /**
          * Book Packet in Leopards System
          */
-
         $response = BookedPackets::bookPacket($request, $account_id);
 
-
-
-        $username= LeopardsSettings::where('account_id', Auth::User()->account_id)->where('name','User ID')->get();
-        $password=LeopardsSettings::where('account_id', Auth::User()->account_id)->where('name','Password')->get();
-    
-        if($response->Data[0]->TrackNumber) {
+        if ($response['status']) {
             // Set Tracking Information
-            $data['track_number'] = $response->Data[0]->TrackNumber;
-            $data['cn_number'] = $response->Data[0]->TrackNumber;
-            $data['slip_link'] = 'http://web.api.wcc.com.pk:3001/api/General/GetPDFFilefromdisk?username='.$username[0]->data.'&password='.$password[0]->data.'&CNNO='.$response->Data[0]->TrackNumber;
+            $data['track_number'] = $response['track_number'];
+            $data['cn_number'] = $response['track_number'];
+            $data['slip_link'] = $response['slip_link'];
         } else {
             return [
                 'status' => false,
                 'record_id' => 0,
-                'error_msg' => $response->Data[0]->Errors
+                'error_msg' => $response['error_msg']
             ];
         }
-
-
 
         // Set Account ID
         $data['account_id'] = $account_id;
@@ -440,19 +439,13 @@ class BookedPackets extends BaseModal
         /**
          * If Consigneee is 'other' then create this consignee into system
          */
-
-//        echo $response;
-        // echo $data['consignee_id'],$data['cn_number'];
-//        exit();
-
-
-        if($data['consignee_id'] == 'other') {
+        if ($data['consignee_id'] == 'other') {
 
             $destination_city = WccCities::where([
                 'city_id' => $data['destination_city']
             ])->first();
 
-            if(!$destination_city) {
+            if (!$destination_city) {
                 return [
                     'status' => false,
                     'record_id' => 0,
@@ -471,7 +464,7 @@ class BookedPackets extends BaseModal
                 'city_id' => $destination_city->id,
             ]);
 
-            if($consignee_created = Consignees::createRecord($consignee, $data['account_id'])) {
+            if ($consignee_created = Consignees::createRecord($consignee, $data['account_id'])) {
                 $data['consignee_id'] = $consignee_created->id;
             } else {
                 return [
@@ -500,7 +493,7 @@ class BookedPackets extends BaseModal
         /**
          * Packet is booked now update Order
          */
-        if(isset($data['order_id']) && $data['order_id']) {
+        if (isset($data['order_id']) && $data['order_id']) {
             ShopifyOrders::where([
                 'name' => $data['order_id'],
                 'account_id' => $account_id,
@@ -522,7 +515,7 @@ class BookedPackets extends BaseModal
     }
 
     /**
-     * Cancel Booked Packet in WCC COD
+     * Cancel Booked Packet in Leopards COD
      *
      * @param $id
      *
@@ -543,11 +536,10 @@ class BookedPackets extends BaseModal
          * '1' as Test Mode
          * '2' as Production Mode
          */
-        if($booked_packet->booking_type == '1') {
+        if ($booked_packet->booking_type == '1') {
             flash('Test Packet can not be cancel.')->error()->important();
             return redirect()->route('admin.booked_packets.index');
         }
-
 
         try {
 
@@ -558,97 +550,66 @@ class BookedPackets extends BaseModal
                 ->orderBy('id', 'asc')
                 ->get()->keyBy('slug');
 
-
             /**
-             * Cancel Single Booked Packet
+             * Merge Booked Packet with LCS Credentials
              */
+            $cn_data = array_merge(array(
+                'api_key' => $leopards_settings['api-key']->data,              // API Key provided by LCS
+                'api_password' => $leopards_settings['api-password']->data,    // API Password provided by LCS
+            ), [
+                'cn_numbers' => $booked_packet->cn_number
+            ]);
 
-            $username=$leopards_settings['username']->data;
-            $password=$leopards_settings['password']->data;
-            $cn_number=$booked_packet->cn_number;
-            $cancel_api="http://web.api.wcc.com.pk:3001/api/General/CancelBooking?username=".$username."&password=".$password."&CNNO=".$cn_number;
+            $client = new Client();
+            $response = $client->post(env('LCS_URL') . 'webservice/cancelBookedPackets/format/json/ ', array(
+                'form_params' => $cn_data
+            ));
 
-            // cancel packet using api
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_HEADER, 0);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); //Set curl to return the data instead of printing it to the browser.
-            curl_setopt($ch, CURLOPT_URL, $cancel_api);
-            $data = curl_exec($ch);
-            curl_close($ch);
-            $data=json_decode($data);
+            if ($response->getStatusCode() == 200) {
+                if ($response->getBody()) {
 
-            // response recieve after cancel api call
-            if ($data->IsSuccessful)
-            {
-//                $msg="Successfully Cancel";
-                $booked_packet->update(['status' => Config::get('constants.status_cancel')]);
-                flash('Packet has been cancelled successfully.')->success()->important();
-            }
-            else
-            {
-                $msg=explode(":",$data->Errors[0])[1];
-                flash($msg)->error()->important();
+                    $result = json_decode($response->getBody(), true);
+                    echo '<pre>';
+                    print_r($result);
+                    exit;
+                    '';
+
+                    if (
+                        $result['status']
+                        || (
+                            !$result['status']
+                            && (
+                                count($result['error'])
+                                && isset($result['error'][$booked_packet->cn_number])
+                            )
+                        )
+                    ) {
+
+                        $booked_packet->update(['status' => Config::get('constants.status_cancel')]);
+                        flash('Packet has been cancelled successfully.')->success()->important();
+                        AuditTrails::inactiveEventLogger(self::$_table, 'inactive', self::$_fillable, $id);
+
+                    } else {
+                        flash($result['error'])->error()->important();
+                        return redirect()->route('admin.booked_packets.index');
+                    }
+
+                } else {
+                    flash('Error in cancel.')->error()->important();
+                    return redirect()->route('admin.booked_packets.index');
+                }
+            } else {
+                flash('Error in cancel.')->error()->important();
                 return redirect()->route('admin.booked_packets.index');
             }
-
-
-//            /*
-//            $cn_data = array_merge(array(
-//                'api_key' => $leopards_settings['api-key']->data,              // API Key provided by LCS
-//                'api_password' => $leopards_settings['api-password']->data,    // API Password provided by LCS
-//            ), [
-//                'cn_numbers' => $booked_packet->cn_number
-//            ]);
-//            $client = new Client();
-//            $response = $client->post(env('LCS_URL') . 'webservice/cancelBookedPackets/format/json/ ', array(
-//                'form_params' => $cn_data
-//            ));
-//            if($response->getStatusCode() == 200) {
-//                if($response->getBody()) {
-//
-//                    $result = json_decode($response->getBody(), true);
-//                    echo '<pre>';
-//                    print_r($result);
-//                    exit; '';
-//
-//                    if(
-//                                $result['status']
-//                            ||  (
-//                                    !$result['status']
-//                                    && (
-//                                                count($result['error'])
-//                                            &&  isset($result['error'][$booked_packet->cn_number])
-//                                    )
-//                                )
-//                    ) {
-//
-//                        $booked_packet->update(['status' => Config::get('constants.status_cancel')]);
-//                        flash('Packet has been cancelled successfully.')->success()->important();
-//                        AuditTrails::inactiveEventLogger(self::$_table, 'inactive', self::$_fillable, $id);
-//
-//                    } else {
-//                        flash($result['error'])->error()->important();
-//                        return redirect()->route('admin.booked_packets.index');
-//                    }
-//
-//                } else {
-//                    flash('Error in cancel.')->error()->important();
-//                    return redirect()->route('admin.booked_packets.index');
-//                }
-//            } else {
-//                flash('Error in cancel.')->error()->important();
-//                return redirect()->route('admin.booked_packets.index');
-//            }
-//            */
-
-
         } catch (\Exception $exception) {
             flash('Error in cancel.')->error()->important();
             return redirect()->route('admin.booked_packets.index');
         }
     }
 
-    static public function cancelBookedPacket($cn_number, $account_id) {
+    static public function cancelBookedPacket($cn_number, $account_id)
+    {
         try {
 
             $leopards_settings = LeopardsSettings::where([
@@ -662,48 +623,47 @@ class BookedPackets extends BaseModal
              * Merge Booked Packet with LCS Credentials
              */
             $cn_data = array_merge(array(
-                'username' => $leopards_settings['username']->data,              // API Key provided by LCS
-                'password' => $leopards_settings['password']->data,    // API Password provided by LCS
+                'api_key' => $leopards_settings['api-key']->data,              // API Key provided by LCS
+                'api_password' => $leopards_settings['api-password']->data,    // API Password provided by LCS
             ), [
                 'cn_numbers' => $cn_number
             ]);
-            
 
-            /**
-             * Cancel Booked Packet
-             */
+            $client = new Client();
+            $response = $client->post(env('LCS_URL') . 'webservice/cancelBookedPackets/format/json/ ', array(
+                'form_params' => $cn_data
+            ));
 
-            $username=$cn_data["username"];
-            $password=$cn_data['password'];
-            $cn_number=$cn_data["cn_numbers"];
+            if ($response->getStatusCode() == 200) {
+                if ($response->getBody()) {
 
+                    $result = json_decode($response->getBody(), true);
 
-            $cancel_api="http://web.api.wcc.com.pk:3001/api/General/CancelBooking?username=".$username."&password=".$password."&CNNO=".$cn_number;
-
-            // cancel packet using api
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_HEADER, 0);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); //Set curl to return the data instead of printing it to the browser.
-            curl_setopt($ch, CURLOPT_URL, $cancel_api);
-            $data = curl_exec($ch);
-            curl_close($ch);
-            $data=json_decode($data);
-
-            // response recieve after cancel api call
-            if ($data->IsSuccessful){
-                    return array(
-                        'status' => true,
-                        'message' => 'Packet has been cancelled successfully.',
-                    );    
+                    if (
+                        $result['status']
+                    ) {
+                        return array(
+                            'status' => true,
+                            'message' => 'Packet has been cancelled successfully.',
+                        );
+                    } else {
+                        if (
+                            !$result['status']
+                            && (
+                                count($result['error'])
+                                && isset($result['error'][$cn_number])
+                            )
+                        ) {
+                            return array(
+                                'status' => false,
+                                'message' => $result['error'][$cn_number],
+                            );
+                        }
+                    }
                 }
-            else {
-                    return array(
-                        'status' => false,
-                        'message' => $result['error'][$cn_number],
-                    );            
-                }
-
-        } catch (\Exception $exception) {}
+            }
+        } catch (\Exception $exception) {
+        }
 
         return array(
             'status' => false,
@@ -734,7 +694,7 @@ class BookedPackets extends BaseModal
          * '1' as Test Mode
          * '2' as Production Mode
          */
-        if($booked_packet->booking_type == '2') {
+        if ($booked_packet->booking_type == '2') {
             flash('Packet can not be delete, only option available is cancel this packet.')->error()->important();
             return redirect()->route('admin.booked_packets.index');
         }
@@ -774,7 +734,8 @@ class BookedPackets extends BaseModal
      * @param $record
      * @return array
      */
-    static public function prepareRecord($record) {
+    static public function prepareRecord($record)
+    {
 
         $prepared_record = [];
 
@@ -782,10 +743,10 @@ class BookedPackets extends BaseModal
          * Get table columns and prepare record
          */
         $columns = Schema::getColumnListing(self::$_table); // users table
-        foreach($record as $column => $value) {
+        foreach ($record as $column => $value) {
             // Skip those records which are in skipped columns array
-            if(count(self::$skip_columns)) {
-                if(in_array($column, self::$skip_columns)) {
+            if (count(self::$skip_columns)) {
+                if (in_array($column, self::$skip_columns)) {
                     continue;
                 }
             }
@@ -793,7 +754,7 @@ class BookedPackets extends BaseModal
             /*
              * Remove records which are not in columns
              */
-            if(!in_array($column, $columns)) {
+            if (!in_array($column, $columns)) {
                 continue;
             }
 
@@ -801,11 +762,11 @@ class BookedPackets extends BaseModal
              * Set DateTimes format
              */
             $timestamps = ['created_at', 'updated_at'];
-            if(in_array($column, $timestamps)) {
+            if (in_array($column, $timestamps)) {
                 $value = Carbon::parse($value)->toDateTimeString();
             }
 
-            if(is_array($value)) {
+            if (is_array($value)) {
                 $prepared_record[$column] = json_encode($value);
             } else {
                 $prepared_record[$column] = $value;
@@ -816,252 +777,8 @@ class BookedPackets extends BaseModal
     }
 
 
-    public static function prepareBookingOrder($order_id = false, $account_id) {
-        $fill_fields = array(
-            'packet_pieces' => 'quantity',
-            'net_weight' => 'total_weight',
-            'collect_amount' => 'total_price',
-            'order_number' => 'order_number',
-            'order_id' => 'name',
-            'comments' => 'note',
-            'title' => 'title',
-            'consignee_name' => 'name',
-            'consignee_email' => 'email',
-            'consignee_phone' => 'phone',
-            'consignee_address' => 'address1',
-            'destination_city' => 'city',
-            'product_description'=>'product_description',
-            'SpecialHandling'=>'SpecialHandling',
-            'InsuranceValue'=>'InsuranceValue'
-        );
-
-
-        $order_fields = array(
-            'note' => 'comments',
-        );
-
-        $booked_packet = array();
-
-        foreach($fill_fields as $key => $value) {
-            if(in_array($key, ['packet_pieces', 'net_weight', 'collect_amount'])) {
-                $booked_packet[$key] = 0;
-            } else {
-                $booked_packet[$key] = null;
-            }
-        }
-
-        if($order_id) {
-            $order = ShopifyOrders::where([
-                'account_id' => $account_id,
-                'order_id' => $order_id,
-            ])->first();
-
-            if($order) {
-                $order = $order->toArray();
-
-                $customer = ShopifyCustomers::where([
-                    'customer_id' => $order['customer_id']
-                ])->first();
-
-                if($customer) {
-                    $customer = $customer->toArray();
-                } else {
-                    $customer = [];
-                }
-
-                $shipping_address = ShippingAddresses::where([
-                    'order_id' => $order['order_id']
-                ])->first();
-
-                if($shipping_address) {
-                    $shipping_address = $shipping_address->toArray();
-                } else {
-                    $shipping_address = [];
-                }
-
-                $order_items = ShopifyOrderItems::where([
-                   'order_id' => $order['order_id']
-                ])->get();
-
-                if($order_items) {
-                    $order_items = $order_items->toArray();
-                } else {
-                    $order_items = [];
-                }
-
-                foreach($fill_fields as $key => $value) {
-                    if($key == 'consignee_name' && $value == 'name') {
-                        continue;
-                    }
-
-                    if(array_key_exists($value, $order)) {
-                        if($value == 'total_weight') {
-                            $booked_packet[$key] = ($order[$value]) ? $order[$value] : '';
-                        } elseif($value == 'total_price') {
-                            /**
-                             * If 'financial_status' is 'paid' then COD amount will be 0.00
-                             */
-                            if(array_key_exists('financial_status', $order) && $order['financial_status'] == 'paid') {
-                                // $booked_packet[$key] = 0.001;
-                                $booked_packet[$key] = $order[$value];
-                            } else {
-                                $booked_packet[$key] = $order[$value];
-                            }
-                        } else {
-                            $booked_packet[$key] = $order[$value];
-                        }
-                    }
-                }
-
-                if(count($shipping_address)) {
-                    foreach($fill_fields as $key => $value) {
-                        if(array_key_exists($value, $shipping_address)) {
-                            if($key != 'consignee_name' && $value == 'name') {
-                                continue;
-                            }
-                            if($key == 'consignee_address') {
-                                $booked_packet[$key] = trim($shipping_address['address1']) . ' ' . trim($shipping_address['address2']);
-                            } else if($key == 'destination_city') {
-                                /**
-                                 * Grab City from WCC System
-                                 */
-                                $city = WccCities::where([
-                                    'account_id' => $account_id
-                                ])
-                                    ->where('name',
-                                        '=',
-                                        trim($shipping_address[$value])
-                                    )
-                                    ->select('city_id', 'name')
-                                    ->first();
-
-                                if($city) {
-                                    $booked_packet[$key] = $city->city_id;
-                                }
-                            } else {
-                                if($value == 'name') {
-                                    $booked_packet[$key] = ($shipping_address[$value]) ? trim(ucwords($shipping_address[$value])) : trim(ucwords($shipping_address['first_name'])) . ' ' . trim(ucwords($shipping_address['last_name']));
-                                } else {
-                                    $booked_packet[$key] = $shipping_address[$value];
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    if(count($customer)) {
-                        foreach($fill_fields as $key => $value) {
-                            if(array_key_exists($value, $customer)) {
-                                if($key != 'consignee_name' && $value == 'name') {
-                                    continue;
-                                }
-                                if($key == 'consignee_address') {
-                                    $booked_packet[$key] = trim($customer['address1']) . ' ' . trim($customer['address2']);
-                                } else if($key == 'destination_city') {
-                                    /**
-                                     * Grab City from WCC System
-                                     */
-                                    $city = WccCities::where([
-                                        'account_id' => $account_id
-                                    ])
-                                        ->where('name',
-                                            '=',
-                                            trim($customer[$value])
-                                        )
-                                        ->select('city_id', 'name')
-                                        ->first();
-
-                                    if($city) {
-                                        $booked_packet[$key] = $city->city_id;
-                                    }
-                                } else {
-                                    if($value == 'name') {
-                                        $booked_packet[$key] = ($customer[$value]) ? trim(ucwords($customer[$value])) : trim(ucwords($customer['first_name'])) . ' ' . trim(ucwords($customer['last_name']));
-                                    } else {
-                                        $booked_packet[$key] = $customer[$value];
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if(count($order_items)) {
-                    $items = [];
-                    foreach($fill_fields as $key => $value) {
-                        if($value == 'name') {
-                            continue;
-                        }
-                        foreach($order_items as $order_item) {
-                            if(array_key_exists($value, $order_item)) {
-                                if($key == 'title') {
-                                    /**
-                                     * Add Line item name and qty into comments section
-                                     */
-                                    $single_item = substr($order_item['title'], 0, 60);
-                                    // Set SKU
-                                    if($order_item['sku']) {
-                                        $single_item .= ' ' . $order_item['sku'];
-                                    }
-                                    // Set Variant Title
-                                    if($order_item['variant_title']) {
-                                        $single_item .= ' (' . $order_item['variant_title'] . ')';
-                                    }
-                                    $single_item .= ' ' . $order_item['quantity'] . ' pc';
-                                    $items[] = $single_item;
-//                                    $items[] = $order_item['title'] . ' ' . $order_item['quantity'] . ' pc';
-                                } else {
-                                    $booked_packet[$key] += $order_item[$value];
-                                }
-                            }
-                        }
-                    }
-
-                    /**
-                     * if line items found then add them into comments
-                     */
-                    if(array_key_exists('comments', $booked_packet) && count($items)) {
-                        $booked_packet['comments'] = trim($booked_packet['comments'] . ' ' . implode(', ', $items));
-                    }
-                }
-            }
-        }
-
-        /**
-         * Adjust Shipper Information as per WCC Settings
-         */
-        $leopards_settings = LeopardsSettings::where([
-            'account_id' => Auth::User()->account_id
-        ])
-            ->select('slug', 'data')
-            ->orderBy('id', 'asc')
-            ->get()->keyBy('slug');
-
-        /**
-         * If Type is 'self' then all fields will have 'self' word
-         * If Type is 'other' then all shipper information will be filled
-         */
-        if($leopards_settings['shipper-type']->data == 'self') {
-            // Shipper Information
-            $booked_packet['origin_city'] = '';
-            $booked_packet['shipper_id'] = 'self';
-            $booked_packet['shipper_name'] = '';
-            $booked_packet['shipper_email'] = '';
-            $booked_packet['shipper_phone'] = '';
-            $booked_packet['shipper_address'] = '';
-        } else {
-            // Shipper Information
-            $booked_packet['origin_city'] = $leopards_settings['shipper-city']->data;
-            $booked_packet['shipper_id'] = 'other';
-            $booked_packet['shipper_name'] = $leopards_settings['shipper-name']->data;
-            $booked_packet['shipper_email'] = $leopards_settings['shipper-email']->data;
-            $booked_packet['shipper_phone'] = $leopards_settings['shipper-phone']->data;
-            $booked_packet['shipper_address'] = $leopards_settings['shipper-address']->data;
-        }
-
-        return $booked_packet;
-    }
-
-    public static function prepareJSONBookingOrder($order, $account_id) {
+    public static function prepareBookingOrder($order_id = false, $account_id)
+    {
         $fill_fields = array(
             'packet_pieces' => 'quantity',
             'net_weight' => 'total_weight',
@@ -1083,8 +800,248 @@ class BookedPackets extends BaseModal
 
         $booked_packet = array();
 
-        foreach($fill_fields as $key => $value) {
-            if(in_array($key, ['packet_pieces', 'net_weight', 'collect_amount'])) {
+        foreach ($fill_fields as $key => $value) {
+            if (in_array($key, ['packet_pieces', 'net_weight', 'collect_amount'])) {
+                $booked_packet[$key] = 0;
+            } else {
+                $booked_packet[$key] = null;
+            }
+        }
+
+        if ($order_id) {
+            $order = ShopifyOrders::where([
+                'account_id' => $account_id,
+                'order_id' => $order_id,
+            ])->first();
+
+            if ($order) {
+                $order = $order->toArray();
+
+                $customer = ShopifyCustomers::where([
+                    'customer_id' => $order['customer_id']
+                ])->first();
+
+                if ($customer) {
+                    $customer = $customer->toArray();
+                } else {
+                    $customer = [];
+                }
+
+                $shipping_address = ShippingAddresses::where([
+                    'order_id' => $order['order_id']
+                ])->first();
+
+                if ($shipping_address) {
+                    $shipping_address = $shipping_address->toArray();
+                } else {
+                    $shipping_address = [];
+                }
+
+                $order_items = ShopifyOrderItems::where([
+                    'order_id' => $order['order_id']
+                ])->get();
+
+                if ($order_items) {
+                    $order_items = $order_items->toArray();
+                } else {
+                    $order_items = [];
+                }
+
+                foreach ($fill_fields as $key => $value) {
+                    if ($key == 'consignee_name' && $value == 'name') {
+                        continue;
+                    }
+                    if (array_key_exists($value, $order)) {
+                        if ($value == 'total_weight') {
+                            $booked_packet[$key] = ($order[$value]) ? $order[$value] : '';
+                        } elseif ($value == 'total_price') {
+                            /**
+                             * If 'financial_status' is 'paid' then COD amount will be 0.00
+                             */
+                            if (array_key_exists('financial_status', $order) && $order['financial_status'] == 'paid') {
+                                $booked_packet[$key] = 0.001;
+                            } else {
+                                $booked_packet[$key] = $order[$value];
+                            }
+                        } else {
+                            $booked_packet[$key] = $order[$value];
+                        }
+                    }
+                }
+
+                if (count($shipping_address)) {
+                    foreach ($fill_fields as $key => $value) {
+                        if (array_key_exists($value, $shipping_address)) {
+                            if ($key != 'consignee_name' && $value == 'name') {
+                                continue;
+                            }
+                            if ($key == 'consignee_address') {
+                                $booked_packet[$key] = trim($shipping_address['address1']) . ' ' . trim($shipping_address['address2']);
+                            } else if ($key == 'destination_city') {
+                                /**
+                                 * Grab City from Leopards System
+                                 */
+                                $city = WccCities::where([
+                                    'account_id' => $account_id
+                                ])
+                                    ->where('name',
+                                        '=',
+                                        trim($shipping_address[$value])
+                                    )
+                                    ->select('city_id', 'name')
+                                    ->first();
+
+                                if ($city) {
+                                    $booked_packet[$key] = $city->city_id;
+                                }
+                            } else {
+                                if ($value == 'name') {
+                                    $booked_packet[$key] = ($shipping_address[$value]) ? trim(ucwords($shipping_address[$value])) : trim(ucwords($shipping_address['first_name'])) . ' ' . trim(ucwords($shipping_address['last_name']));
+                                } else {
+                                    $booked_packet[$key] = $shipping_address[$value];
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (count($customer)) {
+                        foreach ($fill_fields as $key => $value) {
+                            if (array_key_exists($value, $customer)) {
+                                if ($key != 'consignee_name' && $value == 'name') {
+                                    continue;
+                                }
+                                if ($key == 'consignee_address') {
+                                    $booked_packet[$key] = trim($customer['address1']) . ' ' . trim($customer['address2']);
+                                } else if ($key == 'destination_city') {
+                                    /**
+                                     * Grab City from Leopards System
+                                     */
+                                    $city = WccCities::where([
+                                        'account_id' => $account_id
+                                    ])
+                                        ->where('name',
+                                            '=',
+                                            trim($customer[$value])
+                                        )
+                                        ->select('city_id', 'name')
+                                        ->first();
+
+                                    if ($city) {
+                                        $booked_packet[$key] = $city->city_id;
+                                    }
+                                } else {
+                                    if ($value == 'name') {
+                                        $booked_packet[$key] = ($customer[$value]) ? trim(ucwords($customer[$value])) : trim(ucwords($customer['first_name'])) . ' ' . trim(ucwords($customer['last_name']));
+                                    } else {
+                                        $booked_packet[$key] = $customer[$value];
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (count($order_items)) {
+                    $items = [];
+                    foreach ($fill_fields as $key => $value) {
+                        if ($value == 'name') {
+                            continue;
+                        }
+                        foreach ($order_items as $order_item) {
+                            if (array_key_exists($value, $order_item)) {
+                                if ($key == 'title') {
+                                    /**
+                                     * Add Line item name and qty into comments section
+                                     */
+                                    $single_item = substr($order_item['title'], 0, 60);
+                                    // Set SKU
+                                    if ($order_item['sku']) {
+                                        $single_item .= ' ' . $order_item['sku'];
+                                    }
+                                    // Set Variant Title
+                                    if ($order_item['variant_title']) {
+                                        $single_item .= ' (' . $order_item['variant_title'] . ')';
+                                    }
+                                    $single_item .= ' ' . $order_item['quantity'] . ' pc';
+                                    $items[] = $single_item;
+//                                    $items[] = $order_item['title'] . ' ' . $order_item['quantity'] . ' pc';
+                                } else {
+                                    $booked_packet[$key] += $order_item[$value];
+                                }
+                            }
+                        }
+                    }
+
+                    /**
+                     * if line items found then add them into comments
+                     */
+                    if (array_key_exists('comments', $booked_packet) && count($items)) {
+                        $booked_packet['comments'] = trim($booked_packet['comments'] . ' ' . implode(', ', $items));
+                    }
+                }
+            }
+        }
+
+        /**
+         * Adjust Shipper Information as per LCS Settings
+         */
+        $leopards_settings = LeopardsSettings::where([
+            'account_id' => Auth::User()->account_id
+        ])
+            ->select('slug', 'data')
+            ->orderBy('id', 'asc')
+            ->get()->keyBy('slug');
+
+        /**
+         * If Type is 'self' then all fields will have 'self' word
+         * If Type is 'other' then all shipper information will be filled
+         */
+        if ($leopards_settings['shipper-type']->data == 'self') {
+            // Shipper Information
+            $booked_packet['origin_city'] = '';
+            $booked_packet['shipper_id'] = 'self';
+            $booked_packet['shipper_name'] = '';
+            $booked_packet['shipper_email'] = '';
+            $booked_packet['shipper_phone'] = '';
+            $booked_packet['shipper_address'] = '';
+        } else {
+            // Shipper Information
+            $booked_packet['origin_city'] = $leopards_settings['shipper-city']->data;
+            $booked_packet['shipper_id'] = 'other';
+            $booked_packet['shipper_name'] = $leopards_settings['shipper-name']->data;
+            $booked_packet['shipper_email'] = $leopards_settings['shipper-email']->data;
+            $booked_packet['shipper_phone'] = $leopards_settings['shipper-phone']->data;
+            $booked_packet['shipper_address'] = $leopards_settings['shipper-address']->data;
+        }
+
+        return $booked_packet;
+    }
+
+    public static function prepareJSONBookingOrder($order, $account_id)
+    {
+        $fill_fields = array(
+            'packet_pieces' => 'quantity',
+            'net_weight' => 'total_weight',
+            'collect_amount' => 'total_price',
+            'order_number' => 'order_number',
+            'order_id' => 'name',
+            'comments' => 'note',
+            'title' => 'title',
+            'consignee_name' => 'name',
+            'consignee_email' => 'email',
+            'consignee_phone' => 'phone',
+            'consignee_address' => 'address1',
+            'destination_city' => 'city'
+        );
+
+        $order_fields = array(
+            'note' => 'comments',
+        );
+
+        $booked_packet = array();
+
+        foreach ($fill_fields as $key => $value) {
+            if (in_array($key, ['packet_pieces', 'net_weight', 'collect_amount'])) {
                 $booked_packet[$key] = 0;
             } else {
                 $booked_packet[$key] = null;
@@ -1094,25 +1051,25 @@ class BookedPackets extends BaseModal
         $customer = $order['customer'];
         $shipping_address = $order['shipping_address'];
 
-        if(count($order['line_items'])) {
+        if (count($order['line_items'])) {
             $order_items = $order['line_items'];
         } else {
             $order_items = [];
         }
 
-        foreach($fill_fields as $key => $value) {
-            if($key == 'consignee_name' && $value == 'name') {
+        foreach ($fill_fields as $key => $value) {
+            if ($key == 'consignee_name' && $value == 'name') {
                 continue;
             }
-            if(array_key_exists($value, $order)) {
-                if($value == 'total_weight') {
+            if (array_key_exists($value, $order)) {
+                if ($value == 'total_weight') {
                     $booked_packet[$key] = ($order[$value]) ? $order[$value] : '';
-                } elseif($value == 'total_price') {
+                } elseif ($value == 'total_price') {
                     /**
                      * If 'financial_status' is 'paid' then COD amount will be 0.00
                      */
-                    if(array_key_exists('financial_status', $order) && $order['financial_status'] == 'paid') {
-                        $booked_packet[$key] = $order[$value];
+                    if (array_key_exists('financial_status', $order) && $order['financial_status'] == 'paid') {
+                        $booked_packet[$key] = 0.001;
                     } else {
                         $booked_packet[$key] = $order[$value];
                     }
@@ -1122,17 +1079,17 @@ class BookedPackets extends BaseModal
             }
         }
 
-        if(count($shipping_address)) {
-            foreach($fill_fields as $key => $value) {
-                if(array_key_exists($value, $shipping_address)) {
-                    if($key != 'consignee_name' && $value == 'name') {
+        if (count($shipping_address)) {
+            foreach ($fill_fields as $key => $value) {
+                if (array_key_exists($value, $shipping_address)) {
+                    if ($key != 'consignee_name' && $value == 'name') {
                         continue;
                     }
-                    if($key == 'consignee_address') {
+                    if ($key == 'consignee_address') {
                         $booked_packet[$key] = trim($shipping_address['address1']) . ' ' . trim($shipping_address['address2']);
-                    } else if($key == 'destination_city') {
+                    } else if ($key == 'destination_city') {
                         /**
-                         * Grab City from WCC System
+                         * Grab City from Leopards System
                          */
                         $city = WccCities::where([
                             'account_id' => $account_id
@@ -1144,11 +1101,11 @@ class BookedPackets extends BaseModal
                             ->select('city_id', 'name')
                             ->first();
 
-                        if($city) {
+                        if ($city) {
                             $booked_packet[$key] = $city->city_id;
                         }
                     } else {
-                        if($value == 'name') {
+                        if ($value == 'name') {
                             $booked_packet[$key] = ($shipping_address[$value]) ? trim(ucwords($shipping_address[$value])) : trim(ucwords($shipping_address['first_name'])) . ' ' . trim(ucwords($shipping_address['last_name']));
                         } else {
                             $booked_packet[$key] = $shipping_address[$value];
@@ -1157,17 +1114,17 @@ class BookedPackets extends BaseModal
                 }
             }
         } else {
-            if(count($customer)) {
-                foreach($fill_fields as $key => $value) {
-                    if(array_key_exists($value, $customer)) {
-                        if($key != 'consignee_name' && $value == 'name') {
+            if (count($customer)) {
+                foreach ($fill_fields as $key => $value) {
+                    if (array_key_exists($value, $customer)) {
+                        if ($key != 'consignee_name' && $value == 'name') {
                             continue;
                         }
-                        if($key == 'consignee_address') {
+                        if ($key == 'consignee_address') {
                             $booked_packet[$key] = trim($customer['address1']) . ' ' . trim($customer['address2']);
-                        } else if($key == 'destination_city') {
+                        } else if ($key == 'destination_city') {
                             /**
-                             * Grab City from WCC System
+                             * Grab City from Leopards System
                              */
                             $city = WccCities::where([
                                 'account_id' => $account_id
@@ -1179,11 +1136,11 @@ class BookedPackets extends BaseModal
                                 ->select('city_id', 'name')
                                 ->first();
 
-                            if($city) {
+                            if ($city) {
                                 $booked_packet[$key] = $city->city_id;
                             }
                         } else {
-                            if($value == 'name') {
+                            if ($value == 'name') {
                                 $booked_packet[$key] = ($customer[$value]) ? trim(ucwords($customer[$value])) : trim(ucwords($customer['first_name'])) . ' ' . trim(ucwords($customer['last_name']));
                             } else {
                                 $booked_packet[$key] = $customer[$value];
@@ -1194,25 +1151,25 @@ class BookedPackets extends BaseModal
             }
         }
 
-        if(count($order_items)) {
+        if (count($order_items)) {
             $items = [];
-            foreach($fill_fields as $key => $value) {
-                if($value == 'name') {
+            foreach ($fill_fields as $key => $value) {
+                if ($value == 'name') {
                     continue;
                 }
-                foreach($order_items as $order_item) {
-                    if(array_key_exists($value, $order_item)) {
-                        if($key == 'title') {
+                foreach ($order_items as $order_item) {
+                    if (array_key_exists($value, $order_item)) {
+                        if ($key == 'title') {
                             /**
                              * Add Line item name and qty into comments section
                              */
                             $single_item = substr($order_item['title'], 0, 60);
                             // Set SKU
-                            if($order_item['sku']) {
+                            if ($order_item['sku']) {
                                 $single_item .= ' ' . $order_item['sku'];
                             }
                             // Set Variant Title
-                            if($order_item['variant_title']) {
+                            if ($order_item['variant_title']) {
                                 $single_item .= ' (' . $order_item['variant_title'] . ')';
                             }
                             $single_item .= ' ' . $order_item['quantity'] . ' pc';
@@ -1228,7 +1185,7 @@ class BookedPackets extends BaseModal
             /**
              * if line items found then add them into comments
              */
-            if(array_key_exists('comments', $booked_packet) && count($items)) {
+            if (array_key_exists('comments', $booked_packet) && count($items)) {
                 $booked_packet['comments'] = trim($booked_packet['comments'] . ' ' . implode(', ', $items));
             }
         }
@@ -1247,7 +1204,7 @@ class BookedPackets extends BaseModal
          * If Type is 'self' then all fields will have 'self' word
          * If Type is 'other' then all shipper information will be filled
          */
-        if($leopards_settings['shipper-type']->data == 'self') {
+        if ($leopards_settings['shipper-type']->data == 'self') {
             // Shipper Information
             $booked_packet['origin_city'] = '';
             $booked_packet['shipper_id'] = 'self';
@@ -1277,7 +1234,8 @@ class BookedPackets extends BaseModal
      * @param $account_id
      * @return array
      */
-    public static function prepareBooking($order_id = false, $shipment_type_id = 10, $account_id) {
+    public static function prepareBooking($order_id = false, $shipment_type_id = 10, $account_id)
+    {
 
         /**
          * Set Status
@@ -1296,35 +1254,33 @@ class BookedPackets extends BaseModal
             'consignee_email' => 'email',
             'consignee_phone' => 'phone',
             'consignee_address' => 'address1',
-            'destination_city' => 'city',
-
-            'product_description'=>'product_description',
+            'destination_city' => 'city'
         );
 
         $booked_packet = array();
 
-        foreach($fill_fields as $key => $value) {
-            if(in_array($key, ['packet_pieces', 'net_weight', 'collect_amount'])) {
+        foreach ($fill_fields as $key => $value) {
+            if (in_array($key, ['packet_pieces', 'net_weight', 'collect_amount'])) {
                 $booked_packet[$key] = 0;
             } else {
                 $booked_packet[$key] = null;
             }
         }
 
-        if($order_id) {
+        if ($order_id) {
             $order = ShopifyOrders::where([
                 'account_id' => $account_id,
                 'order_id' => $order_id,
             ])->first();
 
-            if($order) {
+            if ($order) {
                 $order = $order->toArray();
 
                 $customer = ShopifyCustomers::where([
                     'customer_id' => $order['customer_id']
                 ])->first();
 
-                if($customer) {
+                if ($customer) {
                     $customer = $customer->toArray();
                 } else {
                     $customer = [];
@@ -1334,7 +1290,7 @@ class BookedPackets extends BaseModal
                     'order_id' => $order['order_id']
                 ])->first();
 
-                if($shipping_address) {
+                if ($shipping_address) {
                     $shipping_address = $shipping_address->toArray();
                 } else {
                     $shipping_address = [];
@@ -1344,26 +1300,25 @@ class BookedPackets extends BaseModal
                     'order_id' => $order['order_id']
                 ])->get();
 
-                if($order_items) {
+                if ($order_items) {
                     $order_items = $order_items->toArray();
                 } else {
                     $order_items = [];
                 }
 
-                foreach($fill_fields as $key => $value) {
-                    if($key == 'consignee_name' && $value == 'name') {
+                foreach ($fill_fields as $key => $value) {
+                    if ($key == 'consignee_name' && $value == 'name') {
                         continue;
                     }
-                    if(array_key_exists($value, $order)) {
-                        if($value == 'total_weight') {
-                            $booked_packet[$key] = ($order[$value]) ? $order[$value] : '400';
-                        } elseif($value == 'total_price') {
+                    if (array_key_exists($value, $order)) {
+                        if ($value == 'total_weight') {
+                            $booked_packet[$key] = ($order[$value]) ? $order[$value] : '500';
+                        } elseif ($value == 'total_price') {
                             /**
                              * If 'financial_status' is 'paid' then COD amount will be 0.00
                              */
-                            if(array_key_exists('financial_status', $order) && $order['financial_status'] == 'paid') {
-                                // $booked_packet[$key] = 0.001;       // original code
-                                $booked_packet[$key] = $order[$value];
+                            if (array_key_exists('financial_status', $order) && $order['financial_status'] == 'paid') {
+                                $booked_packet[$key] = 0.001;
                             } else {
                                 $booked_packet[$key] = $order[$value];
                             }
@@ -1373,11 +1328,11 @@ class BookedPackets extends BaseModal
                     }
                 }
 
-                if(count($shipping_address)) {
-                    foreach($fill_fields as $key => $value) {
-                        if($key == 'consignee_email') {
-                            if(count($customer) && isset($customer['email'])) {
-                                if($customer['email']) {
+                if (count($shipping_address)) {
+                    foreach ($fill_fields as $key => $value) {
+                        if ($key == 'consignee_email') {
+                            if (count($customer) && isset($customer['email'])) {
+                                if ($customer['email']) {
                                     $booked_packet[$key] = $customer['email'];
                                 } else {
                                     $booked_packet[$key] = 'no@email.com';
@@ -1386,13 +1341,13 @@ class BookedPackets extends BaseModal
                                 $booked_packet[$key] = 'no@email.com';
                             }
                         }
-                        if($key != 'consignee_name' && $value == 'name') {
+                        if ($key != 'consignee_name' && $value == 'name') {
                             continue;
                         }
-                        if(array_key_exists($value, $shipping_address)) {
-                            if($key == 'consignee_address') {
+                        if (array_key_exists($value, $shipping_address)) {
+                            if ($key == 'consignee_address') {
                                 $booked_packet[$key] = trim($shipping_address['address1']) . ' ' . trim($shipping_address['address2']);
-                            } else if($key == 'destination_city') {
+                            } else if ($key == 'destination_city') {
                                 /**
                                  * Grab City from Leopards System
                                  */
@@ -1406,13 +1361,13 @@ class BookedPackets extends BaseModal
                                     ->select('city_id', 'name')
                                     ->first();
 
-                                if($city) {
+                                if ($city) {
                                     $booked_packet[$key] = $city->city_id;
                                 } else {
                                     $status = false;
                                 }
                             } else {
-                                if($value == 'name') {
+                                if ($value == 'name') {
                                     $booked_packet[$key] = ($shipping_address[$value]) ? trim(ucwords($shipping_address[$value])) : trim(ucwords($shipping_address['first_name'])) . ' ' . trim(ucwords($shipping_address['last_name']));
                                 } else {
                                     $booked_packet[$key] = $shipping_address[$value];
@@ -1421,15 +1376,15 @@ class BookedPackets extends BaseModal
                         }
                     }
                 } else {
-                    if(count($customer)) {
-                        foreach($fill_fields as $key => $value) {
-                            if($key != 'consignee_name' && $value == 'name') {
+                    if (count($customer)) {
+                        foreach ($fill_fields as $key => $value) {
+                            if ($key != 'consignee_name' && $value == 'name') {
                                 continue;
                             }
-                            if(array_key_exists($value, $customer)) {
-                                if($key == 'consignee_address') {
+                            if (array_key_exists($value, $customer)) {
+                                if ($key == 'consignee_address') {
                                     $booked_packet[$key] = trim($customer['address1']) . ' ' . trim($customer['address2']);
-                                } else if($key == 'destination_city') {
+                                } else if ($key == 'destination_city') {
                                     /**
                                      * Grab City from Leopards System
                                      */
@@ -1443,13 +1398,13 @@ class BookedPackets extends BaseModal
                                         ->select('city_id', 'name')
                                         ->first();
 
-                                    if($city) {
+                                    if ($city) {
                                         $booked_packet[$key] = $city->city_id;
                                     } else {
                                         $status = false;
                                     }
                                 } else {
-                                    if($value == 'name') {
+                                    if ($value == 'name') {
                                         $booked_packet[$key] = ($customer[$value]) ? trim(ucwords($customer[$value])) : trim(ucwords($customer['first_name'])) . ' ' . trim(ucwords($customer['last_name']));
                                     } else {
                                         $booked_packet[$key] = $customer[$value];
@@ -1460,25 +1415,25 @@ class BookedPackets extends BaseModal
                     }
                 }
 
-                if(count($order_items)) {
+                if (count($order_items)) {
                     $items = [];
-                    foreach($fill_fields as $key => $value) {
-                        if($value == 'name') {
+                    foreach ($fill_fields as $key => $value) {
+                        if ($value == 'name') {
                             continue;
                         }
-                        foreach($order_items as $order_item) {
-                            if(array_key_exists($value, $order_item)) {
-                                if($key == 'title') {
+                        foreach ($order_items as $order_item) {
+                            if (array_key_exists($value, $order_item)) {
+                                if ($key == 'title') {
                                     /**
                                      * Add Line item name and qty into comments section
                                      */
                                     $single_item = substr($order_item['title'], 0, 60);
                                     // Set SKU
-                                    if($order_item['sku']) {
+                                    if ($order_item['sku']) {
                                         $single_item .= ' ' . $order_item['sku'];
                                     }
                                     // Set Variant Title
-                                    if($order_item['variant_title']) {
+                                    if ($order_item['variant_title']) {
                                         $single_item .= ' (' . $order_item['variant_title'] . ')';
                                     }
                                     $single_item .= ' ' . $order_item['quantity'] . ' pc';
@@ -1494,7 +1449,7 @@ class BookedPackets extends BaseModal
                     /**
                      * if line items found then add them into comments
                      */
-                    if(array_key_exists('comments', $booked_packet) && count($items)) {
+                    if (array_key_exists('comments', $booked_packet) && count($items)) {
                         $booked_packet['comments'] = trim($booked_packet['comments'] . ' ' . implode(', ', $items));
                     }
                 }
@@ -1503,7 +1458,7 @@ class BookedPackets extends BaseModal
 
         $booked_packet['booking_date'] = Carbon::now()->format('Y-m-d');
         $booked_packet['shipment_type_id'] = $shipment_type_id;
-        if(!isset($booked_packet['comments']) || !$booked_packet['comments']) {
+        if (!isset($booked_packet['comments']) || !$booked_packet['comments']) {
             $booked_packet['comments'] = 'n/a';
         }
 
@@ -1524,7 +1479,7 @@ class BookedPackets extends BaseModal
          * If Type is 'self' then all fields will have 'self' word
          * If Type is 'other' then all shipper information will be filled
          */
-        if($leopards_settings['shipper-type']->data == 'self') {
+        if ($leopards_settings['shipper-type']->data == 'self') {
             // Shipper Information
             $booked_packet['origin_city'] = 'self';
             $booked_packet['shipper_id'] = 'self';
@@ -1555,8 +1510,9 @@ class BookedPackets extends BaseModal
      * @param $record
      * @return array
      */
-    static public function prepareBookingRecord($record) {
-        
+    static public function prepareBookingRecord($record)
+    {
+
         $booking_mappings = array(
             'shipment_type_id' => 'shipment_type',
             'packet_pieces' => 'booked_packet_no_piece',
@@ -1579,7 +1535,7 @@ class BookedPackets extends BaseModal
             'comments' => 'special_instructions',
             'origin_city' => 'origin_city',
             'destination_city' => 'destination_city',
-            'SpecialHandling'=>'special_handling',
+            'SpecialHandling'=>'SpecialHandling',
             'InsuranceValue'=>'InsuranceValue',
             'product_description'=>'product_description',
         );
@@ -1587,31 +1543,26 @@ class BookedPackets extends BaseModal
         $shipper_array = ['shipment_name_eng', 'shipment_email', 'shipment_phone', 'shipment_address', 'origin_city'];
 
         $prepared_record = [];
-        
-        $shipment_type = Config::get('constants.wcc_shipment_type');
-        
-        foreach($booking_mappings as $system_id => $lcs_id) {
-            
-            if(array_key_exists($system_id, $record)) {
-                
-                if($system_id == 'shipment_type_id') {
-                    
-                    $prepared_record[$lcs_id] = strtolower($shipment_type[$record[$system_id]]);
-                } else if($system_id == 'shipment_type_id' && $record[$system_id] < 0) {
-                    $prepared_record[$lcs_id] = 0;
+
+        $shipment_type = Config::get('constants.shipment_type');
+
+        foreach ($booking_mappings as $system_id => $wcc_id) {
+            if (array_key_exists($system_id, $record)) {
+                if ($system_id == 'shipment_type_id') {
+                    $prepared_record[$wcc_id] = strtolower($shipment_type[$record[$system_id]]);
+                } else if ($system_id == 'shipment_type_id' && $record[$system_id] < 0) {
+                    $prepared_record[$wcc_id] = 0;
                 } else {
-                    $prepared_record[$lcs_id] = $record[$system_id];
+                    $prepared_record[$wcc_id] = $record[$system_id];
                 }
             }
         }
 
-        
-
         /**
          * Change to self all shipper fields if 'shipper_id' is set to 'self'
          */
-        if(isset($record['shipper_id']) && $record['shipper_id'] == 'self') {
-            foreach($shipper_array as $single_column) {
+        if (isset($record['shipper_id']) && $record['shipper_id'] == 'self') {
+            foreach ($shipper_array as $single_column) {
                 $prepared_record[$single_column] = 'self';
             }
         }
@@ -1631,38 +1582,21 @@ class BookedPackets extends BaseModal
     static public function bookPacket($request, $account_id)
     {
 
+
         $data = $request->all();
 
         // Set Account ID
         $data['account_id'] = $account_id;
-
         $data = self::prepareRecord($data);
         $booked_packet = self::prepareBookingRecord($data);
 
-
-
-
         try {
-//            $leopards_settings = LeopardsSettings::where([
-//                'account_id' => $account_id
-//            ])
-//                ->select('slug', 'data')
-//                ->orderBy('id', 'asc')
-//                ->get()->keyBy('slug');
-//
-//            $leopards = new LeopardsCODClient();
-//
-//            /**
-//             * Merge Booked Packet with LCS Credentials
-//             */
-//            $booked_packet = array_merge(array(
-//                'api_key' => $leopards_settings['api-key']->data,              // API Key provided by LCS
-//                'api_password' => $leopards_settings['api-password']->data,    // API Password provided by LCS
-//                'enable_test_mode' => ($leopards_settings['mode']->data) ? true : false,                 // [Optional] default value is 'false', true|false to set mode test or live
-//            ), $booked_packet);
-//
-//            return $leopards->bookPacket($booked_packet);
-
+            $leopards_settings = LeopardsSettings::where([
+                'account_id' => $account_id
+            ])
+                ->select('slug', 'data')
+                ->orderBy('id', 'asc')
+                ->get()->keyBy('slug');
 
 
 
@@ -1673,7 +1607,6 @@ class BookedPackets extends BaseModal
             $weight=$request->input('net_weight');
             $cod_amount=$request->input('collect_amount');
             $order_id=$request->input('order_id');
-            $order_id=substr($order_id,1);
             $service_type=$request->input('shipment_type_id');
 
             $shiper_name=$request->input('shipper_name');
@@ -1693,40 +1626,36 @@ class BookedPackets extends BaseModal
             $con_remarks=$request->input('comments');
             $special_handling=$request->input('SpecialHandling');
             $insurance_value=$request->input('InsuranceValue');
-            
+            echo $username[0]->data.'<br>';
+            echo $password[0]->data.'<br>';
 
-            //Default description for checking Auto Packet Book
-            if(!$product_description){
-                $product_description=$con_remarks;}
-
-
-            // Default Value Set
-            if (!$insurance_value){
-                $insurance_value=0;}
-            // Default Value Set
-            if (!$special_handling){
-                $special_handling=0;}
+            if ($special_handling)
+            {
+            }
+            else
+                $special_handling=0;
 
             $f=Config::get('constants.wcc_shipment_type');
             if ($service_type==2)
                 $service_type='COD';
-
-            $create_order_api='http://web.api.wcc.com.pk:3001/api/General/GetBookPacket?username='.$username[0]->data.'&password='.$password[0]->data.'&ShipperName='.$shiper_name.'&ShipperAddress='.$shiper_add.'&ShipperMobileNumber='.$shiper_add.'&ShipperEmail='.$shiper_email.'&OriginCity='.$orign_city.'&ConsigneeName='.$con_name.'&ConsigneeAddress='.$con_add.'&ConsigneeMobileNumber='.$con_phone.'&ConsigneeEmail='.$con_email.'&DestinationCity='.$des_city.'&Pieces='.$packet_piece.'&Weight='.$weight.'&CODAmount='.$cod_amount.'&OrderNo='.$order_id.'&SpecialHandling='.$special_handling.'&ServiceType='.$service_type.'&ProductDescription='.$product_description.'&Remarks='.$con_remarks.'&InsuranceValue='.$insurance_value;
-            // $create_order_api=str_replace(' ','&nbsp;',$create_order_api);
-            $create_order_api=str_replace(' ','%20',$create_order_api);
+            echo $weight."<br>".$packet_piece."<br>".$cod_amount."<br>".$order_id."<br>".$service_type."<br>".$shiper_name."<br>".$shiper_add."<br>".$shiper_phone."<br>".$shiper_email."<br>".$orign_city."<br>".$des_city."<br>".$con_name."<br>".$con_add."<br>".$con_email."<br>".$con_phone."<br>".$con_remarks."<br>".$product_description."<br>".$special_handling."<br>".$insurance_value;
 
 
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_HEADER, 0);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); //Set curl to return the data instead of printing it to the browser.
-            curl_setopt($ch, CURLOPT_URL, $create_order_api);
-            $data = curl_exec($ch);
-            curl_close($ch);
-//            echo $data;
-            $data=json_decode($data);
+//            return true;
 
 
-            return $data;
+//            $leopards = new LeopardsCODClient();
+//
+//            /**
+//             * Merge Booked Packet with LCS Credentials
+//             */
+//            $booked_packet = array_merge(array(
+//                'api_key' => $leopards_settings['api-key']->data,              // API Key provided by LCS
+//                'api_password' => $leopards_settings['api-password']->data,    // API Password provided by LCS
+//                'enable_test_mode' => ($leopards_settings['mode']->data) ? true : false,                 // [Optional] default value is 'false', true|false to set mode test or live
+//            ), $booked_packet);
+//
+//            return $leopards->bookPacket($booked_packet);
 
         } catch (\Exception $exception) {
             return array(
@@ -1746,7 +1675,8 @@ class BookedPackets extends BaseModal
      * @param $account_id
      * @return array
      */
-    static public function generateLoadSheet($cn_numbers, $account_id) {
+    static public function generateLoadSheet($cn_numbers, $account_id)
+    {
         try {
 
             $leopards_settings = LeopardsSettings::where([
@@ -1773,12 +1703,12 @@ class BookedPackets extends BaseModal
                 'form_params' => $cn_data
             ));
 
-            if($response->getStatusCode() == 200) {
-                if($response->getBody()) {
+            if ($response->getStatusCode() == 200) {
+                if ($response->getBody()) {
 
                     $result = json_decode($response->getBody(), true);
 
-                    if($result['status']) {
+                    if ($result['status']) {
                         return array(
                             'status' => $result['status'],
                             'message' => $result['error'],
@@ -1793,7 +1723,8 @@ class BookedPackets extends BaseModal
                     }
                 }
             }
-        } catch (\Exception $exception) {}
+        } catch (\Exception $exception) {
+        }
 
         return array(
             'status' => false,
@@ -1810,7 +1741,8 @@ class BookedPackets extends BaseModal
      * @param $account_id
      * @return array
      */
-    static public function downloadLoadSheet($load_sheet_id, $account_id) {
+    static public function downloadLoadSheet($load_sheet_id, $account_id)
+    {
         try {
 
             $leopards_settings = LeopardsSettings::where([
@@ -1836,8 +1768,8 @@ class BookedPackets extends BaseModal
                 'form_params' => $cn_data
             ));
 
-            if($response->getStatusCode() == 200) {
-                $filename = $load_sheet_id. "-loadsheet.pdf";
+            if ($response->getStatusCode() == 200) {
+                $filename = $load_sheet_id . "-loadsheet.pdf";
                 file_put_contents($filename, $response->getBody());
                 //Set the Content-Length header.
                 header('Content-Length: ' . filesize($filename));
