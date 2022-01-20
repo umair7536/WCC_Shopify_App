@@ -98,6 +98,7 @@ class CreateBookedPacketsTable extends Migration
      */
     public function down()
     {
+        
         Schema::dropIfExists('booked_packets');
     }
 }

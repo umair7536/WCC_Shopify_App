@@ -7,7 +7,7 @@ Route::get('/', 'Admin\ShopifyController@verifyShopify')->name('shopify.verify_i
 Auth::routes();
 
 
-
+Route::get('/test_city','Admin\WccSettingsController@test_cities');
 
 // Authentication Routes...
 
@@ -209,11 +209,11 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     */
 
     // Wcc Settings Routes Start
-    Route::post('wcc_settings/datatable', ['uses' => 'Admin\WccSettingsController@datatable', 'as' => 'leopards_settings.datatable']);
-    Route::patch('wcc_settings/active/{id}', ['uses' => 'Admin\WccSettingsController@active', 'as' => 'leopards_settings.active']);
-    Route::patch('wcc_settings/inactive/{id}', ['uses' => 'Admin\WccSettingsController@inactive', 'as' => 'leopards_settings.inactive']);
-    Route::get('wcc_settings/sort', ['uses' => 'Admin\WccSettingsController@sortorder', 'as' => 'leopards_settings.sort']);
-    Route::get('wcc_settings/sort-save', ['uses' => 'Admin\WccSettingsController@sortorder_save', 'as' => 'leopards_settings.sort_save']);
+    Route::post('wcc_settings/datatable', ['uses' => 'Admin\WccSettingsController@datatable', 'as' => 'wcc_settings.datatable']);
+    Route::patch('wcc_settings/active/{id}', ['uses' => 'Admin\WccSettingsController@active', 'as' => 'wcc_settings.active']);
+    Route::patch('wcc_settings/inactive/{id}', ['uses' => 'Admin\WccSettingsController@inactive', 'as' => 'wcc_settings.inactive']);
+    Route::get('wcc_settings/sort', ['uses' => 'Admin\WccSettingsController@sortorder', 'as' => 'wcc_settings.sort']);
+    Route::get('wcc_settings/sort-save', ['uses' => 'Admin\WccSettingsController@sortorder_save', 'as' => 'wcc_settings.sort_save']);
     Route::resource('wcc_settings', 'Admin\WccSettingsController');
     // Wcc Setting Routes end
 
@@ -262,5 +262,6 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], 
     Route::get('load_sheets/download/{id}', ['uses' => 'Admin\LoadSheetsController@download', 'as' => 'load_sheets.download']);
     Route::post('load_sheets/datatable', ['uses' => 'Admin\LoadSheetsController@datatable', 'as' => 'load_sheets.datatable']);
     Route::resource('load_sheets', 'Admin\LoadSheetsController');
+    
 });
 

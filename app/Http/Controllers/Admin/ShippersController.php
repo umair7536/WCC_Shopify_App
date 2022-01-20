@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\LeopardsCities;
+use App\Models\WccCities;
 use App\Models\Shippers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -26,11 +27,11 @@ class ShippersController extends Controller
             return abort(401);
         }
 
-        $leopards_cities = LeopardsCities::where([
-            'account_id' => Auth::User()->account_id
+        $wcc_cities = WccCities::where([
+            'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
         ])->get()->pluck('name', 'id');
 
-        return view('admin.shippers.index', compact('leopards_cities'));
+        return view('admin.shippers.index', compact('wcc_cities'));
     }
 
     /**
@@ -74,14 +75,14 @@ class ShippersController extends Controller
 
         if ($Shippers) {
 
-            $leopards_cities = LeopardsCities::where([
-                'account_id' => Auth::User()->account_id
+            $wcc_cities = WccCities::where([
+                'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
             ])->get()->keyBy('id');
 
             foreach ($Shippers as $shipper) {
                 $records["data"][] = array(
                     'id' => '<label class="mt-checkbox mt-checkbox-single mt-checkbox-outline"><input name="id[]" type="checkbox" class="checkboxes" value="' . $shipper->id . '"/><span></span></label>',
-                    'city_id' => isset($leopards_cities[$shipper->city_id]) ? $leopards_cities[$shipper->city_id]->name : 'N/A',
+                    'city_id' => isset($wcc_cities[$shipper->city_id]) ? $wcc_cities[$shipper->city_id]->name : 'N/A',
                     'name' => $shipper->name,
                     'email' => $shipper->email,
                     'phone' => $shipper->phone,
@@ -109,11 +110,11 @@ class ShippersController extends Controller
             return abort(401);
         }
 
-        $leopards_cities = LeopardsCities::where([
-            'account_id' => Auth::User()->account_id
+        $wcc_cities = WccCities::where([
+            'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
         ])->get()->pluck('name', 'id');
 
-        return view('admin.shippers.create', compact('leopards_cities'));
+        return view('admin.shippers.create', compact('wcc_cities'));
     }
 
     /**
@@ -187,11 +188,11 @@ class ShippersController extends Controller
             return view('error', compact('lead_statuse'));
         }
 
-        $leopards_cities = LeopardsCities::where([
-            'account_id' => Auth::User()->account_id
+        $wcc_cities = WccCities::where([
+            'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
         ])->get()->pluck('name', 'id');
 
-        return view('admin.shippers.edit', compact('shipper', 'leopards_cities'));
+        return view('admin.shippers.edit', compact('shipper', 'wcc_cities'));
     }
 
     /**

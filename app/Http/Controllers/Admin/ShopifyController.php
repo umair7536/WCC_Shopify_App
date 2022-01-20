@@ -14,7 +14,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Accounts;
 use App\Models\GeneralSettings;
 use App\Models\HeavyLifter;
-use App\Models\LeopardsSettings;
+// use App\Models\LeopardsSettings;
+use App\Models\WccSettings;
 use App\Models\ShopifyCollects;
 use App\Models\ShopifyJobs;
 use App\Models\ShopifyLocations;
@@ -133,12 +134,15 @@ class ShopifyController extends Controller
     {
 
         try {
+
             /*
              * Check if Access token is already set or not
              */
             // Understood this part (every user come here first time for shopify verification)
             if (!session('access_token') || !session('shopify_domain')) {    // This run when access token and shopify admin session not present
                 try {
+
+
 //                    ZfrShopify client provides an easy way to validate an incoming request to make sure it comes from Shopify through the RequestValidator object. It requires a PSR7 requests and a shared secret:
                     $validator = new RequestValidator();
                     $validator->validateRequest($request, self::$APP_SHARED_SECRET);
@@ -148,6 +152,7 @@ class ShopifyController extends Controller
                      */
 
                     $shopRequest = $request->getQueryParams();
+
 
                     // isset() Check whether a variable is empty. Also check whether the variable is set/declared:
                     $code = (isset($shopRequest['code']) && $shopRequest['code']) ? $shopRequest['code'] : '';  // it return null value if $shopRequest['code'] not present
@@ -167,7 +172,8 @@ class ShopifyController extends Controller
                             $tokenExchanger = new TokenExchanger(new Client());
                             // this function exchange tokens and give new token by shopify
                             $accessToken = $tokenExchanger->exchangeCodeForToken(self::$APP_API_KEY, self::$APP_SHARED_SECRET, $shopDomain, explode(',', self::$APP_SCOPES), $code);
-
+                            
+        
 //                            check token present or not
                             if ($accessToken) {
                                 session(['access_token' => $accessToken]);
@@ -516,33 +522,33 @@ class ShopifyController extends Controller
         /**
          * LCS Settings
          */
-        $global_leopards_settings = Config::get('setup.leopards_settings');
+        $global_wcc_settings = Config::get('setup.wcc_settings');
         $sort_number = 0;
-        foreach($global_leopards_settings as $leopards_setting) {
-            $leopards_record = LeopardsSettings::where([
+        foreach($global_wcc_settings as $wcc_setting) {
+            $wcc_record = WccSettings::where([
                 'account_id' => $account_id,
-                'slug' => $leopards_setting['slug'],
+                'slug' => $wcc_setting['slug'],
             ])->select('id')->first();
 
-            if(!$leopards_record) {
+            if(!$wcc_record) {
                 $data = null;
-                if($leopards_setting['slug'] == 'auto-fulfillment') {
+                if($wcc_setting['slug'] == 'auto-fulfillment') {
                     $data = 0;
-                } else if($leopards_setting['slug'] == 'inventory-location') {
+                } else if($wcc_setting['slug'] == 'inventory-location') {
                     $location = ShopifyLocations::where([
                         'account_id' => $account_id
                     ])->first();
                     if($location) {
                         $data = $location->location_id;
                     }
-                } else if($leopards_setting['slug'] == 'shipper-type') {
+                } else if($wcc_setting['slug'] == 'shipper-type') {
                     $data = 'other';
                 }
 
                 // Set Account ID
-                LeopardsSettings::create([
-                    'name' => $leopards_setting['name'],
-                    'slug' => $leopards_setting['slug'],
+                WccSettings::create([
+                    'name' => $wcc_setting['name'],
+                    'slug' => $wcc_setting['slug'],
                     'data' => $data,
                     'sort_number'=> $sort_number++,
                     'account_id' => $account_id,

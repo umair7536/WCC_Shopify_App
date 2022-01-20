@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Events\Shopify\Products\SyncCustomersFire;
 use App\Models\Accounts;
 use App\Models\LeopardsCities;
+use App\Models\WccCities;
 use App\Models\ShopifyCustomers;
 use App\Models\ShopifyShops;
 use Illuminate\Http\Request;
@@ -326,19 +327,19 @@ class ShopifyCustomersController extends Controller
             return view('error', compact('lead_statuse'));
         }
 
-        $leopards_cities = LeopardsCities::where([
-            'account_id' => Auth::User()->account_id,
+        $wcc_cities = WccCities::where([
+            'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
         ])
             ->orderBy('name', 'asc')
             ->get();
 
-        if($leopards_cities) {
-            $leopards_cities = $leopards_cities->pluck('name', 'name');
+        if($wcc_cities) {
+            $wcc_cities = $wcc_cities->pluck('name', 'name');
         } else {
-            $leopards_cities = [];
+            $wcc_cities = [];
         }
 
-        return view('admin.shopify_customers.edit', compact('shopify_customer', 'leopards_cities'));
+        return view('admin.shopify_customers.edit', compact('shopify_customer', 'wcc_cities'));
     }
 
     /**

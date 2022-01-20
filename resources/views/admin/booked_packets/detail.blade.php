@@ -3,7 +3,6 @@
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
         <h4 class="modal-title">@lang('global.app_detail')</h4>
     </div>
-    <div>{{$booked_packet}}</div>
     <table class="table table-striped">
         <tbody>
             <tr>

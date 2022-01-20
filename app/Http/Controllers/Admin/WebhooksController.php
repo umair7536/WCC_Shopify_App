@@ -13,6 +13,7 @@ use App\Http\Controllers\Controller;
 use App\Models\BillingAddresses;
 use App\Models\BookedPackets;
 use App\Models\LeopardsSettings;
+use App\Models\WccSettings;
 use App\Models\ShippingAddresses;
 use App\Models\ShopifyCustomers;
 use App\Models\ShopifyOrderItems;
@@ -153,7 +154,7 @@ class WebhooksController extends Controller
                                 break;
                             default:
                                 /**
-                                 * Dispatch Sync Leopards Cities Event and Delte existing records
+                                 * Dispatch Sync wcc Cities Event and Delte existing records
                                  */
                                 event(new SingleOrderFire($order, $shop));
                                 /**
@@ -361,9 +362,9 @@ class WebhooksController extends Controller
         }
 
         /**
-         * Load Leopards Settings
+         * Load wcc Settings
          */
-        $leopards_settings = LeopardsSettings::where([
+        $wcc_settings = WccSettings::where([
             'account_id' => $booked_packet->account_id
         ])
             ->select('slug', 'data')
@@ -372,11 +373,11 @@ class WebhooksController extends Controller
 
 
         try {
-            $leopards = new LeopardsCODClient();
+            $wcc = new WccCODClient();
 
-            $response = $leopards->trackPacket(array(
-                'api_key' => $leopards_settings['api-key']->data,                                           // API Key provided by LCS
-                'api_password' => $leopards_settings['api-password']->data,                                 // API Password provided by LCS
+            $response = $wcc->trackPacket(array(
+                'api_key' => $wcc_settings['api-key']->data,                                           // API Key provided by LCS
+                'api_password' => $wcc_settings['api-password']->data,                                 // API Password provided by LCS
                 'enable_test_mode' => ($booked_packet->booking_type == '1') ? true : false,                 // [Optional] default value is 'false', true|false to set mode test or live
                 'track_numbers' => $booked_packet->track_number
             ));

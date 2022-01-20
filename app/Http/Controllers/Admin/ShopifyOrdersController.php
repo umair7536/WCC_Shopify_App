@@ -13,6 +13,7 @@ use App\Models\JsonOrders;
 use App\Models\LeopardsCities;
 use App\Models\WccCities;
 use App\Models\LeopardsSettings;
+use App\Models\WccSettings;
 use App\Models\OrderLogs;
 use App\Models\ShippingAddresses;
 use App\Models\ShopifyCustomers;
@@ -45,19 +46,19 @@ class ShopifyOrdersController extends Controller
         $fulfillment_status = Config::get('constants.fulfillment_status');
         $shipment_types = Config::get('constants.wcc_shipment_type');
 
-        $leopards_cities = WccCities::where([
-            'account_id' => Auth::User()->account_id,
+        $wcc_cities = WccCities::where([
+            'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
         ])->get();
 
 
 
-        if($leopards_cities) {
-            $leopards_cities = $leopards_cities->pluck('name', 'name');
+        if($wcc_cities) {
+            $wcc_cities = $wcc_cities->pluck('name', 'name');
         } else {
-            $leopards_cities = [];
+            $wcc_cities = [];
         }
 
-        return view('admin.shopify_orders.index', compact('financial_status', 'fulfillment_status', 'shipment_types', 'leopards_cities'));
+        return view('admin.shopify_orders.index', compact('financial_status', 'fulfillment_status', 'shipment_types', 'wcc_cities'));
     }
 
     /**
@@ -190,6 +191,7 @@ class ShopifyOrdersController extends Controller
 
             $request->replace($data);
 
+            
             $response = $this->bulkActions($request);
 
             if($response['status'] == 'NO') {
@@ -235,7 +237,7 @@ class ShopifyOrdersController extends Controller
         /**
          * If mode is test then stop booking packet in bulk.
          */
-        $leopards_settings = LeopardsSettings::where([
+        $wcc_settings = WccSettings::where([
             'account_id' => $account_id
         ])
             ->select('slug', 'data')
@@ -244,10 +246,10 @@ class ShopifyOrdersController extends Controller
 
 
 
-        if($leopards_settings['mode']->data == '1') {
+        if($wcc_settings['mode']->data == '1') {
             return [
                 'status' => 'NO',
-                'message' => 'Test mode is enabled, <b><a target="_blank" href="' . route('admin.leopards_settings.index') . '">Click Here</a></b> to disable test mode.</b>'
+                'message' => 'Test mode is enabled, <b><a target="_blank" href="' . route('admin.wcc_settings.index') . '">Click Here</a></b> to disable test mode.</b>'
             ];
         }
 
@@ -259,7 +261,7 @@ class ShopifyOrdersController extends Controller
         if(!$result['status']) {
             return [
                 'status' => 'NO',
-                'message' => 'WCC Credentials are invalid, <b><a target="_blank" href="' . route('admin.leopards_settings.index') . '">Click Here</a></b> to setup credentials again.</b>'
+                'message' => 'WCC Credentials are invalid, <b><a target="_blank" href="' . route('admin.wcc_settings.index') . '">Click Here</a></b> to setup credentials again.</b>'
             ];
         }
 
@@ -463,29 +465,29 @@ class ShopifyOrdersController extends Controller
             'company' => array(),
         );
 
-        $leopards_settings = LeopardsSettings::where([
+        $wcc_settings = WccSettings::where([
             'account_id' => $account_id
         ])
             ->select('slug', 'data')
             ->orderBy('id', 'asc')
             ->get()->keyBy('slug');
 
-        if($leopards_settings) {
-            foreach($leopards_settings as $leopards_setting) {
+        if($wcc_settings) {
+            foreach($wcc_settings as $wcc_setting) {
                 if(
-                    ($leopards_setting->slug == 'username' && !$leopards_setting->data)
-                    ||  ($leopards_setting->slug == 'password' && !$leopards_setting->data)
+                    ($wcc_setting->slug == 'username' && !$wcc_setting->data)
+                    ||  ($wcc_setting->slug == 'password' && !$wcc_setting->data)
                 ) {
                     $data['status'] = false;
                 }
             }
         }
 
-        $data['company']['company_name_eng'] = $leopards_settings['shipper-name']->data;
-        $data['company']['company_email'] = $leopards_settings['shipper-email']->data;
-        $data['company']['company_phone'] = $leopards_settings['shipper-phone']->data;
-        $data['company']['company_address1_eng'] = $leopards_settings['shipper-address']->data;
-        $data['company']['tbl_lcs_city_city_id'] = $leopards_settings['shipper-city']->data;
+        $data['company']['company_name_eng'] = $wcc_settings['shipper-name']->data;
+        $data['company']['company_email'] = $wcc_settings['shipper-email']->data;
+        $data['company']['company_phone'] = $wcc_settings['shipper-phone']->data;
+        $data['company']['company_address1_eng'] = $wcc_settings['shipper-address']->data;
+        $data['company']['tbl_lcs_city_city_id'] = $wcc_settings['shipper-city']->data;
 
         return $data;
     }
@@ -648,20 +650,20 @@ class ShopifyOrdersController extends Controller
             return view('error');
         }
 
-        $leopards_cities = WccCities::where([
-            'account_id' => Auth::User()->account_id,
+        $wcc_cities = WccCities::where([
+            'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
             
         ])->where(['city_id'=>'KHI'])
             ->orderBy('name', 'asc')
             ->get();
 
-        if($leopards_cities) {
-            $leopards_cities = $leopards_cities->pluck('name', 'name');
+        if($wcc_cities) {
+            $wcc_cities = $wcc_cities->pluck('name', 'name');
         } else {
-            $leopards_cities = [];
+            $wcc_cities = [];
         }
 
-        return view('admin.shopify_orders.shipping', compact('order_id', 'shipping_address', 'leopards_cities'));
+        return view('admin.shopify_orders.shipping', compact('order_id', 'shipping_address', 'wcc_cities'));
     }
 
     /**

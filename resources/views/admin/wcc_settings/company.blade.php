@@ -31,7 +31,7 @@
                 <span class="caption-subject font-dark sbold uppercase">@lang('global.app_list')</span>
             </div>
             <div class="actions">
-                @if(Gate::allows('leopards_settings_edit'))
+                @if(Gate::allows('Wcc_settings_edit'))
                     <a class="btn btn-success" href="{{ route('admin.wcc_settings.create') }}">@lang('global.app_edit')</a>
                 @endif
             </div>

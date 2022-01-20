@@ -6,7 +6,7 @@
     <div class="portlet-body form">
         <div class="form-group">
 
-            {!! Form::model($leopards_setting, ['method' => 'PUT', 'id' => 'form-validation', 'route' => ['admin.wcc_settings.update', $leopards_setting->id]]) !!}
+            {!! Form::model($wcc_setting, ['method' => 'PUT', 'id' => 'form-validation', 'route' => ['admin.wcc_settings.update', $wcc_setting->id]]) !!}
             <div class="form-body">
                 <!-- Starts Form Validation Messages -->
                 @include('partials.messages')

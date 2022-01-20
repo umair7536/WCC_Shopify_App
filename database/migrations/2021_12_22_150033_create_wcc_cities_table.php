@@ -24,7 +24,7 @@ class CreateWccCitiesTable extends Migration
             $table->unsignedInteger('account_id')->nullable();
 
             // Manage Foreign Key Relationships
-            $table->foreign('account_id')->references('id')->on('accounts');
+            // $table->foreign('account_id')->references('id')->on('accounts');
 
             $table->timestamps();
             $table->softDeletes();

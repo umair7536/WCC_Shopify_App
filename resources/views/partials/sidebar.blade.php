@@ -204,11 +204,11 @@
 {{--                </li>--}}
 {{--            @endif--}}
 
-            @if(Gate::allows('leopards_settings_manage'))
+            @if(Gate::allows('Wcc_settings_manage'))
                 <li class="nav-item start {{ $request->segment(2) == 'wcc_settings' ? 'active active-sub' : '' }}">
                     <a href="{{ route('admin.wcc_settings.index') }}">
                         <i class="icon icon-puzzle"></i>
-                        <span class="title">@lang('global.leopards_settings.title')</span>
+                        <span class="title">@lang('global.wcc_settings.title')</span>
                     </a>
                 </li>
             @endif
@@ -224,8 +224,8 @@
             @endif
 
 {{--            @if(--}}
-{{--                    Gate::allows('leopards_settings_manage') ||--}}
-{{--                    Gate::allows('leopards_cities_manage') ||--}}
+{{--                    Gate::allows('Wcc_settings_manage') ||--}}
+{{--                    Gate::allows('Wcc_cities_manage') ||--}}
 {{--                    Gate::allows('shippers_manage') ||--}}
 {{--                    Gate::allows('consignees_manage')--}}
 {{--                )--}}
@@ -237,21 +237,21 @@
 {{--                ) active open @endif">--}}
 {{--                    <a href="javascript:;" class="nav-link nav-toggle">--}}
 {{--                        <i class="icon-puzzle"></i>--}}
-{{--                        <span class="title">@lang('global.leopards_settings.management') Management</span>--}}
+{{--                        <span class="title">@lang('global.wcc_settings.management') Management</span>--}}
 {{--                        <span class="arrow"></span>--}}
 {{--                    </a>--}}
 {{--                    <ul class="sub-menu">--}}
-{{--                        @if(Gate::allows('leopards_settings_manage'))--}}
+{{--                        @if(Gate::allows('Wcc_settings_manage'))--}}
 {{--                            <li class="nav-item start {{ $request->segment(2) == 'leopards_settings' ? 'active active-sub' : '' }}">--}}
-{{--                                <a href="{{ route('admin.leopards_settings.index') }}">--}}
-{{--                                    <span class="title">@lang('global.leopards_settings.title')</span>--}}
+{{--                                <a href="{{ route('admin.wcc_settings.index') }}">--}}
+{{--                                    <span class="title">@lang('global.wcc_settings.title')</span>--}}
 {{--                                </a>--}}
 {{--                            </li>--}}
 {{--                        @endif--}}
-{{--                        @if(Gate::allows('leopards_cities_manage'))--}}
+{{--                        @if(Gate::allows('wcc_cities_manage'))--}}
 {{--                            <li class="nav-item start {{ $request->segment(2) == 'leopards_cities' ? 'active active-sub' : '' }}">--}}
 {{--                                <a href="{{ route('admin.leopards_cities.index') }}">--}}
-{{--                                    <span class="title">@lang('global.leopards_cities.title')</span>--}}
+{{--                                    <span class="title">@lang('global.wcc_cities.title')</span>--}}
 {{--                                </a>--}}
 {{--                            </li>--}}
 {{--                        @endif--}}

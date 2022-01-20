@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\LeopardsCities;
+use App\Models\WccCities;
 use App\Models\Consignees;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -26,11 +27,11 @@ class ConsigneesController extends Controller
             return abort(401);
         }
 
-        $leopards_cities = LeopardsCities::where([
-            'account_id' => Auth::User()->account_id
+        $wcc_cities = WccCities::where([
+            'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
         ])->get()->pluck('name', 'id');
 
-        return view('admin.consignees.index', compact('leopards_cities'));
+        return view('admin.consignees.index', compact('wcc_cities'));
     }
 
     /**
@@ -74,14 +75,14 @@ class ConsigneesController extends Controller
 
         if ($Consignees) {
 
-            $leopards_cities = LeopardsCities::where([
-                'account_id' => Auth::User()->account_id
+            $wcc_cities = WccCities::where([
+                'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
             ])->get()->keyBy('id');
 
             foreach ($Consignees as $consignee) {
                 $records["data"][] = array(
                     'id' => '<label class="mt-checkbox mt-checkbox-single mt-checkbox-outline"><input name="id[]" type="checkbox" class="checkboxes" value="' . $consignee->id . '"/><span></span></label>',
-                    'city_id' => isset($leopards_cities[$consignee->city_id]) ? $leopards_cities[$consignee->city_id]->name : 'N/A',
+                    'city_id' => isset($wcc_cities[$consignee->city_id]) ? $wcc_cities[$consignee->city_id]->name : 'N/A',
                     'name' => $consignee->name,
                     'email' => $consignee->email,
                     'phone' => $consignee->phone,
@@ -109,11 +110,11 @@ class ConsigneesController extends Controller
             return abort(401);
         }
 
-        $leopards_cities = LeopardsCities::where([
-            'account_id' => Auth::User()->account_id
+        $wcc_cities = WccCities::where([
+            'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
         ])->get()->pluck('name', 'id');
 
-        return view('admin.consignees.create', compact('leopards_cities'));
+        return view('admin.consignees.create', compact('wcc_cities'));
     }
 
     /**
@@ -187,11 +188,11 @@ class ConsigneesController extends Controller
             return view('error', compact('lead_statuse'));
         }
 
-        $leopards_cities = LeopardsCities::where([
-            'account_id' => Auth::User()->account_id
+        $wcc_cities = WccCities::where([
+            'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
         ])->get()->pluck('name', 'id');
 
-        return view('admin.consignees.edit', compact('consignee', 'leopards_cities'));
+        return view('admin.consignees.edit', compact('consignee', 'wcc_cities'));
     }
 
     /**

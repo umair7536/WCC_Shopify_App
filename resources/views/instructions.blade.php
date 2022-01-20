@@ -60,7 +60,7 @@ $booked_packets_test = \App\Models\BookedPackets::where([
                         <div class="timeline-item">
                             <div class="timeline-badge">
                                 <div class="timeline-icon">
-                                    @if($leopards_settings['api-key']->data && $leopards_settings['api-password']->data)
+                                    @if($wcc_settings['username']->data && $wcc_settings['password']->data)
                                         <i class="icon-check font-green-haze"></i>
                                     @else
                                         <i class="icon-close font-red-intense"></i>
@@ -71,17 +71,17 @@ $booked_packets_test = \App\Models\BookedPackets::where([
                                 <div class="timeline-body-arrow"> </div>
                                 <div class="timeline-body-head">
                                     <div class="timeline-body-head-caption">
-                                        @if($leopards_settings['api-key']->data && $leopards_settings['api-password']->data)
-                                            <span class="timeline-body-alerttitle font-green-haze">@lang('global.leopards_settings.title')</span>
+                                        @if($wcc_settings['username']->data && $wcc_settings['password']->data)
+                                            <span class="timeline-body-alerttitle font-green-haze">@lang('global.wcc_settings.title')</span>
                                         @else
-                                            <span class="timeline-body-alerttitle font-red-intense">@lang('global.leopards_settings.title')</span>
+                                            <span class="timeline-body-alerttitle font-red-intense">@lang('global.wcc_settings.title')</span>
                                         @endif
                                     </div>
                                 </div>
                                 <div class="timeline-body-content">
                                     <span class="font-grey-cascade">
                                         <ol>
-                                            <li>Click on <a href="{{ route('admin.wcc_settings.index') }}"><span class="title">@lang('global.leopards_settings.title')</span></a> in left dropdown menu of WCC management.</li>
+                                            <li>Click on <a href="{{ route('admin.wcc_settings.index') }}"><span class="title">@lang('global.wcc_settings.title')</span></a> in left dropdown menu of WCC management.</li>
                                             <li>Click on Edit button.</li>
                                             <li>Fill all information by reading instruction provided on that page.</li>
                                             <li>Click on save button.</li>

@@ -13,6 +13,7 @@ use App\Models\JsonOrders;
 use App\Models\LeopardsCities;
 use App\Models\WccCities;
 use App\Models\LeopardsSettings;
+use App\Models\WccSettings;
 use App\Models\LoadSheets;
 use App\Models\Shippers;
 use App\Models\ShopifyJobs;
@@ -47,7 +48,7 @@ class BookedPacketsController extends Controller
         $status = Config::get('constants.status');
         $shipment_type = Config::get('constants.wcc_shipment_type');
         $wcc_cities = WccCities::where([
-            'account_id' => Auth::User()->account_id,
+            'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
         ])->get();
 
         if($wcc_cities) {
@@ -121,7 +122,7 @@ class BookedPacketsController extends Controller
             $status = Config::get('constants.status');
 
             $wcc_cities = WccCities::where([
-                'account_id' => Auth::User()->account_id,
+                'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
             ])->whereIn('city_id', $cities)
                 ->select('city_id', 'name')
                 ->get();
@@ -174,7 +175,7 @@ class BookedPacketsController extends Controller
         $status = Config::get('constants.status');
         $shipment_type = Config::get('constants.shipment_type');
         $wcc_cities = WccCities::where([
-            'account_id' => Auth::User()->account_id,
+            'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
         ])->get();
 
         if($wcc_cities) {
@@ -233,7 +234,7 @@ class BookedPacketsController extends Controller
             $status = Config::get('constants.status');
 
             $wcc_cities = WccCities::where([
-                'account_id' => Auth::User()->account_id,
+                'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
             ])->whereIn('city_id', $cities)
                 ->select('city_id', 'name')
                 ->get();
@@ -367,7 +368,7 @@ class BookedPacketsController extends Controller
                 /**
                  * Fetch default Inventory Location ID
                  */
-                $inventory_location = LeopardsSettings::getDefaultInventoryLocation($account_id);
+                $inventory_location = WccSettings::getDefaultInventoryLocation($account_id);
 
                 /**
                  * Variable to track if any response was successful
@@ -379,8 +380,7 @@ class BookedPacketsController extends Controller
                 $message .= '<ul>';
 
                 foreach ($booked_packets as $booked_packet) {
-                    echo "test";
-                    exit();
+
                     $order = ShopifyOrders::where([
                         'account_id' => $booked_packet->account_id,
                         'order_number' => $booked_packet->order_number,
@@ -538,7 +538,7 @@ class BookedPacketsController extends Controller
             'company' => array(),
         );
 
-        $wcc_settings = LeopardsSettings::where([
+        $wcc_settings = WccSettings::where([
             'account_id' => $account_id
         ])
             ->select('slug', 'data')
@@ -582,14 +582,15 @@ class BookedPacketsController extends Controller
          */
         $data = $this->getCompanyData(Auth::User()->account_id);
         if(!$data['status']) {
-            if (Gate::allows('leopards_settings_manage')) {
+            if (Gate::allows('Wcc_settings_manage')) {
                 flash('WCC Credentials are invalid, Please provide correct credentials.')->error()->important();
-                return redirect()->route('admin.leopards_settings.index');
+                return redirect()->route('admin.wcc_settings.index');
             } else {
                 flash('WCC Credentials are invalid, Please provide correct credentials.')->error()->important();
                 return redirect()->route('admin.booked_packets.index');
             }
         }
+
 
         /**
          * If Json Based Order is present, make process faster
@@ -608,15 +609,20 @@ class BookedPacketsController extends Controller
                 } else {
                     $order = json_decode($json_order->json_data, true);
                 }
+
+
                 if(
                     (
                         isset($order['id']) && isset($order['customer'])
                     ) && count($order['customer'])
                 ) {
+
+
                     /**
                      * If Order ID is provided then prepare data to automatically be filled
                      */
                     $data['booked_packet'] = BookedPackets::prepareJSONBookingOrder($order, Auth::User()->account_id);
+                    
                 } else {
                     throw new \Exception('Order ID Not found');
                 }
@@ -635,6 +641,7 @@ class BookedPacketsController extends Controller
 
         $booking_date = Carbon::now()->format('Y-m-d');
 
+
         // Default shipment selection
         $default_shipment_type = '2';
 
@@ -643,7 +650,7 @@ class BookedPacketsController extends Controller
          */
         $shipment_type = Config::get('constants.wcc_shipment_type');
         $wcc_cities = WccCities::where([
-            'account_id' => Auth::User()->account_id,
+            'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
         ])->where(['city_id'=>'KHI'])
             ->orderBy('name', 'asc')
             ->get();
@@ -681,6 +688,7 @@ class BookedPacketsController extends Controller
             return abort(401);
         }
 
+
         $validator = $this->verifyFields($request);
 //        $st=$this->book_wcc_packet($request);
         if ($validator->fails()) {
@@ -693,7 +701,7 @@ class BookedPacketsController extends Controller
 
 
 
-
+ 
         $result = BookedPackets::createRecord($request, Auth::User()->account_id);
 
         if($result['status']) {
@@ -703,6 +711,7 @@ class BookedPacketsController extends Controller
             } else {
                 flash('Packet is booked successfully.')->success()->important();
             }
+
 
             $order = ShopifyOrders::where([
                 'account_id' => Auth::User()->account_id,
@@ -844,7 +853,7 @@ class BookedPacketsController extends Controller
         /**
          * Fetch default Inventory Location ID
          */
-        $inventory_location = LeopardsSettings::getDefaultInventoryLocation(Auth::User()->account_id);
+        $inventory_location = WccSettings::getDefaultInventoryLocation(Auth::User()->account_id);
 
         /**
          * Fulfill this order
@@ -902,8 +911,8 @@ class BookedPacketsController extends Controller
     }
     public function book_wcc_packet(Request $request)
     {
-        $username= LeopardsSettings::where('account_id', Auth::User()->account_id)->where('name','User ID')->get();
-        $password=LeopardsSettings::where('account_id', Auth::User()->account_id)->where('name','Password')->get();
+        $username= WccSettings::where('account_id', Auth::User()->account_id)->where('name','User ID')->get();
+        $password=WccSettings::where('account_id', Auth::User()->account_id)->where('name','Password')->get();
 
         $packet_piece=$request->input('packet_pieces');
         $weight=$request->input('net_weight');
@@ -928,8 +937,7 @@ class BookedPacketsController extends Controller
 
         $special_handling=$request->input('SpecialHandling');
         $insurance_value=$request->input('InsuranceValue');
-        echo $username[0]->data.'<br>';
-        echo $password[0]->data.'<br>';
+
 
         if (!$special_handling)
             $special_handling=0;
@@ -937,7 +945,6 @@ class BookedPacketsController extends Controller
         $f=Config::get('constants.wcc_shipment_type');
         if ($service_type==2)
             $service_type='COD';
-        echo $weight."<br>".$packet_piece."<br>".$cod_amount."<br>".$order_id."<br>".$service_type."<br>".$shiper_name."<br>".$shiper_add."<br>".$shiper_phone."<br>".$shiper_email."<br>".$orign_city."<br>".$des_city."<br>".$con_name."<br>".$con_add."<br>".$con_email."<br>".$con_phone."<br>".$con_remarks."<br>".$product_description."<br>".$special_handling."<br>".$insurance_value;
 
         return true;
     }
@@ -1073,7 +1080,7 @@ class BookedPacketsController extends Controller
         /**
          * Load Wcc Settings
          */
-        $wcc_settings = LeopardsSettings::where([
+        $wcc_settings = WccSettings::where([
             'account_id' => Auth::User()->account_id
         ])
             ->select('slug', 'data')
@@ -1168,7 +1175,7 @@ class BookedPacketsController extends Controller
         $shipment_type = Config::get('constants.shipment_type');
 
         $wcc_cities = WccCities::where([
-            'account_id' => Auth::User()->account_id,
+            'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
         ])->whereIn('city_id', [$booked_packet->origin_city, $booked_packet->destination_city])
             ->select('city_id', 'name')
             ->get();

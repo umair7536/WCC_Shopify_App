@@ -1,11 +1,11 @@
-@if($leopards_settings)
+@if($wcc_settings)
     <div class="row">
-        @foreach($leopards_settings as $leopards_setting)
+        @foreach($wcc_settings as $wcc_setting)
             <div class="col-md-12">
-                @if($leopards_setting->slug == 'mode')
-                    {!! Form::hidden('name', $leopards_setting->name, ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
+                @if($wcc_setting->slug == 'mode')
+                    {!! Form::hidden('name', $wcc_setting->name, ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
                     <div class="form-group">
-                        {!! Form::label('data', $leopards_setting->name, ['class' => 'control-label']) !!}
+                        {!! Form::label('data', $wcc_setting->name, ['class' => 'control-label']) !!}
                         {!! Form::select('data', ['0' => 'Producton', '1' => 'Test Mode'], old('data'), ['class' => 'form-control', 'placeholder' => 'Select a Mode']) !!}
                         @if($errors->has('data'))
                             <p class="help-block">
@@ -14,9 +14,9 @@
                         @endif
                     </div>
                 @else
-                    {!! Form::hidden('name', $leopards_setting->name, ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
+                    {!! Form::hidden('name', $wcc_setting->name, ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
                     <div class="form-group">
-                        {!! Form::label('data', $leopards_setting->name, ['class' => 'control-label']) !!}
+                        {!! Form::label('data', $wcc_setting->name, ['class' => 'control-label']) !!}
                         {!! Form::text('data', old('data'), ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
                         @if($errors->has('data'))
                             <p class="help-block">

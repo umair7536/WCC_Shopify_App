@@ -65,8 +65,14 @@ class DatabaseSeeder extends Seeder
         // Leopards Cities Seeder
         $this->call(LeopardsCitiesSeed::class);
 
+        // Wcc Cities Seeder
+        $this->call(WccCitiesSeed::class);
+
         // Leopards Settings Seeder
         $this->call(LeopardsSettingsSeed::class);
+
+        // Wcc Settings Seeder
+        $this->call(WccSettingsSeed::class);
 
         // Shippers Seeder
         $this->call(ShippersSeed::class);
@@ -79,5 +85,6 @@ class DatabaseSeeder extends Seeder
 
         // Booked Packets Seeder
         $this->call(LoadSheetsSeed::class);
+
     }
 }

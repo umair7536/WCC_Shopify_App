@@ -70,7 +70,7 @@
                     <tr role="row" class="filter">
                         <td></td>
                         <td>
-                            {!! Form::select('city_id', $leopards_cities, null, ['class' => 'form-control form-filter input-sm select2', 'placeholder' => 'Select a City']) !!}
+                            {!! Form::select('city_id', $wcc_cities, null, ['class' => 'form-control form-filter input-sm select2', 'placeholder' => 'Select a City']) !!}
                         </td>
                         <td>
                             <input type="text" class="form-control form-filter input-sm" name="name">

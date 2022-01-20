@@ -6,6 +6,7 @@ use App\Events\Leopards\SyncLeopardsCitiesFire;
 use App\Helpers\Leopards;
 use App\Models\Accounts;
 use App\Models\LeopardsCities;
+use App\Models\WccSettings;
 use App\Models\WccCities;
 use App\Models\LeopardsSettings;
 use App\Models\ShopifyLocations;
@@ -48,7 +49,7 @@ class LeopardsSettingsController extends Controller
 
 
 
-        $leopards_settings = LeopardsSettings::where([
+        $leopards_settings = WccSettings::where([
             'account_id' => Auth::User()->account_id
         ])
             ->orderBy('id', 'asc')
@@ -113,18 +114,18 @@ class LeopardsSettingsController extends Controller
         }
 
 
-        $leopards_settings = LeopardsSettings::where([
+        $leopards_settings = WccSettings::where([
             'account_id' => $account_id
         ])
             ->orderBy('id', 'asc')
             ->get();
 
 
-        $inventory_location = LeopardsSettings::getDefaultInventoryLocation($account_id);
+        $inventory_location = WccSettings::getDefaultInventoryLocation($account_id);
 
-        $fulfillment_status = LeopardsSettings::isAutoFulfillmentEnabled($account_id);
+        $fulfillment_status = WccSettings::isAutoFulfillmentEnabled($account_id);
         ($fulfillment_status) ? $fulfillment_status = '1' : '0';
-        $mark_status = LeopardsSettings::isAutoMarkPaidEnabled($account_id);
+        $mark_status = WccSettings::isAutoMarkPaidEnabled($account_id);
         ($mark_status) ? $mark_status = '1' : '0';
 
 
@@ -191,7 +192,7 @@ class LeopardsSettingsController extends Controller
         $data = $request->all();
         $request = new Request();
         $request->replace($data);
-        if(LeopardsSettings::createRecord($request, Auth::User()->account_id)) {
+        if(WccSettings::createRecord($request, Auth::User()->account_id)) {
             flash('Record has been updated successfully.')->success()->important();
 
             return response()->json(array(

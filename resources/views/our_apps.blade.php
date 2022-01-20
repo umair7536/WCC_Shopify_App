@@ -38,11 +38,11 @@
                                     </div>
                                     <div class="mt-card-content">
                                         <h3 class="mt-card-name">
-                                            Leopards Courier
+                                            WCC Courier
                                         </h3>
                                         <p class="mt-card-desc font-grey-mint">There for you!</p>
                                         <div class="mt-card-social">
-                                            <a href="https://apps.shopify.com/kourify-leopards-courier" target="_blank" class="btn green-sharp btn-block btn-outline sbold uppercase"><i class="fa fa-download"></i> Add App</a>
+                                            <a href="#" target="_blank" class="btn green-sharp btn-block btn-outline sbold uppercase"><i class="fa fa-download"></i> Add App</a>
                                         </div>
                                     </div>
                                 </div>

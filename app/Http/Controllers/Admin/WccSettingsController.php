@@ -7,6 +7,7 @@ use App\Events\Leopards\SyncLeopardsCitiesFire;
 use App\Helpers\Leopards;
 use App\Models\Accounts;
 use App\Models\WccCities;
+use App\Models\WccSettings;
 use App\Models\LeopardsSettings;
 use App\Models\ShopifyLocations;
 use Illuminate\Http\Request;
@@ -26,7 +27,7 @@ class WccSettingsController extends Controller
      */
     public function index()
     {
-        if (! Gate::allows('leopards_settings_manage')) {
+        if (! Gate::allows('Wcc_settings_manage')) {
             return abort(401);
         }
 
@@ -47,7 +48,7 @@ class WccSettingsController extends Controller
 
 
 
-        $wcc_settings = LeopardsSettings::where([
+        $wcc_settings = WccSettings::where([
             'account_id' => Auth::User()->account_id
         ])
             ->orderBy('id', 'asc')
@@ -61,7 +62,7 @@ class WccSettingsController extends Controller
         // this code copy of above but in which i have set account_id 3 because in wcccities DB only account_id 3 present
         if($wcc_settings['shipper-type']->data == 'other') {
             $wcc_cities = WccCities::where([
-                'account_id' => Auth::User()->account_id,    // Bydeafult set 3
+                'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,    // Bydeafult set 3
             ])->whereIn('city_id', [$wcc_settings['shipper-city']->data])
                 ->select('city_id', 'name')
                 ->get();
@@ -85,7 +86,7 @@ class WccSettingsController extends Controller
      */
     public function create()
     {
-        if (! Gate::allows('leopards_settings_edit')) {
+        if (! Gate::allows('Wcc_settings_edit')) {
             return abort(401);
         }
 
@@ -104,18 +105,18 @@ class WccSettingsController extends Controller
         }
 
 
-        $wcc_settings = LeopardsSettings::where([
+        $wcc_settings = WccSettings::where([
             'account_id' => $account_id
         ])
             ->orderBy('id', 'asc')
             ->get();
 
 
-        $inventory_location = LeopardsSettings::getDefaultInventoryLocation($account_id);
+        $inventory_location = WccSettings::getDefaultInventoryLocation($account_id);
 
-        $fulfillment_status = LeopardsSettings::isAutoFulfillmentEnabled($account_id);
+        $fulfillment_status = WccSettings::isAutoFulfillmentEnabled($account_id);
         ($fulfillment_status) ? $fulfillment_status = '1' : '0';
-        $mark_status = LeopardsSettings::isAutoMarkPaidEnabled($account_id);
+        $mark_status = WccSettings::isAutoMarkPaidEnabled($account_id);
         ($mark_status) ? $mark_status = '1' : '0';
 
 
@@ -127,7 +128,6 @@ class WccSettingsController extends Controller
         $shipment_type = Config::get('constants.shipment_type');
         $wcc_cities = WccCities::where([
             'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
-            'account_id' => Auth::User()->account_id,
             'city_id'=>'KHI',
         ])
             ->orderBy('name', 'asc')
@@ -149,7 +149,7 @@ class WccSettingsController extends Controller
      */
     public function store(Request $request)
     {
-        if (! Gate::allows('leopards_settings_edit')) {
+        if (! Gate::allows('Wcc_settings_edit')) {
             return abort(401);
         }
 
@@ -183,7 +183,7 @@ class WccSettingsController extends Controller
         $data = $request->all();
         $request = new Request();
         $request->replace($data);
-        if(LeopardsSettings::createRecord($request, Auth::User()->account_id)) {
+        if(WccSettings::createRecord($request, Auth::User()->account_id)) {
             flash('Record has been updated successfully.')->success()->important();
 
             return response()->json(array(
@@ -255,4 +255,43 @@ class WccSettingsController extends Controller
 
 
     }
+
+    public function test_cities()
+    {
+            $username=env('WCC_USERNAME');
+            $password=env('WCC_PASSWORD');
+
+            $req=file_get_contents('http://web.api.wcc.com.pk:3001/api/General/GetCityList?username='.$username.'&password='.$password);
+            $j_data=json_decode($req);
+            if($j_data=='1' || $j_data==true || $j_data==1)
+            {
+
+                $wcc_cities = [];
+                $sort_number = 0;
+                // var_dump($j_data);
+                foreach($j_data->Data as $data)
+                {  
+                    $wcc_cities[] = array(
+                        'name' => $data->CityName,
+                        'city_id' => $data->CityCode,
+                        'account_id' => 2,
+                        'created_at' => \Carbon\Carbon::now(),
+                        'updated_at' => \Carbon\Carbon::now(),
+                    );
+
+                }
+
+
+                var_dump($wcc_cities);
+                
+                exit();
+            }
+
+            echo "No City Present";
+            exit();
+
+    }
+
+
+
 }

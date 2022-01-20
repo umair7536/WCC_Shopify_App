@@ -415,9 +415,10 @@ class BookedPackets extends BaseModal
 
 
 
-        $username= LeopardsSettings::where('account_id', Auth::User()->account_id)->where('name','User ID')->get();
-        $password=LeopardsSettings::where('account_id', Auth::User()->account_id)->where('name','Password')->get();
+        $username= WccSettings::where('account_id', Auth::User()->account_id)->where('name','User ID')->get();
+        $password=WccSettings::where('account_id', Auth::User()->account_id)->where('name','Password')->get();
     
+
         if($response->Data[0]->TrackNumber) {
             // Set Tracking Information
             $data['track_number'] = $response->Data[0]->TrackNumber;
@@ -487,13 +488,13 @@ class BookedPackets extends BaseModal
          * '1' as Test Mode
          * '2' as Production Mode
          */
-        $leopards_setting = LeopardsSettings::where([
+        $wcc_setting = WccSettings::where([
             'account_id' => $account_id,
             'slug' => 'mode'
         ])
             ->select('slug', 'data')
             ->first();
-        $data['booking_type'] = ($leopards_setting->data) ? 1 : 2;
+        $data['booking_type'] = ($wcc_setting->data) ? 1 : 2;
 
         $record = self::create($data);
 
@@ -514,7 +515,7 @@ class BookedPackets extends BaseModal
 
         return [
             'status' => true,
-            'test_mode' => ($leopards_setting->data) ? 1 : 0,
+            'test_mode' => ($wcc_setting->data) ? 1 : 0,
             'record_id' => $record->id,
             'record' => $record,
             'error_msg' => null
@@ -551,7 +552,7 @@ class BookedPackets extends BaseModal
 
         try {
 
-            $leopards_settings = LeopardsSettings::where([
+            $wcc_settings = WccSettings::where([
                 'account_id' => Auth::User()->account_id
             ])
                 ->select('slug', 'data')
@@ -563,8 +564,8 @@ class BookedPackets extends BaseModal
              * Cancel Single Booked Packet
              */
 
-            $username=$leopards_settings['username']->data;
-            $password=$leopards_settings['password']->data;
+            $username=$wcc_settings['username']->data;
+            $password=$wcc_settings['password']->data;
             $cn_number=$booked_packet->cn_number;
             $cancel_api="http://web.api.wcc.com.pk:3001/api/General/CancelBooking?username=".$username."&password=".$password."&CNNO=".$cn_number;
 
@@ -594,8 +595,8 @@ class BookedPackets extends BaseModal
 
 //            /*
 //            $cn_data = array_merge(array(
-//                'api_key' => $leopards_settings['api-key']->data,              // API Key provided by LCS
-//                'api_password' => $leopards_settings['api-password']->data,    // API Password provided by LCS
+//                'api_key' => $wcc_settings['api-key']->data,              // API Key provided by LCS
+//                'api_password' => $wcc_settings['api-password']->data,    // API Password provided by LCS
 //            ), [
 //                'cn_numbers' => $booked_packet->cn_number
 //            ]);
@@ -651,7 +652,7 @@ class BookedPackets extends BaseModal
     static public function cancelBookedPacket($cn_number, $account_id) {
         try {
 
-            $leopards_settings = LeopardsSettings::where([
+            $wcc_settings = WccSettings::where([
                 'account_id' => $account_id
             ])
                 ->select('slug', 'data')
@@ -662,8 +663,8 @@ class BookedPackets extends BaseModal
              * Merge Booked Packet with LCS Credentials
              */
             $cn_data = array_merge(array(
-                'username' => $leopards_settings['username']->data,              // API Key provided by LCS
-                'password' => $leopards_settings['password']->data,    // API Password provided by LCS
+                'username' => $wcc_settings['username']->data,              // API Key provided by LCS
+                'password' => $wcc_settings['password']->data,    // API Password provided by LCS
             ), [
                 'cn_numbers' => $cn_number
             ]);
@@ -926,7 +927,7 @@ class BookedPackets extends BaseModal
                                  * Grab City from WCC System
                                  */
                                 $city = WccCities::where([
-                                    'account_id' => $account_id
+                                    'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
                                 ])
                                     ->where('name',
                                         '=',
@@ -961,7 +962,7 @@ class BookedPackets extends BaseModal
                                      * Grab City from WCC System
                                      */
                                     $city = WccCities::where([
-                                        'account_id' => $account_id
+                                        'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
                                     ])
                                         ->where('name',
                                             '=',
@@ -1029,7 +1030,7 @@ class BookedPackets extends BaseModal
         /**
          * Adjust Shipper Information as per WCC Settings
          */
-        $leopards_settings = LeopardsSettings::where([
+        $wcc_settings = WccSettings::where([
             'account_id' => Auth::User()->account_id
         ])
             ->select('slug', 'data')
@@ -1040,7 +1041,7 @@ class BookedPackets extends BaseModal
          * If Type is 'self' then all fields will have 'self' word
          * If Type is 'other' then all shipper information will be filled
          */
-        if($leopards_settings['shipper-type']->data == 'self') {
+        if($wcc_settings['shipper-type']->data == 'self') {
             // Shipper Information
             $booked_packet['origin_city'] = '';
             $booked_packet['shipper_id'] = 'self';
@@ -1050,12 +1051,12 @@ class BookedPackets extends BaseModal
             $booked_packet['shipper_address'] = '';
         } else {
             // Shipper Information
-            $booked_packet['origin_city'] = $leopards_settings['shipper-city']->data;
+            $booked_packet['origin_city'] = $wcc_settings['shipper-city']->data;
             $booked_packet['shipper_id'] = 'other';
-            $booked_packet['shipper_name'] = $leopards_settings['shipper-name']->data;
-            $booked_packet['shipper_email'] = $leopards_settings['shipper-email']->data;
-            $booked_packet['shipper_phone'] = $leopards_settings['shipper-phone']->data;
-            $booked_packet['shipper_address'] = $leopards_settings['shipper-address']->data;
+            $booked_packet['shipper_name'] = $wcc_settings['shipper-name']->data;
+            $booked_packet['shipper_email'] = $wcc_settings['shipper-email']->data;
+            $booked_packet['shipper_phone'] = $wcc_settings['shipper-phone']->data;
+            $booked_packet['shipper_address'] = $wcc_settings['shipper-address']->data;
         }
 
         return $booked_packet;
@@ -1135,7 +1136,7 @@ class BookedPackets extends BaseModal
                          * Grab City from WCC System
                          */
                         $city = WccCities::where([
-                            'account_id' => $account_id
+                            'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
                         ])
                             ->where('name',
                                 '=',
@@ -1170,7 +1171,7 @@ class BookedPackets extends BaseModal
                              * Grab City from WCC System
                              */
                             $city = WccCities::where([
-                                'account_id' => $account_id
+                                'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
                             ])
                                 ->where('name',
                                     '=',
@@ -1234,9 +1235,9 @@ class BookedPackets extends BaseModal
         }
 
         /**
-         * Adjust Shipper Information as per LCS Settings
+         * Adjust Shipper Information as per WCC Settings
          */
-        $leopards_settings = LeopardsSettings::where([
+        $wcc_settings = WccSettings::where([
             'account_id' => Auth::User()->account_id
         ])
             ->select('slug', 'data')
@@ -1247,7 +1248,7 @@ class BookedPackets extends BaseModal
          * If Type is 'self' then all fields will have 'self' word
          * If Type is 'other' then all shipper information will be filled
          */
-        if($leopards_settings['shipper-type']->data == 'self') {
+        if($wcc_settings['shipper-type']->data == 'self') {
             // Shipper Information
             $booked_packet['origin_city'] = '';
             $booked_packet['shipper_id'] = 'self';
@@ -1257,12 +1258,12 @@ class BookedPackets extends BaseModal
             $booked_packet['shipper_address'] = '';
         } else {
             // Shipper Information
-            $booked_packet['origin_city'] = $leopards_settings['shipper-city']->data;
+            $booked_packet['origin_city'] = $wcc_settings['shipper-city']->data;
             $booked_packet['shipper_id'] = 'other';
-            $booked_packet['shipper_name'] = $leopards_settings['shipper-name']->data;
-            $booked_packet['shipper_email'] = $leopards_settings['shipper-email']->data;
-            $booked_packet['shipper_phone'] = $leopards_settings['shipper-phone']->data;
-            $booked_packet['shipper_address'] = $leopards_settings['shipper-address']->data;
+            $booked_packet['shipper_name'] = $wcc_settings['shipper-name']->data;
+            $booked_packet['shipper_email'] = $wcc_settings['shipper-email']->data;
+            $booked_packet['shipper_phone'] = $wcc_settings['shipper-phone']->data;
+            $booked_packet['shipper_address'] = $wcc_settings['shipper-address']->data;
         }
 
         return $booked_packet;
@@ -1394,10 +1395,10 @@ class BookedPackets extends BaseModal
                                 $booked_packet[$key] = trim($shipping_address['address1']) . ' ' . trim($shipping_address['address2']);
                             } else if($key == 'destination_city') {
                                 /**
-                                 * Grab City from Leopards System
+                                 * Grab City from Wcc System
                                  */
                                 $city = WccCities::where([
-                                    'account_id' => $account_id
+                                    'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
                                 ])
                                     ->where('name',
                                         '=',
@@ -1431,10 +1432,10 @@ class BookedPackets extends BaseModal
                                     $booked_packet[$key] = trim($customer['address1']) . ' ' . trim($customer['address2']);
                                 } else if($key == 'destination_city') {
                                     /**
-                                     * Grab City from Leopards System
+                                     * Grab City from Wcc System
                                      */
                                     $city = WccCities::where([
-                                        'account_id' => $account_id
+                                        'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
                                     ])
                                         ->where('name',
                                             '=',
@@ -1510,7 +1511,7 @@ class BookedPackets extends BaseModal
         /**
          * Adjust Shipper Information as per LCS Settings
          */
-        $leopards_settings = LeopardsSettings::where([
+        $wcc_settings = WccSettings::where([
             'account_id' => $account_id
         ])
             ->select('slug', 'data')
@@ -1524,7 +1525,7 @@ class BookedPackets extends BaseModal
          * If Type is 'self' then all fields will have 'self' word
          * If Type is 'other' then all shipper information will be filled
          */
-        if($leopards_settings['shipper-type']->data == 'self') {
+        if($wcc_settings['shipper-type']->data == 'self') {
             // Shipper Information
             $booked_packet['origin_city'] = 'self';
             $booked_packet['shipper_id'] = 'self';
@@ -1534,12 +1535,12 @@ class BookedPackets extends BaseModal
             $booked_packet['shipper_address'] = 'self';
         } else {
             // Shipper Information
-            $booked_packet['origin_city'] = $leopards_settings['shipper-city']->data;
+            $booked_packet['origin_city'] = $wcc_settings['shipper-city']->data;
             $booked_packet['shipper_id'] = 'other';
-            $booked_packet['shipper_name'] = $leopards_settings['shipper-name']->data;
-            $booked_packet['shipper_email'] = $leopards_settings['shipper-email']->data;
-            $booked_packet['shipper_phone'] = $leopards_settings['shipper-phone']->data;
-            $booked_packet['shipper_address'] = $leopards_settings['shipper-address']->data;
+            $booked_packet['shipper_name'] = $wcc_settings['shipper-name']->data;
+            $booked_packet['shipper_email'] = $wcc_settings['shipper-email']->data;
+            $booked_packet['shipper_phone'] = $wcc_settings['shipper-phone']->data;
+            $booked_packet['shipper_address'] = $wcc_settings['shipper-address']->data;
         }
 
         return array(
@@ -1643,7 +1644,7 @@ class BookedPackets extends BaseModal
 
 
         try {
-//            $leopards_settings = LeopardsSettings::where([
+//            $wcc_settings = WccSettings::where([
 //                'account_id' => $account_id
 //            ])
 //                ->select('slug', 'data')
@@ -1656,9 +1657,9 @@ class BookedPackets extends BaseModal
 //             * Merge Booked Packet with LCS Credentials
 //             */
 //            $booked_packet = array_merge(array(
-//                'api_key' => $leopards_settings['api-key']->data,              // API Key provided by LCS
-//                'api_password' => $leopards_settings['api-password']->data,    // API Password provided by LCS
-//                'enable_test_mode' => ($leopards_settings['mode']->data) ? true : false,                 // [Optional] default value is 'false', true|false to set mode test or live
+//                'api_key' => $wcc_settings['api-key']->data,              // API Key provided by LCS
+//                'api_password' => $wcc_settings['api-password']->data,    // API Password provided by LCS
+//                'enable_test_mode' => ($wcc_settings['mode']->data) ? true : false,                 // [Optional] default value is 'false', true|false to set mode test or live
 //            ), $booked_packet);
 //
 //            return $leopards->bookPacket($booked_packet);
@@ -1666,8 +1667,8 @@ class BookedPackets extends BaseModal
 
 
 
-            $username= LeopardsSettings::where('account_id', Auth::User()->account_id)->where('name','User ID')->get();
-            $password=LeopardsSettings::where('account_id', Auth::User()->account_id)->where('name','Password')->get();
+            $username= WccSettings::where('account_id', Auth::User()->account_id)->where('name','User ID')->get();
+            $password=WccSettings::where('account_id', Auth::User()->account_id)->where('name','Password')->get();
 
             $packet_piece=$request->input('packet_pieces');
             $weight=$request->input('net_weight');
@@ -1749,7 +1750,7 @@ class BookedPackets extends BaseModal
     static public function generateLoadSheet($cn_numbers, $account_id) {
         try {
 
-            $leopards_settings = LeopardsSettings::where([
+            $wcc_settings = WccSettings::where([
                 'account_id' => $account_id
             ])
                 ->select('slug', 'data')
@@ -1760,8 +1761,8 @@ class BookedPackets extends BaseModal
              * Merge Booked Packet with LCS Credentials
              */
             $cn_data = array_merge(array(
-                'api_key' => $leopards_settings['api-key']->data,              // API Key provided by LCS
-                'api_password' => $leopards_settings['api-password']->data,    // API Password provided by LCS
+                'api_key' => $wcc_settings['api-key']->data,              // API Key provided by LCS
+                'api_password' => $wcc_settings['api-password']->data,    // API Password provided by LCS
             ), [
                 'cn_numbers' => $cn_numbers,
                 'courier_name' => env('LCS_COURIER_NAME'),
@@ -1813,7 +1814,7 @@ class BookedPackets extends BaseModal
     static public function downloadLoadSheet($load_sheet_id, $account_id) {
         try {
 
-            $leopards_settings = LeopardsSettings::where([
+            $wcc_settings = WccSettings::where([
                 'account_id' => $account_id
             ])
                 ->select('slug', 'data')
@@ -1824,8 +1825,8 @@ class BookedPackets extends BaseModal
              * Merge Booked Packet with LCS Credentials
              */
             $cn_data = array_merge(array(
-                'api_key' => $leopards_settings['api-key']->data,              // API Key provided by LCS
-                'api_password' => $leopards_settings['api-password']->data,    // API Password provided by LCS
+                'api_key' => $wcc_settings['api-key']->data,              // API Key provided by LCS
+                'api_password' => $wcc_settings['api-password']->data,    // API Password provided by LCS
             ), [
                 'load_sheet_id' => $load_sheet_id,
                 'response_type' => 'pdf'

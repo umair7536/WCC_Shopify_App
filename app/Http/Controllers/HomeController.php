@@ -10,7 +10,8 @@ use App\Events\Shopify\Products\UploadVariantsFire;
 use App\Events\Shopify\Webhooks\CreateWebhooksFire;
 use App\Models\Accounts;
 use App\Models\HeavyLifter;
-use App\Models\LeopardsSettings;
+// use App\Models\LeopardsSettings;
+use App\Models\WccSettings;
 use App\Models\ShopifyJobs;
 use App\Models\ShopifyLocations;
 use Config;
@@ -51,35 +52,35 @@ class HomeController extends Controller
         foreach($accounts as $account) {
             $account_id = $account->id;
 
-            $global_leopards_settings = Config::get('setup.leopards_settings');
+            $global_wcc_settings = Config::get('setup.wcc_settings');
             $sort_number = 0;
-            foreach($global_leopards_settings as $leopards_setting) {
-                $leopards_record = LeopardsSettings::where([
+            foreach($global_wcc_settings as $wcc_setting) {
+                $wcc_record = WccSettings::where([
                     'account_id' => $account_id,
-                    'slug' => $leopards_setting['slug'],
+                    'slug' => $wcc_setting['slug'],
                 ])->select('id')->first();
 
-                if(!$leopards_record) {
+                if(!$wcc_record) {
                     $data = null;
-                    if($leopards_setting['slug'] == 'auto-mark-paid') {
+                    if($wcc_setting['slug'] == 'auto-mark-paid') {
                         $data = 0;
-                    } else if($leopards_setting['slug'] == 'auto-fulfillment') {
+                    } else if($wcc_setting['slug'] == 'auto-fulfillment') {
                         $data = 0;
-                    } else if($leopards_setting['slug'] == 'inventory-location') {
+                    } else if($wcc_setting['slug'] == 'inventory-location') {
                         $location = ShopifyLocations::where([
                             'account_id' => $account_id
                         ])->first();
                         if($location) {
                             $data = $location->location_id;
                         }
-                    } else if($leopards_setting['slug'] == 'shipper-type') {
+                    } else if($wcc_setting['slug'] == 'shipper-type') {
                         $data = 'self';
                     }
 
                     // Set Account ID
-                    LeopardsSettings::create([
-                        'name' => $leopards_setting['name'],
-                        'slug' => $leopards_setting['slug'],
+                    WccSettings::create([
+                        'name' => $wcc_setting['name'],
+                        'slug' => $wcc_setting['slug'],
                         'data' => $data,
                         'sort_number'=> $sort_number++,
                         'account_id' => $account_id,
@@ -100,14 +101,13 @@ class HomeController extends Controller
      */
     public function instructions()
     {
-        $leopards_settings = LeopardsSettings::where([
+        $wcc_settings = WccSettings::where([
             'account_id' => Auth::User()->account_id
         ])
             ->select('slug', 'data')
             ->orderBy('id', 'asc')
             ->get()->keyBy('slug');
-
-        return view('instructions', compact('leopards_settings'));
+        return view('instructions', compact('wcc_settings'));
     }
 
     /**
@@ -165,7 +165,7 @@ class HomeController extends Controller
 
                     $updateable_data = [];
 
-                    $leopards_settings = LeopardsSettings::where([
+                    $wcc_settings = WccSettings::where([
                         'account_id' => $account->id
                     ])
                         ->orderBy('id', 'asc')
@@ -175,18 +175,18 @@ class HomeController extends Controller
                     $company = [];
 
                     if(
-                                $leopards_settings['shipper-type']->data == 'self'
+                                $wcc_settings['shipper-type']->data == 'self'
                         && (
-                                    $leopards_settings['api-key']->data
-                                &&  $leopards_settings['api-password']->data
-                                &&  $leopards_settings['company-id']->data
+                                    $wcc_settings['api-key']->data
+                                &&  $wcc_settings['api-password']->data
+                                &&  $wcc_settings['company-id']->data
                         )
                     ) {
                         try {
                             $client = new Client();
                             $response = $client->post(env('LCS_URL') . 'common_calls/getCountryById', array(
                                 'form_params' => array(
-                                    'company_id' => $leopards_settings['company-id']->data
+                                    'company_id' => $wcc_settings['company-id']->data
                                 )
                             ));
 
@@ -214,7 +214,7 @@ class HomeController extends Controller
 
                         if(count($company) && count($updateable_data)) {
                             foreach ($updateable_data as $slug => $data) {
-                                LeopardsSettings::where([
+                                WccSettings::where([
                                     'account_id' => $account->id,
                                     'slug' => $slug,
                                 ])
@@ -224,9 +224,9 @@ class HomeController extends Controller
                             }
                             echo "<br/><br/> AC ID: " . $account->id . ' updated';
                         }
-                    } else if($leopards_settings['shipper-type']->data == 'self') {
+                    } else if($wcc_settings['shipper-type']->data == 'self') {
                         echo "<br/><br/> AC ID: " . $account->id . ' updated to self only';
-                        LeopardsSettings::where([
+                        WccSettings::where([
                             'account_id' => $account->id,
                             'slug' => 'shipper-type',
                         ])

@@ -82,7 +82,7 @@
                                     <input type="text" class="form-control form-filter input-sm" placeholder="Tags" name="tags">
                                 </div>
                                 <div class="form-group">
-                                    {!! Form::select('destination_city', $leopards_cities, null, [
+                                    {!! Form::select('destination_city', $wcc_cities, null, [
                                         'multiple' => 'multiple', 'class' => 'form-control form-filter input-sm mt-multiselect',
                                         'data-label' => 'left', 'data-select-all' => 'true', 'data-width' => '100%',
                                         'data-filter' => 'true', 'id' => 'destination_city'
@@ -153,7 +153,7 @@
 {{--                            <input type="text" class="form-control form-filter input-sm" name="cn_number">--}}
 {{--                        </td>--}}
 {{--                        <td>--}}
-{{--                            {!! Form::select('destination_city', $leopards_cities, null, [--}}
+{{--                            {!! Form::select('destination_city', $wcc_cities, null, [--}}
 {{--                                    'multiple' => 'multiple', 'class' => 'form-control form-filter input-sm mt-multiselect',--}}
 {{--                                    'data-label' => 'left', 'data-select-all' => 'true', 'data-width' => '100%',--}}
 {{--                                    'data-filter' => 'true'--}}

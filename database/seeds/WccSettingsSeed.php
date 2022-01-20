@@ -6,7 +6,6 @@ use Spatie\Permission\Models\Role;
 use App\Models\WccSettings;
 use Illuminate\Support\Facades\Config;
 
-
 class WccSettingsSeed extends Seeder
 {
     /**
@@ -18,8 +17,8 @@ class WccSettingsSeed extends Seeder
     {
         // Permissions has been added
         $MainPermission = Permission::create([
-            'title' => 'Leopards Settings',
-            'name' => 'leopards_settings_manage',
+            'title' => 'Wcc Settings',
+            'name' => 'Wcc_settings_manage',
             'guard_name' => 'web',
             'main_group' => 1,
             'parent_id' => 0,
@@ -28,7 +27,7 @@ class WccSettingsSeed extends Seeder
         Permission::insert([
             [
                 'title' => 'Create',
-                'name' => 'leopards_settings_create',
+                'name' => 'Wcc_settings_create',
                 'guard_name' => 'web',
                 'main_group' => 0,
                 'created_at' => \Carbon\Carbon::now(),
@@ -37,7 +36,7 @@ class WccSettingsSeed extends Seeder
             ],
             [
                 'title' => 'Edit',
-                'name' => 'leopards_settings_edit',
+                'name' => 'Wcc_settings_edit',
                 'guard_name' => 'web',
                 'main_group' => 0,
                 'created_at' => \Carbon\Carbon::now(),
@@ -46,7 +45,7 @@ class WccSettingsSeed extends Seeder
             ],
             [
                 'title' => 'Activate',
-                'name' => 'leopards_settings_active',
+                'name' => 'Wcc_settings_active',
                 'guard_name' => 'web',
                 'main_group' => 0,
                 'created_at' => \Carbon\Carbon::now(),
@@ -55,7 +54,7 @@ class WccSettingsSeed extends Seeder
             ],
             [
                 'title' => 'Inactivate',
-                'name' => 'leopards_settings_inactive',
+                'name' => 'Wcc_settings_inactive',
                 'guard_name' => 'web',
                 'main_group' => 0,
                 'created_at' => \Carbon\Carbon::now(),
@@ -64,7 +63,7 @@ class WccSettingsSeed extends Seeder
             ],
             [
                 'title' => 'Delete',
-                'name' => 'leopards_settings_destroy',
+                'name' => 'Wcc_settings_destroy',
                 'guard_name' => 'web',
                 'main_group' => 0,
                 'created_at' => \Carbon\Carbon::now(),
@@ -73,7 +72,7 @@ class WccSettingsSeed extends Seeder
             ],
             [
                 'title' => 'Sort',
-                'name' => 'leopards_settings_sort',
+                'name' => 'Wcc_settings_sort',
                 'guard_name' => 'web',
                 'main_group' => 0,
                 'created_at' => \Carbon\Carbon::now(),
@@ -85,32 +84,33 @@ class WccSettingsSeed extends Seeder
         $role = Role::findOrFail(1);
 
         // Assign Permission to 'administrator' role
-        $role->givePermissionTo('leopards_settings_manage');
-        $role->givePermissionTo('leopards_settings_create');
-        $role->givePermissionTo('leopards_settings_edit');
-        $role->givePermissionTo('leopards_settings_active');
-        $role->givePermissionTo('leopards_settings_inactive');
-        $role->givePermissionTo('leopards_settings_destroy');
-        $role->givePermissionTo('leopards_settings_sort');
+        $role->givePermissionTo('Wcc_settings_manage');
+        $role->givePermissionTo('Wcc_settings_create');
+        $role->givePermissionTo('Wcc_settings_edit');
+        $role->givePermissionTo('Wcc_settings_active');
+        $role->givePermissionTo('Wcc_settings_inactive');
+        $role->givePermissionTo('Wcc_settings_destroy');
+        $role->givePermissionTo('Wcc_settings_sort');
 
         $application_user = Role::findOrFail(2);
-        $application_user->givePermissionTo('leopards_settings_manage');
-//        $application_user->givePermissionTo('leopards_settings_create');
-        $application_user->givePermissionTo('leopards_settings_edit');
-//        $application_user->givePermissionTo('leopards_settings_active');
-//        $application_user->givePermissionTo('leopards_settings_inactive');
-//        $application_user->givePermissionTo('leopards_settings_destroy');
-        $application_user->givePermissionTo('leopards_settings_sort');
+        $application_user->givePermissionTo('Wcc_settings_manage');
+//        $application_user->givePermissionTo('Wcc_settings_create');
+        $application_user->givePermissionTo('Wcc_settings_edit');
+//        $application_user->givePermissionTo('Wcc_settings_active');
+//        $application_user->givePermissionTo('Wcc_settings_inactive');
+//        $application_user->givePermissionTo('Wcc_settings_destroy');
+        $application_user->givePermissionTo('Wcc_settings_sort');
 
-        $global_leopards_settings = Config::get('setup.leopards_settings');
+        $global_Wcc_settings = Config::get('setup.wcc_settings');
 
         $wcc_settings = [];
+        $d1=[null,null,null,null,null,null,null,null,'COD','self','self','self','self','self',null];
         $sort_number = 0;
-        foreach($global_leopards_settings as $leopards_setting) {
+        foreach($global_Wcc_settings as $Wcc_setting) {
             $wcc_settings[] = array(
-                'name' => $leopards_setting['name'],
-                'slug' => $leopards_setting['slug'],
-                'data' => null,
+                'name' => $Wcc_setting['name'],
+                'slug' => $Wcc_setting['slug'],
+                'data' => $d1[$sort_number],
                 'sort_number'=> $sort_number++,
                 'account_id' => 1,
                 'created_at' => \Carbon\Carbon::now(),
@@ -124,12 +124,12 @@ class WccSettingsSeed extends Seeder
 
         $wcc_settings1 = [];
         $sort_number = 0;
-        $d1=[null,null,null,null,null,null,null,null,'COD','self','self','self','self','self',null];
+       
         foreach($global_wcc_settings as $wcc_setting) {
             $wcc_settings1[] = array(
                 'name' => $wcc_setting['name'],
                 'slug' => $wcc_setting['slug'],
-                'data' => d1[$sort_number],
+                'data' => $d1[$sort_number],
                 'sort_number'=> $sort_number++,
                 'account_id' => 2,
                 'created_at' => \Carbon\Carbon::now(),
@@ -137,7 +137,6 @@ class WccSettingsSeed extends Seeder
             );
         }
         WccSettings::insert($wcc_settings);
-        WccSettings::insert($wcc_settings1);
 
     }
 }

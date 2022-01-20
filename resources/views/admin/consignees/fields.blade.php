@@ -1,7 +1,7 @@
 <div class="row">
     <div class="form-group col-md-6">
         {!! Form::label('city_id', 'City*', ['class' => 'control-label']) !!}
-        {!! Form::select('city_id', $leopards_cities, old('city_id'), ['class' => 'form-control inpt-focus select2', 'placeholder' => 'Select a City', 'required' => '']) !!}
+        {!! Form::select('city_id', $wcc_cities, old('city_id'), ['class' => 'form-control inpt-focus select2', 'placeholder' => 'Select a City', 'required' => '']) !!}
         @if($errors->has('city_id'))
             <p class="help-block">
                 {{ $errors->first('city_id') }}

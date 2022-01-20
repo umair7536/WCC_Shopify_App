@@ -26,9 +26,9 @@ class Shippers extends BaseModal
     /**
      * Get City Detail
      */
-    public function leopards_citie()
+    public function wcc_citie()
     {
-        return $this->belongsTo('App\Models\LeopardsCities', 'city_id');
+        return $this->belongsTo('App\Models\WccCities', 'city_id');
     }
 
     /**

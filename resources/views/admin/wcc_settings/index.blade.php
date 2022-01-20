@@ -31,11 +31,11 @@
                 <span class="caption-subject font-dark sbold uppercase">@lang('global.app_list')</span>
             </div>
             <div class="actions">
-                @if(Gate::allows('leopards_settings_create'))
+                @if(Gate::allows('Wcc_settings_create'))
                     <a class="btn btn-success" href="{{ route('admin.wcc_settings.create') }}"
                        data-target="#ajax_leopards_settings" data-toggle="modal">@lang('global.app_add_new')</a>
                 @endif
-                @if(Gate::allows('leopards_settings_sort'))
+                @if(Gate::allows('Wcc_settings_sort'))
                     <a href="{{ route('admin.wcc_settings.sort') }}"
                        class="btn btn-success">@lang('global.leopards_settings.fields.sort')</a>
                 @endif
@@ -43,11 +43,11 @@
         </div>
         <div class="portlet-body">
             <div class="note note-info">
-                <h4 class="block">Integrate Leopards COD Account</h4>
-                <p>To simply integrate Leopads COD account follow the steps below. </p>
+                <h4 class="block">Integrate WCC COD Account</h4>
+                <p>To simply integrate WCC COD account follow the steps below. </p>
                 <ul>
-                    <li><a target="_blank" href="http://new.leopardscod.com/login">Login</a> to Leopards COD system.</li>
-                    <li>Go to API Settings from menu (If you didn't see this menu contact Leopards COD support to enable this feature).</li>
+                    <li><a target="_blank" href="http://new.wcc.com/login">Login</a> to WCC COD system.</li>
+                    <li>Go to API Settings from menu (If you didn't see this menu contact Wcc COD support to enable this feature).</li>
                     <li>Go to API Management menu.</li>
                     <li>Copy API Key and API Password (If API Key section is an empty, click on 'Generate Key' button to got API key).</li>
                     <li>Put API Key and API Passwords in this system via editing each setting.</li>
