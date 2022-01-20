@@ -45,6 +45,7 @@ return [
         'orders/fulfilled' => 'Order Fulfillment',
         'orders/paid' => 'Order Payment',
         'orders/updated' => 'Order Update',
+        'orders/edited' => 'Order Edited',
         'app/uninstalled' => 'App Uninstalled',
     ),
 

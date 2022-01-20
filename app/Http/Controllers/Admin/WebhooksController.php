@@ -106,9 +106,15 @@ class WebhooksController extends Controller
 
                         $shop = $shop->toArray();
                         $order = json_decode($request->getBody(), true);
-                        $order['order_id'] = $order['id'];
+                        if(isset($order['order_edit'])) {
+
+                        } else {
+                            $order['order_id'] = $order['id'];
+                        }
 
                         switch ($shopify_topic) {
+                            case 'orders/edited':
+                                break;
                             case 'orders/delete':
                                 /**
                                  * Delete Addresses
@@ -141,7 +147,7 @@ class WebhooksController extends Controller
 
                                 break;
                             case 'orders/create':
-                                event(new SingleOrderUpdatedFire($order, $shop));
+                                event(new SingleOrderFire($order, $shop));
                                 break;
                             case 'orders/fulfilled':
                                 event(new SingleOrderFulfilledFire($order, $shop));

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
 use App\Models\AuditTrails;
 use Auth;
+use ZfrShopify\ShopifyGraphQLClient;
 
 
 class ShopifyWebhooks extends BaseModal
@@ -207,21 +208,64 @@ class ShopifyWebhooks extends BaseModal
 
             $data = $request->all();
 
-            $shopify = self::getShopifyObject();
+            $shop = ShopifyShops::where([
+                'account_id' => Auth::User()->account_id
+            ])->first();
 
-            $webhook = $shopify->createWebhook(array(
-               'address' => $data['address'],
-               'format' => $data['format'],
-               'topic' => $data['topic'],
-            ));
+            $shopify = new ShopifyGraphQLClient([
+                'private_app' => false,
+                'api_key' => env('SHOPIFY_APP_API_KEY'), // In public app, this is the app ID
+                'version' => env('SHOPIFY_API_VERSION'), // Put API Version
+                'access_token' => $shop->access_token,
+                'shop' => $shop->myshopify_domain
+            ]);
+
+            $variables = [
+                'topic' => strtoupper(str_replace('/','_', $data['topic'])),
+                'webhookSubscription' => [
+                    'callbackUrl' => env('APP_URL_TUNNEL') . '/webhooks/' . explode('/', $data['topic'])[0],
+                    'format' => strtoupper($data['format'])
+                ]
+            ];
+
+
+            $query = <<<'EOT'
+mutation webhookSubscriptionCreate($topic: WebhookSubscriptionTopic!, $webhookSubscription: WebhookSubscriptionInput!) {
+  webhookSubscriptionCreate(topic: $topic, webhookSubscription: $webhookSubscription) {
+    webhookSubscription {
+      id
+      topic
+      format
+      endpoint {
+        __typename
+        ... on WebhookHttpEndpoint {
+          callbackUrl
+        }
+      }
+    }
+  }
+}
+
+EOT;
+
+            $result = $shopify->request($query, $variables);
+
+            $webhook = [
+                'id' => explode('/', $result['webhookSubscriptionCreate']['webhookSubscription']['id'])[4],
+                'address' => env('APP_URL_TUNNEL') . '/webhooks/' . explode('/', $data['topic'])[0],
+                'format' => 'json',
+                'topic' => $data['topic'],
+                'fields' => [],
+                'metafield_namespaces' => [],
+            ];
 
             if(count($webhook)) {
                 // Set Account ID
                 $data['account_id'] = $account_id;
                 $data['fields'] = json_encode($webhook['fields']);
                 $data['metafield_namespaces'] = json_encode($webhook['metafield_namespaces']);
-                $data['created_at'] = Carbon::parse($webhook['created_at'])->toDateTimeString();
-                $data['updated_at'] = Carbon::parse($webhook['updated_at'])->toDateTimeString();
+                $data['created_at'] = Carbon::now()->toDateTimeString();
+                $data['updated_at'] = Carbon::now()->toDateTimeString();
                 $data['webhook_id'] = $webhook['id'];
                 $data['address'] = $webhook['address'];
                 $data['topic'] = $webhook['topic'];

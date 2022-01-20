@@ -99,7 +99,7 @@ class ShopifyWebhooksController extends Controller
             return abort(401);
         }
 
-        return view('admin.shopify_webhooks.create', compact('city'));
+        return view('admin.shopify_webhooks.create');
     }
 
 
