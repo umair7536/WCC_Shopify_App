@@ -105,10 +105,10 @@
                         {!! Form::label($wcc_setting->slug, $wcc_setting->name, ['class' => 'control-label']) !!}
                         @if($wcc_setting->data)
                             {{--                            {!! Form::text($wcc_setting->slug, $wcc_setting->data, ['class' => 'form-control', 'placeholder' => '']) !!}--}}
-                            {!! Form::text($wcc_setting->slug,$wcc_setting->data , ['class' => 'form-control', 'placeholder' => '']) !!}
+                            {!! Form::text($wcc_setting->slug, $wcc_setting->data, ['class' => 'form-control', 'placeholder' => '']) !!}
 
                         @else
-                            {!! Form::text($wcc_setting->slug, 'self', ['class' => 'form-control', 'placeholder' => '']) !!}
+                            {!! Form::text($wcc_setting->slug, $wcc_setting->data, ['class' => 'form-control', 'placeholder' => '']) !!}
 
                         @endif
 
@@ -121,8 +121,7 @@
                 @elseif($wcc_setting->slug == 'shipper-city')
                     <div class="form-group {{ $wcc_setting->slug }}">
                         {!! Form::label($wcc_setting->slug, $wcc_setting->name, ['class' => 'control-label']) !!}
-
-                            {!! Form::select($wcc_setting->slug, $wcc_cities, '', ['class' => 'form-control', 'placeholder' => 'Select a City']) !!}
+                            {!! Form::select($wcc_setting->slug, $wcc_cities,$wcc_setting->data, ['class' => 'form-control', 'placeholder' => 'Select a City']) !!}
 {{--                        @endif--}}
                         @if($errors->has($wcc_setting->slug))
                             <p class="help-block">

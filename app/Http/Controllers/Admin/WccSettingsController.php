@@ -123,8 +123,7 @@ class WccSettingsController extends Controller
         /**
          * Manage Shipment Type
          */
-//        echo Auth::User()->account_id;
-//        exit();
+
         $shipment_type = Config::get('constants.wcc_shipment_type');
         $wcc_cities = WccCities::where([
             'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
@@ -132,6 +131,7 @@ class WccSettingsController extends Controller
         ])
             ->orderBy('name', 'asc')
             ->get();
+        echo $wcc_cities;
         if($wcc_cities) {
             $wcc_cities = $wcc_cities->pluck('name', 'city_id');
         } else {

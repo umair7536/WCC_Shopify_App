@@ -145,20 +145,20 @@ $booked_packets_test = \App\Models\BookedPackets::where([
         @endif
 
         @if(Gate::allows('booked_packets_manage'))
-            <div class="col-md-4">
+            <!-- <div class="col-md-4"> -->
                 <!-- BEGIN WIDGET THUMB -->
-                <div class="widget-thumb widget-bg-color-white text-uppercase margin-bottom-20 bordered">
-                    <h4 class="widget-thumb-heading">Booked Packets (Test)</h4>
-                    <div class="widget-thumb-wrap">
-                        <i class="widget-thumb-icon bg-green icon-users"></i>
-                        <div class="widget-thumb-body">
-                            <span class="widget-thumb-subtitle">Total</span>
-                            <span class="widget-thumb-body-stat" data-counter="counterup" data-value="{{ number_format($booked_packets_test) }}">{{ number_format($booked_packets_test) }}</span>
-                        </div>
-                    </div>
-                </div>
+                <!-- <div class="widget-thumb widget-bg-color-white text-uppercase margin-bottom-20 bordered"> -->
+                    <!-- <h4 class="widget-thumb-heading">Booked Packets (Test)</h4> -->
+                    <!-- <div class="widget-thumb-wrap"> -->
+                        <!-- <i class="widget-thumb-icon bg-green icon-users"></i> -->
+                        <!-- <div class="widget-thumb-body"> -->
+                            <!-- <span class="widget-thumb-subtitle">Total</span> -->
+                            <!-- <span class="widget-thumb-body-stat" data-counter="counterup" data-value="{{ number_format($booked_packets_test) }}">{{ number_format($booked_packets_test) }}</span> -->
+                        <!-- </div> -->
+                    <!-- </div> -->
+                <!-- </div> -->
                 <!-- END WIDGET THUMB -->
-            </div>
+            <!-- </div> -->
         @endif
 
         <div class="clearfix"></div>
