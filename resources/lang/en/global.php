@@ -361,6 +361,6 @@ return [
     'app_delete' => 'Delete',
     'app_cancel' => 'Cancel',
     'app_arrange' => 'Arrange List',
-    'global_title' => 'WCC Courier',
+    'global_title' => 'WCC | World Commerce Courier',
 
 ];
