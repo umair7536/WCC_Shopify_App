@@ -13,7 +13,7 @@ class CleanJsonOrders extends Command
      *
      * @var string
      */
-    protected $signature = 'lcs:clean-jsonorders';
+    protected $signature = 'wcc:clean-jsonorders';
 
     /**
      * The console command description.
