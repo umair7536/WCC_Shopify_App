@@ -3,7 +3,7 @@
         @foreach($wcc_settings as $wcc_setting)
             <div class="col-md-12">
                 @if($wcc_setting->slug == 'mode')
-                    <div class="form-group">
+                    <!-- <div class="form-group">
                         {!! Form::label($wcc_setting->slug, $wcc_setting->name, ['class' => 'control-label']) !!}
                         {!! Form::select($wcc_setting->slug, ['0' => 'Producton', '1' => 'Test Mode'], $wcc_setting->data, ['class' => 'form-control', 'placeholder' => 'Select a Mode']) !!}
                         @if($errors->has($wcc_setting->slug))
@@ -11,7 +11,7 @@
                                 {{ $errors->first($wcc_setting->slug) }}
                             </p>
                         @endif
-                    </div>
+                    </div> -->
                 @elseif($wcc_setting->slug == 'auto-fulfillment')
                     {!! Form::hidden('name', $wcc_setting->name, ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
                     <div class="form-group">
@@ -25,7 +25,7 @@
                     </div>
                 @elseif($wcc_setting->slug == 'auto-mark-paid')
                     {!! Form::hidden('name', $wcc_setting->name, ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
-                    <div class="form-group">
+                    <!-- <div class="form-group">
                         {!! Form::label('data', $wcc_setting->name, ['class' => 'control-label']) !!}
                         {!! Form::select($wcc_setting->slug, ['0' => 'No', '1' => 'Yes'], $mark_status, ['class' => 'form-control', 'placeholder' => 'Select an Option', 'required' => '']) !!}
                         @if($errors->has('data'))
@@ -33,7 +33,7 @@
                                 {{ $errors->first('data') }}
                             </p>
                         @endif
-                    </div>
+                    </div> -->
                 @elseif($wcc_setting->slug == 'inventory-location')
                     {!! Form::hidden('name', $wcc_setting->name, ['class' => 'form-control', 'placeholder' => '', 'required' => '']) !!}
                     <div class="form-group">
@@ -105,7 +105,7 @@
                         {!! Form::label($wcc_setting->slug, $wcc_setting->name, ['class' => 'control-label']) !!}
                         @if($wcc_setting->data)
                             {{--                            {!! Form::text($wcc_setting->slug, $wcc_setting->data, ['class' => 'form-control', 'placeholder' => '']) !!}--}}
-                            {!! Form::text($wcc_setting->slug, 'self', ['class' => 'form-control', 'placeholder' => '']) !!}
+                            {!! Form::text($wcc_setting->slug,$wcc_setting->data , ['class' => 'form-control', 'placeholder' => '']) !!}
 
                         @else
                             {!! Form::text($wcc_setting->slug, 'self', ['class' => 'form-control', 'placeholder' => '']) !!}

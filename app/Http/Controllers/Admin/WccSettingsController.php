@@ -125,7 +125,7 @@ class WccSettingsController extends Controller
          */
 //        echo Auth::User()->account_id;
 //        exit();
-        $shipment_type = Config::get('constants.shipment_type');
+        $shipment_type = Config::get('constants.wcc_shipment_type');
         $wcc_cities = WccCities::where([
             'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
             'city_id'=>'KHI',
@@ -154,6 +154,8 @@ class WccSettingsController extends Controller
         }
 
         $validator = $this->verifyFields($request);
+        
+        
 //        echo $validator;
 //        exit();
         if ($validator->fails()) {
@@ -170,6 +172,7 @@ class WccSettingsController extends Controller
 
         $response = $this->verifyAccount($request, Auth::User()->account_id);
 
+
         if (!$response['status']) {
             return response()->json(array(
                 'status' => 0,
@@ -181,11 +184,12 @@ class WccSettingsController extends Controller
             $request->replace($data);
         }
         $data = $request->all();
+        $data["mode"]="0";
+        $data["auto-mark-paid"]="0";
         $request = new Request();
         $request->replace($data);
         if(WccSettings::createRecord($request, Auth::User()->account_id)) {
             flash('Record has been updated successfully.')->success()->important();
-
             return response()->json(array(
                 'status' => 1,
                 'message' => 'Record has been updated successfully.',
@@ -207,7 +211,7 @@ class WccSettingsController extends Controller
     protected function verifyFields(Request $request)
     {
         return $validator = Validator::make($request->all(), [
-            'mode' => 'required',
+            // 'mode' => 'required',
             'username' => 'required',
             'password' => 'required',
 //            'api-key' => 'required',

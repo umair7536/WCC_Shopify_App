@@ -220,7 +220,7 @@ class BookedPackets extends BaseModal
     static public function getRecords(Request $request, $iDisplayStart, $iDisplayLength, $account_id = false, $booking_type = false)
     {
         $where = array();
-
+        
         $orderBy = 'created_at';
         $order = 'desc';
 

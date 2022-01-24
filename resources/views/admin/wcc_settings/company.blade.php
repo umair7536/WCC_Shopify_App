@@ -71,7 +71,7 @@
                                 @endif
                                 @if(
                                     in_array($wcc_setting->slug, [
-                                        'api-key', 'api-password', 'company-id', 'shipper-type'
+                                        'api-key', 'api-password', 'company-id', 'shipper-type','mode','auto-mark-paid'
                                     ]))
                                     @continue
                                 @endif
@@ -100,6 +100,10 @@
                                         <td>{{ ($shipper_type == 'self') ? 'Not Availabe' : $wcc_setting->data }}</td>
                                     @elseif($wcc_setting->slug == 'shipper-city')
                                         <td>{{ ($shipper_type == 'self') ? 'Not Availabe' : (array_key_exists($wcc_setting->data, $wcc_cities) ? $wcc_cities[$wcc_setting->data]['name'] : 'N/A') }}</td>
+                                    @elseif($wcc_setting->slug == 'mode') 
+                                        continue
+
+
                                     @else
                                         <td>{{ ($wcc_setting->slug == 'mode') ? ($wcc_setting->data ? 'Test Mode' : 'Production') : $wcc_setting->data }}</td>
                                     @endif

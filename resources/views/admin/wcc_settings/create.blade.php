@@ -42,5 +42,5 @@
 @section('javascript')
     <script src="{{ url('metronic/assets/global/plugins/jquery-validation/js/jquery.validate.min.js') }}" type="text/javascript"></script>
     <script src="{{ url('metronic/assets/global/plugins/jquery-validation/js/additional-methods.min.js') }}" type="text/javascript"></script>
-    <script src="{{ url('js/admin/leopards_settings/fields.js') }}" type="text/javascript"></script>
+    <script src="{{ url('js/admin/wcc_settings/fields.js') }}" type="text/javascript"></script>
 @endsection

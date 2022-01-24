@@ -63,9 +63,9 @@
                                 <span></span>
                             </label>
                         </th>
-                        <th>@lang('global.leopards_settings.fields.name')</th>
-                        <th>@lang('global.leopards_settings.fields.data')</th>
-                        <th width="20%">@lang('global.leopards_settings.fields.actions')</th>
+                        <th>@lang('global.wcc_settings.fields.name')</th>
+                        <th>@lang('global.wcc_settings.fields.data')</th>
+                        <th width="20%">@lang('global.wcc_settings.fields.actions')</th>
                     </tr>
                     <tr role="row" class="filter">
                         <td></td>

@@ -116,9 +116,10 @@ class BookedPacketsController extends Controller
             foreach($BookedPackets as $booked_packet) {
                 $cities[] = $booked_packet->origin_city;
                 $cities[] = $booked_packet->destination_city;
+                
             }
 
-            $shipment_type = Config::get('constants.shipment_type');
+            $shipment_type = Config::get('constants.wcc_shipment_type');
             $status = Config::get('constants.status');
 
             $wcc_cities = WccCities::where([
