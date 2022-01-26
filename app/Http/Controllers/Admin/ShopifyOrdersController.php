@@ -363,6 +363,9 @@ class ShopifyOrdersController extends Controller
                            $message .= '<li>Order <b>' . $order->name . '</b> has some issues. [' . implode(', ', $validator->messages()->all()) . ']';
                            continue;
                        }
+                       
+                       $booking_packet_request["order_id"]=$order->order_id;
+
 
                        $result = BookedPackets::createRecord($booking_packet_request, $account_id);
 

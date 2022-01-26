@@ -137,7 +137,7 @@ class BookedPacketsController extends Controller
                 $records["data"][] = array(
                     'id' => '<label class="mt-checkbox mt-checkbox-single mt-checkbox-outline"><input name="id[]" type="checkbox" class="checkboxes" value="'.$booked_packet->id.'"/><span></span></label>',
                     'status' => $status[$booked_packet->status],
-                    'order_id' => $booked_packet->order_id,
+                    'order_id' => $booked_packet->order_number,
                     'shipment_type_id' => $shipment_type[$booked_packet->shipment_type_id],
                     'cn_number' => $booked_packet->cn_number,
 //                    'origin_city' => isset($wcc_cities[$booked_packet->origin_city]) ? $wcc_cities[$booked_packet->origin_city]->name : 'n/a',
@@ -698,8 +698,11 @@ class BookedPacketsController extends Controller
                 'message' => $validator->messages()->all(),
             ));
         }
-
-
+        $order = ShopifyOrders::where([
+            'account_id' => Auth::User()->account_id,
+            'order_number' => $request->order_number,
+        ])->first();
+        $request["order_id"]=$order->order_id;
 
 
  
@@ -718,6 +721,22 @@ class BookedPacketsController extends Controller
                 'account_id' => Auth::User()->account_id,
                 'order_number' => $result['record']->order_number
             ])->first();
+
+
+            $booked_packet = BookedPackets::where([
+                'account_id' => Auth::User()->account_id,
+                'id' => $result['record_id'],
+            ])->first();
+
+
+
+            ShopifyOrders::where([
+                'order_id' => $order->order_id,
+                'account_id' => Auth::User()->account_id,
+            ])->update(array(
+                'booking_id' => $booked_packet->id,
+                'cn_number' => $booked_packet->cn_number
+            ));
 
             if($order) {
 
@@ -834,7 +853,7 @@ class BookedPacketsController extends Controller
             ['id','=',$id],
             ['account_id','=', Auth::User()->account_id]
         ])->first();
-
+  
 
         if(!$booked_packet) {
             return view('error');
@@ -847,7 +866,7 @@ class BookedPacketsController extends Controller
         ])
             ->select('order_id')
             ->first();
-        
+
 
 
 
@@ -1173,7 +1192,7 @@ class BookedPacketsController extends Controller
 
         }
 
-        $shipment_type = Config::get('constants.shipment_type');
+        $shipment_type = Config::get('constants.wcc_shipment_type');
 
         $wcc_cities = WccCities::where([
             'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,

@@ -37,7 +37,7 @@ class CreateBookedPacketsTable extends Migration
             $table->string('shipper_email', 255)->nullable();
             $table->string('shipper_phone', 255);
             $table->text('shipper_address');
-            $table->unsignedInteger('origin_city')->nullable();
+            $table->string('origin_city')->nullable();
 
             $table->string('special_handling');
             $table->string('remarks');
@@ -55,7 +55,7 @@ class CreateBookedPacketsTable extends Migration
             $table->string('consignee_phone_3', 255)->nullable();
             $table->text('consignee_address');
 
-            $table->unsignedInteger('destination_city')->nullable();
+            $table->string('destination_city')->nullable();
 
             $table->text('comments')->nullable();
 

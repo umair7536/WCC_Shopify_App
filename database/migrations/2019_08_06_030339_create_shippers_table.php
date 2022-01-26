@@ -23,11 +23,11 @@ class CreateShippersTable extends Migration
             $table->text('address');
             $table->unsignedTinyInteger('active')->default(1);
             $table->unsignedInteger('account_id')->nullable();
-            $table->unsignedInteger('city_id')->nullable();
+            $table->string('city_id')->nullable();
 
             // Add foreign key
             $table->foreign('account_id','shippers_account')->references('id')->on('accounts');
-            $table->foreign('city_id','shippers_city')->references('id')->on('leopards_cities');
+            // $table->foreign('city_id','shippers_city')->references('id')->on('wcc_cities');
 
             $table->timestamps();
             $table->softDeletes();

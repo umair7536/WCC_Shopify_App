@@ -495,7 +495,6 @@ class BookedPackets extends BaseModal
             ->select('slug', 'data')
             ->first();
         $data['booking_type'] = ($wcc_setting->data) ? 1 : 2;
-
         $record = self::create($data);
 
         /**
