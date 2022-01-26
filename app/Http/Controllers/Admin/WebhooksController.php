@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use Auth;
 use App\Events\Shopify\Customers\SingleCustomerFire;
 use App\Events\Shopify\Orders\SingleOrderCancelledFire;
 use App\Events\Shopify\Orders\SingleOrderCreateFire;
@@ -379,58 +380,77 @@ class WebhooksController extends Controller
 
 
         try {
-            $wcc = new WccCODClient();
+            $username= WccSettings::where('account_id', Auth::User()->account_id)->where('name','User ID')->get();
+            $password=WccSettings::where('account_id', Auth::User()->account_id)->where('name','Password')->get();
+            $track_order_api='http://web.api.wcc.com.pk:3001/api/General/Tracking?username='.$username[0]->data.'&password='.$password[0]->data.'&CNNO='.$track_number;
+            // $create_order_api=str_replace(' ','&nbsp;',$create_order_api);
+            $track_order_api=str_replace(' ','%20',$track_order_api);
 
-            $response = $wcc->trackPacket(array(
-                'api_key' => $wcc_settings['api-key']->data,                                           // API Key provided by LCS
-                'api_password' => $wcc_settings['api-password']->data,                                 // API Password provided by LCS
-                'enable_test_mode' => ($booked_packet->booking_type == '1') ? true : false,                 // [Optional] default value is 'false', true|false to set mode test or live
-                'track_numbers' => $booked_packet->track_number
-            ));
-
-            $packet = array();
-            $track_history = [];
-
-            if($response['status']) {
-                if(isset($response['packet_list']) && count($response['packet_list'])) {
-
-                    $packet = $response['packet_list'][0];
-                    $track_history = array_reverse($packet['Tracking Detail']);
-
-                    /**
-                     * Update Packet Status
-                     */
-                    $status = Config::get('constants.status');
-                    $status_id = 0;
-
-                    foreach ($status as $key => $value) {
-                        if(strtolower($packet['booked_packet_status']) == strtolower($value)) {
-                            $status_id = $key;
-                        }
-                    }
-
-                    if(
-                            array_key_exists('invoice_number', $packet)
-                        &&  array_key_exists('invoice_date', $packet)
-                    ) {
-                        BookedPackets::where([
-                            'track_number' => $packet['track_number']
-                        ])->update(array(
-                            'status' => $status_id,
-                            'invoice_number' => $packet['invoice_number'],
-                            'invoice_date' => $packet['invoice_date']
-                        ));
-                    } else {
-                        BookedPackets::where([
-                            'track_number' => $packet['track_number']
-                        ])->update(array(
-                            'status' => $status_id
-                        ));
-                    }
-                }
+            
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_HEADER, 0);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); //Set curl to return the data instead of printing it to the browser.
+            curl_setopt($ch, CURLOPT_URL, $track_order_api);
+            $data = curl_exec($ch);
+            curl_close($ch);
+//            echo $data;
+            $data=json_decode($data);
+            
+            if ($data->IsSuccessful)
+            {
+                echo 'Tracking Present';
+                exit();
+            }
+            else
+            {
+                echo 'No Tracking Present';
+                exit();
             }
 
+            // $packet = array();
+            // $track_history = [];
+
+            // if($response['status']) {
+            //     if(isset($response['packet_list']) && count($response['packet_list'])) {
+
+            //         $packet = $response['packet_list'][0];
+            //         $track_history = array_reverse($packet['Tracking Detail']);
+
+            //         /**
+            //          * Update Packet Status
+            //          */
+            //         $status = Config::get('constants.status');
+            //         $status_id = 0;
+
+            //         foreach ($status as $key => $value) {
+            //             if(strtolower($packet['booked_packet_status']) == strtolower($value)) {
+            //                 $status_id = $key;
+            //             }
+            //         }
+
+            //         if(
+            //                 array_key_exists('invoice_number', $packet)
+            //             &&  array_key_exists('invoice_date', $packet)
+            //         ) {
+            //             BookedPackets::where([
+            //                 'track_number' => $packet['track_number']
+            //             ])->update(array(
+            //                 'status' => $status_id,
+            //                 'invoice_number' => $packet['invoice_number'],
+            //                 'invoice_date' => $packet['invoice_date']
+            //             ));
+            //         } else {
+            //             BookedPackets::where([
+            //                 'track_number' => $packet['track_number']
+            //             ])->update(array(
+            //                 'status' => $status_id
+            //             ));
+            //         }
+            //     }
+            // }
+
         } catch (\Exception $exception) {
+            echo $track_number;
             echo 'Something went wrong, please contact support'; exit;
         }
 

@@ -120,9 +120,8 @@ $booked_packets_test = \App\Models\BookedPackets::where([
                                             <li>[Optional] Search order that you want to book by using search filters.</li>
                                             <li>In the actions column there will be dropdown named "Book", Click on it then choose "Book in WCC COD".</li>
                                             <li>It will open book a packet form with filled Order Information</li>
-                                            <li>[Optional[ Adjust values in fields as per your needs.</li>
+                                            <li>[Optional] Adjust values in fields as per your needs.</li>
                                             <li>click on "Save" button to book this packet. After successful booking of packet you will be redirected back to <a href="{{ route('admin.booked_packets.index') }}">@lang('global.booked_packets.title')</a>.</li>
-                                            <li>[Note*] If you are using Test mode, then you can see Booked Packets in <a href="{{ route('admin.booked_packets.api') }}">@lang('global.booked_packets.api_title')</a>.</li>
                                         </ol>
                                     </span>
                                 </div>
