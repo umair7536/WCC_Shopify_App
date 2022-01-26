@@ -67,7 +67,7 @@ class WebhooksController extends Controller
                 }
 
             } catch (InvalidRequestException $exception) {
-                // Handle your error heres
+                return response()->json(['status' => false, "message" => "Authentication Failed"], 401);
             }
         }
 
@@ -173,7 +173,7 @@ class WebhooksController extends Controller
                     }
 
                 } catch (InvalidRequestException $exception) {
-                    // Handle your error heres
+                    return response()->json(['status' => false, "message" => "Authentication Failed"], 401);
                 }
             }
         } catch (\Exception $exception) {}
@@ -237,6 +237,7 @@ class WebhooksController extends Controller
                     }
 
                 } catch (InvalidRequestException $exception) {
+                    return response()->json(['status' => false, "message" => "Authentication Failed"], 401);
                 }
             }
         } catch (\Exception $exception) {
@@ -273,7 +274,7 @@ class WebhooksController extends Controller
             }
 
         } catch (InvalidRequestException $exception) {
-            return response()->json(['status' => false]);
+            return response()->json(['status' => false, "message" => "Authentication Failed"], 401);
         }
 
         return response()->json(['status' => true]);
@@ -307,7 +308,7 @@ class WebhooksController extends Controller
             }
 
         } catch (InvalidRequestException $exception) {
-            return response()->json(['status' => false]);
+            return response()->json(['status' => false, "message" => "Authentication Failed"], 401);
         }
 
         return response()->json(['status' => true]);
@@ -341,7 +342,7 @@ class WebhooksController extends Controller
             }
 
         } catch (InvalidRequestException $exception) {
-            return response()->json(['status' => false]);
+            return response()->json(['status' => false, "message" => "Authentication Failed"], 401);
         }
 
         return response()->json(['status' => true]);
