@@ -38,6 +38,10 @@
             </div> -->
         </div>
         <div class="portlet-body">
+            <div class="note note-warning">
+                <h4 class="block">Important</h4>
+                <p>If clicking on "Print Slip" doesn't download the slip, copy "Print Slip" URL and open it in a new tab to download.</p>
+            </div>
             <div class="table-container">
                 <div class="table-actions-wrapper">
                     <span> </span>
