@@ -399,7 +399,8 @@ class ShopifyOrdersController extends Controller
                            continue;
                        }
                    } else {
-                       $message .= '<li>Order <b>' . $order->name . '</b> has consignee city / shipper information issue. Please select proper city or check shipper information from settings for this packet to book.';
+                    //    $message .= '<li>Order <b>' . $order->name . '</b> has consignee city / shipper information issue. Please select proper city or check shipper information from settings for this packet to book.';
+                       $message .= '<li>Order <b>' . $order->name . '</b> has consignee city / shipper information issue. Please select proper city. This city is not avaiable. Please book packet manully by selecting proper city. Click <a href="http://lcsapp.local/admin/shopify_orders/book-manual?id='.$order->order_id.'&shop=umairappdevelopment.myshopify.com"><b>here</b></a> for book manually. ';
                        continue;
                    }
                 }

@@ -20,6 +20,8 @@ use App\Models\ShopifyJobs;
 use App\Models\ShopifyLocations;
 use App\Models\ShopifyOrders;
 use App\Models\ShopifyShops;
+use App\Models\ShopifyCustomers;
+use App\Models\ShippingAddresses;
 use Carbon\Carbon;
 use Developifynet\LeopardsCOD\LeopardsCOD;
 use Developifynet\LeopardsCOD\LeopardsCODClient;
@@ -737,6 +739,18 @@ class BookedPacketsController extends Controller
                 'booking_id' => $booked_packet->id,
                 'cn_number' => $booked_packet->cn_number
             ));
+
+            $customer_id=ShopifyOrders::where(['order_id' => $order->order_id,
+            'account_id' => Auth::User()->account_id,])->first();
+            $wcc_cities = WccCities::where([
+                'account_id' => WccCities::orderBy('id', 'desc')->first()->account_id,
+                'city_id'=> $request->destination_city,
+            ])->first();
+
+
+            ShopifyCustomers::where('customer_id',$customer_id->customer_id)->update(['city'=>$wcc_cities->name]);
+
+            ShippingAddresses::where('order_id',$order->order_id)->update(['city'=>$wcc_cities->name]);
 
             if($order) {
 
